@@ -1,0 +1,6 @@
+# PostgreSQL extension control file for pl/dotnet
+default_version = '0.9'
+comment = '.NET C# and F# as procedural languages'
+module_pathname = '$libdir/pldotnet'
+relocatable = false
+schema = 'pldotnet'

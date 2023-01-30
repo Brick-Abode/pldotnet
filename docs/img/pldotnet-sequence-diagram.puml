@@ -1,0 +1,75 @@
+@startuml
+
+!pragma useVerticalIf on
+
+participant "PostgreSQL" as S
+participant "pl/dotnet: C" as D
+participant "pl/dotnet: C#/UserHandler" as H
+participant "pl/dotnet: C#/UserFunction" as F
+
+autonumber
+S -> D: pldotnet_generic_handler(FunctionCallInfo fcinfo, bool is_inline, pldotnet_Language language="csharp")
+group Main call from C into dotnet
+    D -> H: CallUserFunction (arguments: List<IntPtr>, output: IntPtr, isnull: bool[])
+    group Convert each Datum to dotnet values to pass to function
+        H -> H: argument_0 = InputNullableValue(arguments.[0], isnull.[0])
+        H -> H: InputValue(arguments.[0])
+        H -> D: pldotnet_GetInt32(arguments.[0])
+        D -[dotted]->> H: return(value)
+        H -[dotted]->> H: return(value) // return from InputValue()
+        H -[dotted]->> H: return(value) // return from InputNullableValue()
+        H -> H: argument_1 = InputNullableValue(arguments.[1], isnull.[1])
+        H -> H: InputValue(arguments.[1])
+        H -> D: pldotnet_GetInt16(arguments.[1])
+        D -[dotted]->> H: return(value)
+        H -[dotted]->> H: return(value) // return from InputValue()
+        H -[dotted]->> H: return(value) // return from InputNullableValue()
+    end
+    group UserFunction call
+        H -> F: user_function(argument_0, argument_1)
+        F -> F: result = a + b
+        F -[dotted]->> H: return(result) // from user_function()
+    end
+    group Convert dotnet value to Datum & set for return
+        H -> H: IntHandlerObj.OutputNullableValue(result);
+        H -> D: pldotnet_CreateDatumInt32(result)
+        D -[dotted]->> H: return(resultDatum)
+        H -[dotted]->> H: return() // from IntHandlerObj.OutputNullableValue(result)
+    end
+    H -[dotted]->> D: return(success) // from CallUserFunction()
+end
+D -[dotted]->> S: return(datum) // from pldotnet_generic_handler()
+
+@enduml
+
+''' namespace PlDotNET.UserSpace
+''' {
+'''     public static class UserFunction
+'''     {
+'''         public static int? integertest(int a, short b)
+'''         {
+''' #line 1
+'''             return a + b;
+'''         }
+'''     }
+'''     public static class UserHandler
+'''     {
+'''         public static IntHandler IntHandlerObj = new IntHandler();
+'''         public static ShortHandler ShortHandlerObj = new ShortHandler();
+'''         public static unsafe void CallUserFunction(List<IntPtr> arguments, IntPtr output, bool[] isnull)
+'''         {
+''' #line 1
+'''             // As the SQL function named integertest is `STRICT` or `RETURNS NULL ON NULL INPUT`,
+'''             // `PL.NET` doesn't check whether any argument datum is null.
+'''             // You can also set true for the `Engine.AlwaysNullable` variable
+'''             // to always check whether the datum is null.
+'''             // BEGIN create arguments for integertest
+'''             var argument_0 = IntHandlerObj.InputValue(arguments[0]);
+'''             var argument_1 = ShortHandlerObj.InputValue(arguments[1]);
+'''             // END create arguments for integertest
+'''             var result = PlDotNET.UserSpace.UserFunction.integertest((int)argument_0, (short)argument_1);
+'''             var resultDatum = IntHandlerObj.OutputNullableValue(result);
+'''             OutputResult.SetDatumResult(resultDatum, result == null, output);
+'''         }
+'''     }
+''' }

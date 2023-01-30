@@ -1,0 +1,20 @@
+Source: pldotnet
+Priority: optional
+Section: database
+Maintainer: Todd Lewis <tlewis@brickabode.com>
+Build-Depends: debhelper (>= 9), pkg-config, postgresql-server-dev-all (>= 158~)
+Standards-Version: 0.9
+Homepage: http://www.brickabode.com/pldotnet/
+
+Package: postgresql-PGVERSION-pldotnet
+Architecture: any
+Depends: dotnet-runtime-6.0 (>= 6.0), dotnet-sdk-6.0 (>= 6.0), dotnet-hostfxr-6.0 (>=6.0), postgresql-PGVERSION, ${postgresql:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Provides: postgresql-PGVERSION-pldotnet
+Description: PL/.NET a.k.a (pldotnet) adds Microsoft's .NET framework to PostgreSQL by
+ introducing both the C# and F# as loadable procedural language.
+ .
+ PostgreSQL is an open source SQL database server.
+ .
+ This package provides a procedural language interface to .NET C# and F# from
+ PostgreSQL. Procedural languages are used to write functions
+ which can be called in database queries.

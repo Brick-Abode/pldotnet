@@ -1,0 +1,11 @@
+FROM ubuntu:22.04
+
+# PLDOTNET
+COPY . /app/pldotnet/
+WORKDIR /app/pldotnet
+
+# Do all the things
+RUN apt update &&  apt install make
+RUN make -f /app/pldotnet/docker/scripts/Makefile-builder deb_build
+
+ENTRYPOINT []

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+PLDOTNET_ENGINE_DIR=/var/lib/PlDotNET
+
+rm -rf $PLDOTNET_ENGINE_DIR/
+rm -f /etc/ld.so.conf.d/nethost_pldotnet.conf
+rm -f /lib/x86_64-linux-gnu/libnethost.so
+
+if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
+    # Remove my changes to the db.
+    db_purge
+fi

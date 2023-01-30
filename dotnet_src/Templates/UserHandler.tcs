@@ -1,0 +1,26 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
+using NpgsqlTypes;
+using PlDotNET.Handler;
+
+namespace PlDotNET.UserSpace
+{
+    public static class UserHandler
+    {
+        // $handler_objects$
+
+        public static unsafe void CallUserFunction(List<IntPtr> arguments, IntPtr output, bool[] isnull)
+        {
+            #line 1
+            // $create_arguments
+
+            // $user_function_call$
+
+            // $call_set_result$
+        }
+    }
+}

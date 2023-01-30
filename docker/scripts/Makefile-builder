@@ -1,0 +1,96 @@
+# avoids tzdata prompt
+export DEBIAN_FRONTEND=noninteractive
+
+apt_update:
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt-get update
+
+add_dotnet: apt_update
+	echo "# ENVIRONMENT SETUP: running $@"
+	wget -q \
+		https://packages.microsoft.com/config/$(shell lsb_release -i | cut -f2 -d'	' | sed 's/.*/\L&/')/$(shell lsb_release -r | cut -f2 -d'	')/packages-microsoft-prod.deb \
+		-O packages-microsoft-prod.deb
+	dpkg -i packages-microsoft-prod.deb
+	apt-get update
+
+install_dotnet_deb: add_dotnet
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y dotnet-sdk-6.0 dotnet-runtime-6.0 dotnet-hostfxr-6.0 debhelper
+
+install_dotnet_ubuntu: add_dotnet
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y dotnet-hostfxr-6.0=6.0.8-1 dotnet-runtime-6.0=6.0.8-1 dotnet-sdk-6.0=6.0.400-1
+
+install_requirements: apt_update
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y wget libglib2.0-dev apt-transport-https lsb-release build-essential apt-utils pkg-config
+
+install_pg_dev: install_requirements install_misc
+	# installs postgresql dev packages
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y postgresql postgresql-common postgresql-server-dev-all devscripts
+	mkdir -p /var/log/postgresql/data1
+
+install_misc:
+	# installs miscellaneous commands for convenience
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y sudo vim cdecl strace doxygen graphviz
+
+install_cluster_requirements: install_misc
+	# cluster creation requirements; locale settings
+	echo "# ENVIRONMENT SETUP: running $@"
+	apt install -y locales rsync
+	sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen
+	locale-gen
+
+create_cluster_and_install_extension:
+	# creating persistent cluster and installing extension
+	echo "# ENVIRONMENT SETUP: running $@"
+	bash /app/pldotnet/docker/scripts/create_pg_cluster.sh
+	bash /app/pldotnet/docker/scripts/start_pg_cluster.sh
+	bash /app/pldotnet/docker/scripts/install_make.sh
+	service postgresql stop
+	rsync -a ${PGDATA}/* /var/lib/postgresql/pgnet_backup_cluster
+
+install_pls:
+	echo "# Installing plpython..."
+	apt install -y postgresql-plpython3-14
+
+	echo "# Installing pljava..."
+	apt install -y default-jre-headless openjdk-11-jre-headless default-jdk maven
+	wget -q \
+		http://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-pljava/postgresql-pljava-common_1.6.4-2.pgdg20.04+1_all.deb \
+		-O package-pljava-common.deb
+	dpkg -i package-pljava-common.deb
+	wget -q \
+		http://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-pljava/postgresql-14-pljava_1.6.4-2.pgdg20.04+1_amd64.deb \
+		-O package-pljava-14.deb
+	dpkg -i package-pljava-14.deb
+	mvn install:install-file \
+   		-Dfile=/usr/share/postgresql/14/pljava/pljava-api-1.6.4.jar \
+   		-DgroupId=org.postgresql \
+   		-DartifactId=pljava-api \
+   		-Dversion=1.6.4 \
+   		-Dpackaging=jar \
+   		-DgeneratePom=true
+
+	echo "# Installing pllua..."
+	apt install -y liblua5.3-0 postgresql-14-pllua
+
+	echo "# Installing plperl..."
+	apt install -y postgresql-plperl-14
+
+	echo "# Installing plr..."
+	apt install -y postgresql-14-plr
+
+	echo "# Installing tcl..."
+	apt install -y postgresql-pltcl-14
+
+	echo "# Installing plv8"
+	apt install -y g++ python2 libc++-dev libc++abi-dev libtinfo5 ninja-build
+	sudo ln -s -f /usr/bin/python2 /usr/bin/python
+	cd .. && wget https://github.com/plv8/plv8/archive/v3.0.0.tar.gz && tar -xvzf v3.0.0.tar.gz && cd plv8-3.0.0 && make && make install
+
+# these targets correspond to the original Dockerfiles which this Makefile replaces
+deb_build: install_pg_dev install_dotnet_deb
+ubuntu22_install: install_pg_dev install_dotnet_ubuntu install_pls

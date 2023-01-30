@@ -1,0 +1,98 @@
+version: '3.4'
+
+x-interactive: &interactive
+  tty: true        # docker run -t
+  stdin_open: true # docker run -i
+
+x-command: &command
+  # command: sh -c "make installcheck"
+  command: sh -c "bash"
+
+x-pgdata: &pgdata
+  PGDATA: /var/lib/postgresql/data
+
+x-build-args: &build-args
+  context: .
+  args:
+    <<: *pgdata
+
+x-environment: &environment
+  environment:
+    USE_DOTNETBUILD: "FALSE"
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    <<: *pgdata
+
+x-ports: &ports
+  ports:
+    - "5432:5432"
+
+networks:
+  db_network:
+    name: pldotnet_network
+
+services:
+  pldotnet-ubuntu22: &pldotnet-current-container
+    container_name: pldotnet-ubuntu22
+    image: pldotnet:ubuntu22
+    <<: *interactive
+    <<: *command
+    build:
+      dockerfile: docker/Dockerfile_ubuntu22
+      <<: *build-args
+    <<: *environment
+    <<: *ports
+    networks:
+      db_network:
+    volumes:
+      - ./:/app/pldotnet/
+      - ./postgres-data/ubuntu22:/var/lib/postgresql/data
+
+  pldotnet-build:
+    container_name: pldotnet-build
+    image: pldotnet:build
+    <<: *interactive
+    command: sh -c "bash /app/pldotnet/docker/scripts/build_packages.sh"
+    build:
+      dockerfile: docker/Dockerfile_deb-build
+      <<: *build-args
+    <<: *environment
+    volumes:
+      - ./dotnet_src/:/app/pldotnet/dotnet_src/
+      - ./src/:/app/pldotnet/src/
+      - ./Makefile:/app/pldotnet/Makefile
+      - ./pldotnet.control:/app/pldotnet/pldotnet.control
+      - ./pldotnet--0.9.sql:/app/pldotnet/pldotnet--0.9.sql
+      - ./tests/:/app/pldotnet/tests/
+      - ./debian/packages/:/app/pldotnet/debian/packages/
+      - ./debian/changelog:/app/pldotnet/debian/changelog
+      - ./debian/control.in:/app/pldotnet/debian/control.in
+      - ./debian/copyright:/app/pldotnet/debian/copyright
+      - ./debian/pgversions:/app/pldotnet/debian/pgversions
+      - ./debian/postinst:/app/pldotnet/debian/postinst
+      - ./debian/postrm:/app/pldotnet/debian/postrm
+      - ./debian/preinst:/app/pldotnet/debian/preinst
+      - ./debian/prerm:/app/pldotnet/debian/prerm
+      - ./debian/rules:/app/pldotnet/debian/rules
+
+  pldotnet-build-arm:
+    container_name: pldotnet-build-arm
+    image: pldotnet:build
+    <<: *interactive
+    command: sh -c "bash /app/pldotnet/docker/scripts/build_packages.sh"
+    build:
+      dockerfile: docker/Dockerfile_ubuntu-build-arm
+      <<: *build-args
+    <<: *environment
+    volumes:
+      - ./src/:/app/pldotnet/src/
+      - ./Makefile:/app/pldotnet/Makefile
+      - ./dotnet_src/:/app/pldotnet/dotnet_src/
+      - ./tests/:/app/pldotnet/tests/
+      - ./debian/packages/:/app/pldotnet/debian/packages/
+      - ./debian/pgversions-arm:/app/pldotnet/debian/pgversions
+      - ./debian/rules:/app/pldotnet/debian/rules
+      - ./debian/prerm:/app/pldotnet/debian/prerm
+      - ./debian/preinst:/app/pldotnet/debian/preinst
+      - ./debian/postrm:/app/pldotnet/debian/postrm
+      - ./debian/postinst:/app/pldotnet/debian/postinst

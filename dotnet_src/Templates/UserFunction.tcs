@@ -1,0 +1,21 @@
+using System;
+using System.Buffers;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Unicode;
+using NpgsqlTypes;
+using PlDotNET.Handler;
+
+namespace PlDotNET.UserSpace
+{
+    public static class UserFunction
+    {
+        // $user_function_declaration$
+    }
+}
