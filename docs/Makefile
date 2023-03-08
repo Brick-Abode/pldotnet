@@ -21,7 +21,7 @@ interior_pdf: .venv.created $(BIG_IMGS)
 	. venv/bin/activate && \
 	pdflatex -shell-escape pldotnet-whitepaper-dec22.tex # `-shell-escape` is for minted
 
-pldotnet-whitepaper-dec22.pdf: pldotnet-whitepaper-dec22.tex
+pldotnet-whitepaper-dec22.pdf: pldotnet-whitepaper-dec22.tex pldotnet-whitepaper-dec22.bbl
 	(cd img && make)
 	make interior_pdf
 	bibtex pldotnet-whitepaper-dec22

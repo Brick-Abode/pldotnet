@@ -94,20 +94,38 @@ an object-oriented dialect of ML.)
 
 % # Current state
 
-The PostgreSQL project includes support for user-defined functions, stored procedures, and triggers.
-These can be implemented in a number of languages, including SQL, C, TCL, Perl, and Python in the standard distribution~\cite{PostgreSQL2022}, and Java~\cite{PLJava}, Lua~\cite{PLLua}, and R~\cite{PLR} outside of the standard definition.
+The PostgreSQL project includes support for user-defined functions,
+stored procedures, and triggers.  These can be implemented in a
+number of languages, including SQL, C, TCL, Perl, and Python in the
+standard distribution~\cite{PostgreSQL2022}, and Java~\cite{PLJava},
+Lua~\cite{PLLua}, and R~\cite{PLR} outside of the standard definition.
 
 % ### niche (motivation, the current gap)
 
-%\footnote{pl/dotnet is unusual in PostgreSQL in that it is one extension which supports two languages; the PostgreSQL languages added are \textquote{plcsharp} and \textquote{plfsharp}.}
-The pl/dotnet project extends PostgreSQL to support user functions,
-procedures, and \texttt{DO} blocks.  for the \dotnet platform,
-including both C\# and F\#.  We have achieved native representation
-for 38 of out of 46 PostgreSQL user types, plus their arrays, the
-widest range of any external procedural language in PostgreSQL. In
-our benchmarks we are the fastest external procedural language in
+%\footnote{pl/dotnet is unusual in PostgreSQL in that it is one
+extension which supports two languages; the PostgreSQL languages
+added are \textquote{plcsharp} and \textquote{plfsharp}.} The
+pl/dotnet project extends PostgreSQL to support user functions,
+procedures, and \texttt{DO} blocks for the \dotnet platform, including
+both C\# and F\#.  We have achieved native representation for 38
+of out of 46 PostgreSQL user types, plus their arrays, the widest
+range of any external procedural language in PostgreSQL. In our
+benchmarks we are the fastest external procedural language in
 PostgreSQL.
-%\footnote{These benchmarks are somewhat arbitrary, merely having been designed for our own needs, but the were not cherry picked or tuned; we built the tests first and only benchmarked them afterwards. It is possible that some of our implementation choices in other languages were sub-optimal, and we welcome corrections, but the consistency of the results across multiple languages makes us reasonably confident in the data. The tests and test results are available in our repository for inspection.} Work remains, especially the complete implementation of the Server Programming Interface, but we think the initial results are promising, and we share them in this paper. pl/dotnet is a free software project, licensed under the PostgreSQL License.  Full source can be downloaded from our github repository\footnote{\url{https://github.com/Brick-Abode/pldotnet/}}.
+
+%\footnote{These benchmarks are somewhat arbitrary, merely having
+been designed for our own needs, but the were not cherry picked or
+tuned; we built the tests first and only benchmarked them afterwards.
+It is possible that some of our implementation choices in other
+languages were sub-optimal, and we welcome corrections, but the
+consistency of the results across multiple languages makes us
+reasonably confident in the data. The tests and test results are
+available in our repository for inspection.} Work remains, especially
+the complete implementation of the Server Programming Interface,
+but we think the initial results are promising, and we share them
+in this paper. pl/dotnet is a free software project, licensed under
+the PostgreSQL License.  Full source can be downloaded from our
+github repository\footnote{\url{https://github.com/Brick-Abode/pldotnet/}}.
 
 %%%%% Motivation and Goals %%%%%
 
@@ -131,7 +149,12 @@ so we have full support in pl/dotnet for F\#, making pl/dotnet (to
 our knowledge) the only stored procedure implementation on a
 relational database with full support for a functional programming
 language with Hindley-Milner type inference.
-%\footnote{The histories of both strongly-typed functional programming and relational databases are many decades long, with lengthy literatures, so we make this claim weakly and modestly; we are not aware of any precedent but welcome any such being brought to our attention.  We are industrial researchers, not an academics, and are therefore humble concerning our literature review abilities.}
+%\footnote{The histories of both strongly-typed functional programming
+and relational databases are many decades long, with lengthy
+literatures, so we make this claim weakly and modestly; we are not
+aware of any precedent but welcome any such being brought to our
+attention.  We are industrial researchers, not an academics, and
+are therefore humble concerning our literature review abilities.}
 
 Third, programmers have long used stored procedures in their architectures
 for performance and security, but doing so is difficult because of
