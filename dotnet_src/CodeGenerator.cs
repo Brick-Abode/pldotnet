@@ -19,8 +19,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using PlDotNET.Handler;
+using CSharp = Microsoft.CodeAnalysis.CSharp;
+using VB = Microsoft.CodeAnalysis.VisualBasic;
 
 namespace PlDotNET
 {
@@ -387,7 +388,67 @@ namespace PlDotNET
         /// <inheritdoc />
         public override string FormatGeneratedCode(string sourceCode)
         {
-            SyntaxTree userTree = SyntaxFactory.ParseSyntaxTree(sourceCode);
+            SyntaxTree userTree = CSharp.SyntaxFactory.ParseSyntaxTree(sourceCode);
+            SyntaxNode node = userTree.GetRoot().NormalizeWhitespace();
+            sourceCode = node.ToFullString();
+            return sourceCode;
+        }
+    }
+
+    public class VisualBasicCodeGenerator : CSharpCodeGenerator
+    {
+        /// <summary>
+        /// This Dictionary contains the C# types that differs from F# type names.
+        /// </summary>
+        private static readonly Dictionary<string, string> VisualBasicTypes =
+               new ()
+        {
+            { "bool", "Boolean" },
+            { "short", "Short" },
+            { "int", "Integer" },
+            { "long", "Long" },
+            { "string", "String" },
+            { "float", "Single" },
+            { "double", "Double" },
+            { "decimal", "Decimal" },
+            { "byte[]", "Byte()" },
+            { "(IPAddress Address, int Netmask)", "(Address As IPAddress, Netmask As Integer)" },
+        };
+
+        public VisualBasicCodeGenerator()
+        {
+            this.UserHandlerTemplatePath = "@PLDOTNET_TEMPLATE_DIR/UserHandler.tcs";
+            this.UserFunctionTemplatePath = "@PLDOTNET_TEMPLATE_DIR/UserFunction.tvb";
+            this.Language = DotNETLanguage.VisualBasic;
+        }
+
+        /// <inheritdoc />
+        public override string BuildUserFunction(string funcName, string funcBody, uint returnTypeId, string[] paramNames, string[] dotnetTypes, bool supportNullInput)
+        {
+            var sb = new System.Text.StringBuilder();
+            string returnType = Engine.HandleArray.ContainsKey((OID)returnTypeId) ? "Array" : Engine.OidTypes[(OID)returnTypeId];
+            returnType = VisualBasicTypes.ContainsKey(returnType) ? VisualBasicTypes[returnType] : returnType;
+            _ = returnType == "void" ? string.Empty : "?";
+            string aux = supportNullInput ? "?" : string.Empty;
+
+            sb.Append($"Public Shared Function {funcName}(");
+            for (int i = 0, length = paramNames.Length; i < length; i++)
+            {
+                string dotnetType = VisualBasicTypes.ContainsKey(dotnetTypes[i]) ? VisualBasicTypes[dotnetTypes[i]] : dotnetTypes[i];
+                sb.Append($"{paramNames[i]} As {dotnetType}{aux}");
+                if (i < length - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append($") As {returnType}? \n{funcBody}\nEnd Function");
+            return sb.ToString();
+        }
+
+        public override string FormatGeneratedCode(string sourceCode)
+        {
+            SyntaxTree userTree = VB.SyntaxFactory.ParseSyntaxTree(sourceCode);
             SyntaxNode node = userTree.GetRoot().NormalizeWhitespace();
             sourceCode = node.ToFullString();
             return sourceCode;

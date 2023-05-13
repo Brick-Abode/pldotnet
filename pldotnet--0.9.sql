@@ -35,3 +35,21 @@ CREATE LANGUAGE plfsharp
   HANDLER plfsharp_call_handler
   INLINE plfsharp_inline_handler
   VALIDATOR plfsharp_validator;
+
+-- .NET Visual Basic language
+CREATE FUNCTION plvisualbasic_call_handler()
+  RETURNS language_handler AS 'MODULE_PATHNAME'
+  LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION plvisualbasic_inline_handler(internal)
+  RETURNS VOID AS 'MODULE_PATHNAME'
+  LANGUAGE C IMMUTABLE STRICT;
+
+CREATE FUNCTION plvisualbasic_validator(oid)
+  RETURNS VOID AS 'MODULE_PATHNAME'
+  LANGUAGE C IMMUTABLE STRICT;
+
+CREATE LANGUAGE plvisualbasic
+  HANDLER plvisualbasic_call_handler
+  INLINE plvisualbasic_inline_handler
+  VALIDATOR plvisualbasic_validator;
