@@ -34,6 +34,19 @@ namespace PlDotNET
         public DotNETLanguage Language;
 
         /// <summary>
+        /// This List contains the .NET Classes used to map the PostgreSQL Types.
+        /// </summary>
+        protected static readonly List<string> ClassTypes =
+               new ()
+        {
+            "Array",
+            "byte[]",
+            "BitArray",
+            "string",
+            "PhysicalAddress",
+        };
+
+        /// <summary>
         /// Filter the necessary handlers that need to be created in the generated code.
         /// </summary>
         /// <returns>
@@ -427,13 +440,14 @@ namespace PlDotNET
         {
             var sb = new System.Text.StringBuilder();
             string returnType = Engine.HandleArray.ContainsKey((OID)returnTypeId) ? "Array" : Engine.OidTypes[(OID)returnTypeId];
+            string returnNullable = ClassTypes.Contains(returnType) ? string.Empty : "?";
+
             returnType = VisualBasicTypes.ContainsKey(returnType) ? VisualBasicTypes[returnType] : returnType;
-            _ = returnType == "void" ? string.Empty : "?";
-            string aux = supportNullInput ? "?" : string.Empty;
 
             sb.Append($"Public Shared Function {funcName}(");
             for (int i = 0, length = paramNames.Length; i < length; i++)
             {
+                string aux = (supportNullInput && !ClassTypes.Contains(dotnetTypes[i])) ? "?" : string.Empty;
                 string dotnetType = VisualBasicTypes.ContainsKey(dotnetTypes[i]) ? VisualBasicTypes[dotnetTypes[i]] : dotnetTypes[i];
                 sb.Append($"{paramNames[i]} As {dotnetType}{aux}");
                 if (i < length - 1)
@@ -442,7 +456,7 @@ namespace PlDotNET
                 }
             }
 
-            sb.Append($") As {returnType}? \n{funcBody}\nEnd Function");
+            sb.Append($") As {returnType}{returnNullable} \n{funcBody}\nEnd Function");
             return sb.ToString();
         }
 
@@ -468,19 +482,6 @@ namespace PlDotNET
             { "long", "int64" },
             { "NpgsqlRange<long>", "NpgsqlRange<int64>" },
             { "(IPAddress Address, int Netmask)", "struct(IPAddress*int)" },
-        };
-
-        /// <summary>
-        /// This List contains the .NET Classes used to map the PostgreSQL Types.
-        /// </summary>
-        private static readonly List<string> ClassTypes =
-               new ()
-        {
-            "Array",
-            "byte[]",
-            "BitArray",
-            "string",
-            "PhysicalAddress",
         };
 
         public FSharpCodeGenerator()
