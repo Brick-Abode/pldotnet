@@ -60,7 +60,7 @@ extern char *dnldir;
              __FILE__, __LINE__, __VA_ARGS__);                             \
     }
 
-typedef enum pldotnet_Language { csharp, fsharp } pldotnet_Language;
+typedef enum pldotnet_Language { csharp, fsharp, visual_basic } pldotnet_Language;
 
 typedef struct MemoryContextWrapper {
     MemoryContext prev;
@@ -164,6 +164,44 @@ Datum plfsharp_inline_handler(PG_FUNCTION_ARGS);
  * @return The datum that can be stored in a PostgreSQL table.
  */
 Datum plfsharp_validator(PG_FUNCTION_ARGS);
+
+/**
+ * @brief The call_handler will be called to execute the procedural
+ * language's functions. The call handler receives a pointer to a
+ * FunctionCallInfoData struct containing argument values and information
+ * about the called function, and it is expected to return a Datum result.
+ *
+ * @param PG_FUNCTION_ARGS The standard parameter list for fmgr-compatible
+ * functions.
+ *
+ * @return The datum that can be stored in a PostgreSQL table.
+ */
+Datum plvisualbasic_call_handler(PG_FUNCTION_ARGS);
+
+/**
+ * @brief The inline_handler will be called to execute an anonymous code
+ * block (DO command) in this language.
+ *
+ * @param PG_FUNCTION_ARGS The standard parameter list for
+ * fmgr-compatible functions.
+ *
+ * @return The datum that can be stored in a PostgreSQL table.
+ */
+Datum plvisualbasic_inline_handler(PG_FUNCTION_ARGS);
+
+/**
+ * @brief The validator function will inspect the function body for syntactical
+ * correctness, but it can also look at other properties of the function,
+ * for example if the language cannot handle certain argument types. To
+ * signal an error, the validator function should use the ereport()
+ * function. The return value of the function is ignored.
+ *
+ * @param PG_FUNCTION_ARGS The standard parameter list for fmgr-compatible
+ * functions.
+ *
+ * @return The datum that can be stored in a PostgreSQL table.
+ */
+Datum plvisualbasic_validator(PG_FUNCTION_ARGS);
 
 /**
  * @brief Build the config paths related to .NET.

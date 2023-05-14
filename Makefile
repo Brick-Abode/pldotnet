@@ -48,9 +48,11 @@ pldotnet-install: pldotnet-uninstall install
 	sed -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | sed 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/FSharp/FSharpCompiler.fs
 	sed -i 's/@PLDOTNET_TEMPLATE_DIR/$(shell echo $(PLDOTNET_TEMPLATE_DIR) | sed 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/CodeGenerator.cs
 	$(BUILD_PLDOTNET_PROJECT)
+	runuser -u postgres -- psql -c "CREATE EXTENSION pldotnet;"
 
 pldotnet-uninstall: uninstall
 	rm -rf $(PLDOTNET_ENGINE_ROOT)/PlDotNET
+	runuser -u postgres -- psql -c "DROP EXTENSION IF EXISTS pldotnet CASCADE;"
 
 pldotnet-install-dpkg:
 	make documentation

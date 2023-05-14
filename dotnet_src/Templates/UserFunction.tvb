@@ -1,0 +1,19 @@
+Imports System
+Imports System.Buffers
+Imports System.Collections
+Imports System.Collections.Generic
+Imports System.Diagnostics
+Imports System.Linq
+Imports System.Net
+Imports System.Net.NetworkInformation
+Imports System.Runtime.InteropServices
+Imports System.Text
+Imports System.Text.Unicode
+Imports NpgsqlTypes
+Imports PlDotNET.Handler
+
+Namespace PlDotNET.UserSpace
+    Public Class UserFunction
+        // $user_function_declaration$
+    End Class
+End Namespace

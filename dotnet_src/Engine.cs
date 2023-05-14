@@ -160,9 +160,27 @@ namespace PlDotNET
 
         public static IDictionary<uint, CachedFunction> FuncBuiltCodeDict = new Dictionary<uint, CachedFunction>();
 
-        public static FSharpCodeGenerator FSharpGenerator = new ();
+        public static Dictionary<string, DotNETLanguage> DotNETLanguages = new ()
+        {
+            { "csharp", DotNETLanguage.CSharp },
+            { "fsharp", DotNETLanguage.FSharp },
+            { "visualbasic", DotNETLanguage.VisualBasic },
+        };
 
-        public static CSharpCodeGenerator CSharpGenerator = new ();
+        public static Dictionary<DotNETLanguage, CodeGenerator> CodeGenerators = new ()
+        {
+            { DotNETLanguage.CSharp, new CSharpCodeGenerator() },
+            { DotNETLanguage.FSharp, new FSharpCodeGenerator() },
+            { DotNETLanguage.VisualBasic, new VisualBasicCodeGenerator() },
+        };
+
+        public static Dictionary<DotNETLanguage, CodeCompiler> CodeCompilers = new ()
+        {
+            { DotNETLanguage.CSharp, new CSharpCompiler() },
+
+            // {DotNETLanguage.FSharp, new ()},
+            { DotNETLanguage.VisualBasic, new VisualBasicCompiler() },
+        };
 
         public unsafe delegate int DelCompileUserFunction(uint functionId, IntPtr name, uint returnType, IntPtr paramNames, uint* paramTypes, IntPtr body, [MarshalAs(UnmanagedType.I1)] bool supportNullInput, IntPtr dotnetLanguage);
 
@@ -273,88 +291,6 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// This function compiles the dynamic code using Roslyn.
-        /// </summary>
-        /// <returns>
-        /// Returns The response of the dynamic code compiled with Roslyn.
-        /// </returns>
-        public static Microsoft.CodeAnalysis.Emit.EmitResult CompileSourceCode(string sourceCode, MemoryStream memStream, string assemblyName, MemoryStream memStreamUserFunction = null)
-        {
-            SyntaxTree userTree = SyntaxFactory.ParseSyntaxTree(sourceCode);
-
-            var trustedAssembliesPathsArray = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
-            List<string> trustedAssembliesPaths = new ();
-            trustedAssembliesPaths.AddRange(trustedAssembliesPathsArray);
-            trustedAssembliesPaths.Add(typeof(NpgsqlPoint).Assembly.Location);
-            trustedAssembliesPaths.Add(typeof(Engine).Assembly.Location);
-
-            var neededAssemblies = new[]
-            {
-                "System.Buffers",
-                "System.Collections",
-                "System.Collections.Generic",
-                "System.Console",
-                "System.Core",
-                "System.Data",
-                "System.Data.Common",
-                "System.Data.SqlClient",
-                "System.Diagnostics",
-                "System.Diagnostics.CodeAnalysis",
-                "System.Globalization",
-                "System.Linq",
-                "System.Linq.Expressions",
-                "System.Net.NetworkInformation",
-                "System.Net.Primitives",
-                "System.Private.CoreLib",
-                "System.Runtime",
-                "System.Text",
-                "System.Text.Unicode",
-                "Npgsql",
-                "PlDotNET",
-            };
-
-            List<PortableExecutableReference> references = trustedAssembliesPaths
-                .Where(p => neededAssemblies.Contains(Path.GetFileNameWithoutExtension(p)))
-                .Select(p => MetadataReference.CreateFromFile(p))
-                .ToList();
-
-            if (memStreamUserFunction != null)
-            {
-                references.Add(MetadataReference.CreateFromStream(new MemoryStream(memStreamUserFunction.GetBuffer())));
-            }
-
-            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-                .WithOptimizationLevel(OptimizationLevel.Release)
-                .WithConcurrentBuild(true).WithAllowUnsafe(true);
-
-            CSharpCompilation compilation = CSharpCompilation.Create(
-                $"{assemblyName}.dll",
-                options: compilationOptions,
-                syntaxTrees: new[] { userTree },
-                references: references);
-
-            Microsoft.CodeAnalysis.Emit.EmitResult compileResult = compilation.Emit(memStream);
-
-            if (!compileResult.Success)
-            {
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine($"PL.NET could not compile the following C# generated code:");
-                sb.AppendLine($"**********");
-                sb.AppendLine($"{sourceCode}");
-                sb.AppendLine($"**********");
-                sb.AppendLine($"Here are the compilation results:");
-                foreach (var diagnostic in compileResult.Diagnostics)
-                {
-                    sb.AppendLine(diagnostic.ToString());
-                }
-
-                Elog.Warning(sb.ToString());
-            }
-
-            return compileResult;
-        }
-
-        /// <summary>
         /// This function is called called from C code and tries to create and
         /// compile the dynamic code using Roslyn. It also saves the
         /// CachedFunction in FuncBuiltCodeDict so that any compiled code can
@@ -397,6 +333,9 @@ namespace PlDotNET
             // The language name (just csharp or fsharp for now)
             string plLanguage = Marshal.PtrToStringAuto(language);
 
+            // The DotNETLanguage of the dynamic codes
+            DotNETLanguage dotnetLanguage = useUserAssembly ? DotNETLanguage.CSharp : DotNETLanguages[plLanguage];
+
             // Generates the source codes
             // PL.NET generates and compiles one or two dynamic codes, according to the language type and wheter the user
             // provided his own assembly.
@@ -416,17 +355,16 @@ namespace PlDotNET
             string userFunctionCode, userHandlerCode;
             try
             {
-                // The CodeGenerator object that creates the dynamic codes according to the language (C# or F#)
-                CodeGenerator dynamicCodeGenerator = (plLanguage == "csharp" || useUserAssembly) ? CSharpGenerator : FSharpGenerator;
-
                 // Generate the UserFunction code
                 // If the user provides his own assembly, this variable receives the assembly information.
                 // If the user function uses F#, this variable receives an empty string, since PL.NET creates the UserFunction
                 // together with the UserHandler.
-                userFunctionCode = dynamicCodeGenerator.BuildUserFunctionSourceCode(funcName, returnTypeId, paramNameArray, paramTypeArray, funcBody, supportNullInput || Engine.AlwaysNullable);
+                userFunctionCode = CodeGenerators[useUserAssembly ? DotNETLanguage.CSharp : dotnetLanguage]
+                    .BuildUserFunctionSourceCode(funcName, returnTypeId, paramNameArray, paramTypeArray, funcBody, supportNullInput || Engine.AlwaysNullable);
 
                 // Generate the UserHandler code
-                userHandlerCode = dynamicCodeGenerator.BuildUserHandlerSourceCode(funcName, returnTypeId, paramNameArray, paramTypeArray, funcBody, supportNullInput || Engine.AlwaysNullable);
+                userHandlerCode = CodeGenerators[dotnetLanguage == DotNETLanguage.FSharp ? dotnetLanguage : DotNETLanguage.CSharp]
+                    .BuildUserHandlerSourceCode(funcName, returnTypeId, paramNameArray, paramTypeArray, funcBody, supportNullInput || Engine.AlwaysNullable);
             }
             catch (Exception e)
             {
@@ -448,9 +386,6 @@ namespace PlDotNET
                     FuncBuiltCodeDict.Remove(functionId);
                 }
             }
-
-            // The DotNETLanguage of the dynamic codes
-            DotNETLanguage dotnetLanguage = (plLanguage == "csharp" || useUserAssembly) ? DotNETLanguage.CSharp : DotNETLanguage.FSharp;
 
             MemoryStream memUserFunction, memUserHandler;
             try
@@ -505,24 +440,22 @@ namespace PlDotNET
         public static MemoryStream CreateMemoryStreamForUserFunctionCode(DotNETLanguage language, uint functionId, bool useUserAssembly, string userFunctionCode)
         {
             MemoryStream memUserFunction = new ();
-            if (!useUserAssembly)
-            {
-                if (language == DotNETLanguage.CSharp)
-                {
-                    var compileResultUserFunction = CompileSourceCode(userFunctionCode, memUserFunction, $"UserFunction_{functionId}");
 
-                    // Verify that the C# code for UserFunction compiled correctly
-                    if (!compileResultUserFunction.Success)
-                    {
-                        throw new SystemException("PL.NET could not compile the generated C# code.");
-                    }
-                }
-            }
-            else
+            if (useUserAssembly)
             {
                 string userAssemblyPath = userFunctionCode.Split(":")[0];
                 using var fs = File.Open(userAssemblyPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 fs.CopyTo(memUserFunction);
+            }
+            else if (language != DotNETLanguage.FSharp)
+            {
+                var compileResultUserFunction = CodeCompilers[language].CompileSourceCode(userFunctionCode, memUserFunction, $"UserFunction_{functionId}");
+
+                // Verify that the C# code for UserFunction compiled correctly
+                if (!compileResultUserFunction.Success)
+                {
+                    throw new SystemException("PL.NET could not compile the generated C# code.");
+                }
             }
 
             return memUserFunction;
@@ -550,7 +483,7 @@ namespace PlDotNET
             }
             else
             {
-                var compileResultUserHandler = Engine.CompileSourceCode(userHandlerCode, memUserHandler, $"UserHandler_{functionId}", assemblyToInclude);
+                var compileResultUserHandler = CodeCompilers[DotNETLanguage.CSharp].CompileSourceCode(userHandlerCode, memUserHandler, $"UserHandler_{functionId}", assemblyToInclude);
 
                 // Verify that the C# code for UserHandler compiled correctly
                 if (!compileResultUserHandler.Success)

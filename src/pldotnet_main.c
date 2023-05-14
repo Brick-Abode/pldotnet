@@ -24,6 +24,9 @@ PG_FUNCTION_INFO_V1(plcsharp_validator);
 PG_FUNCTION_INFO_V1(plfsharp_call_handler);
 PG_FUNCTION_INFO_V1(plfsharp_inline_handler);
 PG_FUNCTION_INFO_V1(plfsharp_validator);
+PG_FUNCTION_INFO_V1(plvisualbasic_call_handler);
+PG_FUNCTION_INFO_V1(plvisualbasic_inline_handler);
+PG_FUNCTION_INFO_V1(plvisualbasic_validator);
 
 /*
  * START: declaring variables
@@ -355,6 +358,18 @@ Datum plfsharp_validator(PG_FUNCTION_ARGS) {
     return pldotnet_validator(fcinfo, fsharp);
 }
 
+Datum plvisualbasic_call_handler(PG_FUNCTION_ARGS) {
+    return pldotnet_generic_handler(fcinfo, false, visual_basic);
+}
+Datum plvisualbasic_inline_handler(PG_FUNCTION_ARGS) {
+    Datum result = pldotnet_generic_handler(fcinfo, true, visual_basic);
+    unload_assemblies(fcinfo->flinfo->fn_oid);
+    return result;
+}
+Datum plvisualbasic_validator(PG_FUNCTION_ARGS) {
+    return pldotnet_validator(fcinfo, visual_basic);
+}
+
 bool pldotnet_BuildPaths(void) {
     const char json_path_suffix[] =
         "/bin/Release/net6.0/PlDotNET."
@@ -564,18 +579,20 @@ static bool pldotnet_GetSourceCode(
     bool is_inline, bool validation,
     pldotnet_UserFunctionDeclaration *user_function_decl,
     pldotnet_Language language) {
+    char *lang = language == csharp ? "csharp" : language == fsharp ? "fsharp" : "visualbasic";
+
     if (nullptr == user_function_decl)
         elog(ERROR, "[pldotnet]: Invalid argument: user_function_decl is null");
 
     if (is_inline) {
-        user_function_decl->language = language == csharp ? "csharp" : "fsharp";
+        user_function_decl->language = lang;
         user_function_decl->func_name = "plcsharp_inline_block";
         user_function_decl->func_ret_type = VOIDOID;
         user_function_decl->func_body =
             ((InlineCodeBlock *)DatumGetPointer(PG_GETARG_DATUM(0)))
                 ->source_text;
     } else {
-        user_function_decl->language = language == csharp ? "csharp" : "fsharp";
+        user_function_decl->language = lang;
         user_function_decl->func_name = NameStr(procst->proname);
         user_function_decl->func_ret_type = procst->prorettype;
         user_function_decl->func_body = pldotnet_GetFunctionBody(proc, procst);
