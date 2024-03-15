@@ -5,7 +5,7 @@ COPY . /app/pldotnet/
 WORKDIR /app/pldotnet
 
 # Do all the things
-RUN apt update &&  apt install make
+RUN apt update &&  apt install -y make
 RUN make -f /app/pldotnet/docker/scripts/Makefile-builder deb_build
 
-ENTRYPOINT []
+ENTRYPOINT [ "bash", "/app/pldotnet/docker/scripts/create_and_start_cluster.sh" ]

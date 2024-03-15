@@ -40,6 +40,17 @@ SELECT 'c#-float8', 'sumDouble1', sumDouble(10.5000000000055, 10.5000000000054) 
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'c#-float8-null', 'sumDouble2', sumDouble(NULL, NULL) = double precision '0';
 
+CREATE OR REPLACE FUNCTION make_pi_n(n int) RETURNS double precision AS $$
+double sum = 0.0;
+for(int i=0;i<n;i++){ sum += ((i%2)==0?1.0:-1.0)/(2*i+1); }
+return 4.0 * sum;
+$$
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-float8-make-pi', 'make_pi_lt', make_pi_n(1000) < double precision '3.15';
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-float8-make-pi', 'make_pi_gt', make_pi_n(1000) > double precision '3.13';
+
 --- Float Arrays
 CREATE OR REPLACE FUNCTION returnRealArray(floats real[]) RETURNS real[] AS $$
 return floats;
@@ -53,10 +64,10 @@ SELECT 'c#-float4-null-3array-arraynull', 'returnRealArray3', returnRealArray(AR
 
 CREATE OR REPLACE FUNCTION sumRealArray(floats real[]) RETURNS real AS $$
 Array flatten_floats = Array.CreateInstance(typeof(object), floats.Length);
-ArrayHandler.FlatArray(floats, ref flatten_floats);
+ArrayManipulation.FlatArray(floats, ref flatten_floats);
 float float_sum = 0;
 for(int i = 0; i < flatten_floats.Length; i++)
-{   
+{
     if (flatten_floats.GetValue(i) == null)
         continue;
     float_sum = float_sum + (float)flatten_floats.GetValue(i);
@@ -98,10 +109,10 @@ SELECT 'c#-float8-null-2array-arraynull', 'returnDoubleArray2', returnDoubleArra
 
 CREATE OR REPLACE FUNCTION sumDoubleArray(doubles double precision[]) RETURNS double precision AS $$
 Array flatten_doubles = Array.CreateInstance(typeof(object), doubles.Length);
-ArrayHandler.FlatArray(doubles, ref flatten_doubles);
+ArrayManipulation.FlatArray(doubles, ref flatten_doubles);
 double double_sum = 0;
 for(int i = 0; i < flatten_doubles.Length; i++)
-{   
+{
     if (flatten_doubles.GetValue(i) == null)
         continue;
     double_sum = double_sum + (double)flatten_doubles.GetValue(i);

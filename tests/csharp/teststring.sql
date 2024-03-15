@@ -127,7 +127,7 @@ SELECT 'c#-text-null-3array-arraynull', 'returnTextArray3', returnTextArray(ARRA
 
 CREATE OR REPLACE FUNCTION JoinTextArray(texts text[]) RETURNS text AS $$
 Array flatten_texts = Array.CreateInstance(typeof(object), texts.Length);
-ArrayHandler.FlatArray(texts, ref flatten_texts);
+ArrayManipulation.FlatArray(texts, ref flatten_texts);
 string result = "";
 for(int i = 0; i < flatten_texts.Length; i++)
 {
@@ -174,7 +174,7 @@ SELECT 'c#-bpchar-null-1array', 'updateCharArrayIndex3', updateCharArrayIndex(AR
 
 CREATE OR REPLACE FUNCTION AddSmileToChars(values_array BPCHAR[]) RETURNS BPCHAR[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
 {
     if (flatten_values.GetValue(i) == null)
@@ -211,7 +211,7 @@ SELECT 'c#-varchar-null-2array-arraynull', 'updateVarcharArrayIndex2', updateVar
 
 CREATE OR REPLACE FUNCTION AddSmileToVarchars(values_array VARCHAR[]) RETURNS VARCHAR[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
 {
     if (flatten_values.GetValue(i) == null)
@@ -248,7 +248,7 @@ SELECT 'c#-xml-null-2array-arraynull', 'updateXMLArrayIndex2', updateXMLArrayInd
 
 CREATE OR REPLACE FUNCTION ReplaceXMLsWord(values_array XML[]) RETURNS XML[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
 {
     if (flatten_values.GetValue(i) == null)

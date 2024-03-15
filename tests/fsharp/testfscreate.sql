@@ -5,7 +5,7 @@ $$ LANGUAGE plfsharp;
 
 CREATE OR REPLACE FUNCTION updateMoneyArrayFSharp(values_array MONEY[], desired MONEY, index int) RETURNS MONEY[] AS $$
     let flatten_floats = Array.CreateInstance(typeof<decimal>, values_array.Length)
-    ArrayHandler.FlatArray(values_array, ref flatten_floats) |> ignore
+    ArrayManipulation.FlatArray(values_array, ref flatten_floats) |> ignore
     flatten_floats.SetValue(desired, index)
     flatten_floats
 $$ LANGUAGE plfsharp STRICT;

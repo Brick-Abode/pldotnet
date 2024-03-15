@@ -1,5 +1,9 @@
 -- BIT
 
+CREATE OR REPLACE FUNCTION nulltest() RETURNS int4 AS $$
+    return null;
+$$ LANGUAGE plcsharp;
+
 CREATE OR REPLACE FUNCTION modifybit(a BIT(10)) RETURNS BIT(10) AS $$
     if (a == null)
         return null;
@@ -57,16 +61,16 @@ SELECT 'c#-bit-null-2array-arraynull', 'updateBitArrayIndex3', updateBitArrayInd
 
 CREATE OR REPLACE FUNCTION ToggleFirstBits(values_array BIT(8)[]) RETURNS BIT(8)[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     BitArray orig_value = (BitArray)flatten_values.GetValue(i);
     BitArray new_value = orig_value;
     new_value[0] = new_value[0] ? false : true;
-    
+
     flatten_values.SetValue((BitArray)new_value, i);
 }
 return flatten_values;
@@ -99,16 +103,16 @@ SELECT 'c#-varbit-null-2array-arraynull', 'updateVarbitArrayIndex3', updateVarbi
 
 CREATE OR REPLACE FUNCTION ToggleFirstVarbits(values_array BIT VARYING[]) RETURNS BIT VARYING[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     BitArray orig_value = (BitArray)flatten_values.GetValue(i);
     BitArray new_value = orig_value;
     new_value[0] = new_value[0] ? false : true;
-    
+
     flatten_values.SetValue((BitArray)new_value, i);
 }
 return flatten_values;

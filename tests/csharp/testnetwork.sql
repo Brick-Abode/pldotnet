@@ -110,9 +110,9 @@ SELECT 'c#-macaddr-null-2array-arraynull', 'updateArrayMacAddressIndex3', update
 
 CREATE OR REPLACE FUNCTION IncreaseMacAddress(values_array MACADDR[]) RETURNS MACADDR[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
@@ -120,7 +120,7 @@ for(int i = 0; i < flatten_values.Length; i++)
     byte[] bytes = orig_value.GetAddressBytes();
     bytes[0] += 1;
     PhysicalAddress new_value = new PhysicalAddress(bytes);
-    
+
     flatten_values.SetValue((PhysicalAddress)new_value, i);
 }
 return flatten_values;
@@ -154,9 +154,9 @@ SELECT 'c#-macaddr8-null-2array-arraynull', 'updateArrayMacAddress8Index3', upda
 
 CREATE OR REPLACE FUNCTION IncreaseMacAddress8(values_array MACADDR8[]) RETURNS MACADDR8[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
@@ -164,7 +164,7 @@ for(int i = 0; i < flatten_values.Length; i++)
     byte[] bytes = orig_value.GetAddressBytes();
     bytes[0] += 1;
     PhysicalAddress new_value = new PhysicalAddress(bytes);
-    
+
     flatten_values.SetValue((PhysicalAddress)new_value, i);
 }
 return flatten_values;
@@ -197,9 +197,9 @@ SELECT 'c#-inet-null-2array-arraynull', 'updateArrayNetMaskIndex3', updateArrayN
 
 CREATE OR REPLACE FUNCTION IncreaseInetAddress(values_array INET[]) RETURNS INET[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
@@ -207,7 +207,7 @@ for(int i = 0; i < flatten_values.Length; i++)
     byte[] bytes = orig_value.Address.GetAddressBytes();
     bytes[0] += 1;
     (IPAddress Address, int Netmask) new_value = (new IPAddress(bytes), orig_value.Netmask);
-    
+
     flatten_values.SetValue(((IPAddress Address, int Netmask))new_value, i);
 }
 return flatten_values;
@@ -240,9 +240,9 @@ SELECT 'c#-cidr-null-2array-arraynull', 'updateArrayCIDRIndex3', updateArrayCIDR
 
 CREATE OR REPLACE FUNCTION IncreaseCIDRAddress(values_array CIDR[]) RETURNS CIDR[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
@@ -250,7 +250,7 @@ for(int i = 0; i < flatten_values.Length; i++)
     byte[] bytes = orig_value.Address.GetAddressBytes();
     bytes[0] += 1;
     (IPAddress Address, int Netmask) new_value = (new IPAddress(bytes), orig_value.Netmask);
-    
+
     flatten_values.SetValue(((IPAddress Address, int Netmask))new_value, i);
 }
 return flatten_values;

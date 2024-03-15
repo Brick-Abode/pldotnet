@@ -16,7 +16,7 @@
         <Rule Id="SA1008"  Action="Warning" />          <!-- Opening parenthesis should be spaced correctly -->
         <Rule Id="SA1009"  Action="Warning" />          <!-- Closing parenthesis should be spaced correctly -->
         <Rule Id="SA1010"  Action="Warning" />          <!-- Opening square brackets should be spaced correctly -->
-        <Rule Id="SA1011"  Action="Warning" />          <!-- Closing square brackets should be spaced correctly -->
+        <Rule Id="SA1011"  Action="None" />          <!-- Closing square brackets should be spaced correctly -->
         <Rule Id="SA1012"  Action="Warning" />          <!-- Opening braces should be spaced correctly -->
         <Rule Id="SA1013"  Action="Warning" />          <!-- Closing braces should be spaced correctly -->
         <Rule Id="SA1014"  Action="Warning" />          <!-- Opening generic brackets should be spaced correctly -->
@@ -38,7 +38,7 @@
 
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.ReadabilityRules">
         <Rule Id="SA1100"  Action="Warning" />          <!-- Do not prefix calls with base unless local implementation exists -->
-        <Rule Id="SA1101"  Action="Warning" />          <!-- Prefix local calls with this -->
+        <Rule Id="SA1101"  Action="None" />          <!-- Prefix local calls with this -->
         <Rule Id="SA1102"  Action="Warning" />          <!-- Query clause should follow previous clause -->
         <Rule Id="SA1103"  Action="Warning" />          <!-- Query clauses should be on separate lines or all on one line -->
         <Rule Id="SA1104"  Action="Warning" />          <!-- Query clause should begin on new line when previous clause spans multiple lines -->

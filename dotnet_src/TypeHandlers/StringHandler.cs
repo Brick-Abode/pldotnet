@@ -16,7 +16,7 @@ using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Unicode;
+using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
@@ -28,8 +28,6 @@ namespace PlDotNET.Handler
     /// </remarks>
     public class StringHandler : ObjectTypeHandler<string>
     {
-        public static UTF8Encoding Utf8 = new ();
-
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumTextAttributes().
@@ -109,20 +107,13 @@ namespace PlDotNET.Handler
                     throw new NotImplementedException($"StringConstructors doesn't support {(OID)this.ElementOID}");
             }
 
-            ReadOnlySpan<byte> nativeSpan = new (str_p, strlen);
-
-            // Copies the contents of the read-only span into a new array, which is a copy of the array allocated
-            // inside the memory context of the query. This ensures that the string value is built using a copied
-            // array, avoiding issues after the query is finished.
-            byte[] bytes = nativeSpan.ToArray();
-
-            return Utf8.GetString(bytes, 0, strlen);
+            return Encoding.UTF8.GetString(str_p, strlen);
         }
 
         /// <inheritdoc />
         public override IntPtr OutputValue(string value)
         {
-            byte[] encodedBytes = Utf8.GetBytes(value);
+            byte[] encodedBytes = Encoding.UTF8.GetBytes(value);
             int len = encodedBytes.Length;
             return (int)this.ElementOID switch
             {

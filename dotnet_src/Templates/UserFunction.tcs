@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -9,8 +10,15 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
+using System.Threading;
+using System.Threading.Tasks;
+using Npgsql;
 using NpgsqlTypes;
-using PlDotNET.Handler;
+using Npgsql.Tests;
+using Npgsql.Tests.Types;
+using PlDotNET.Common;
+
+#nullable enable
 
 namespace PlDotNET.UserSpace
 {

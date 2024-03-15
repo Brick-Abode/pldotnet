@@ -46,7 +46,7 @@ SELECT 'f#-bool-null-3array-arraynull', 'returnBooleanArrayFSharp3', returnBoole
 
 CREATE OR REPLACE FUNCTION countBoolFSharp(booleans boolean[], desired boolean) RETURNS Integer AS $$
 let flatten_booleans = Array.CreateInstance(typeof<Object>, booleans.Length)
-ArrayHandler.FlatArray(booleans, ref flatten_booleans) |> ignore
+ArrayManipulation.FlatArray(booleans, ref flatten_booleans) |> ignore
 let mutable count = 0
 for i = 0 to flatten_booleans.Length - 1 do
     if System.Object.ReferenceEquals(flatten_booleans.GetValue(i), null) then

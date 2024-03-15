@@ -1,26 +1,40 @@
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using Npgsql;
 using NpgsqlTypes;
+using PlDotNET.Common;
 using PlDotNET.Handler;
 
 namespace PlDotNET.UserSpace
 {
     public static class UserHandler
     {
+        // $fsharp_wrapper_for_inout$
+
         // $handler_objects$
 
-        public static unsafe void CallUserFunction(List<IntPtr> arguments, IntPtr output, bool[] isnull)
+        // $srf_cache$
+
+        public static unsafe int CallUserFunction(List<IntPtr> arguments, IntPtr output, ulong call_id, int call_mode, bool[] isnull)
         {
             #line 1
-            // $create_arguments
+            // $srf_begin$
+
+            // $create_arguments$
 
             // $user_function_call$
 
+            // $srf_middle$
+
             // $call_set_result$
+
+            // $srf_end$
         }
     }
 }

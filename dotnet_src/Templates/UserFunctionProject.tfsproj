@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PlDotNET.Common">
+      <HintPath>$PlDotNET.Common.dll$</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>$Npgsql.dll$</HintPath>
+    </Reference>
+    <Reference Include="NpgsqlTypes">
+      <HintPath>$NpgsqlTypes.dll$</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>stylecop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+</Project>

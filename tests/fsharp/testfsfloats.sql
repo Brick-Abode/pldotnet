@@ -93,6 +93,17 @@ $$ LANGUAGE plfsharp STRICT;
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'f#-float4-null-3array-arraynull', 'CreateDoubleMultidimensionalArrayFSharp', CreateDoubleMultidimensionalArrayFSharp() = ARRAY[[1.24323::float8, 0::float8, 0::float8], [0::float8, 8.11134::float8, 0::float8], [0::float8, 0::float8, 16.14256::float8]];
 
+CREATE OR REPLACE FUNCTION make_pi_n_fs(a int) RETURNS float8 AS $$
+    let mutable sum : float = 0.0
+    for i = 0 to a do
+        sum <- sum + ((if i % 2 = 0 then 1.0 else -1.0)/ float(2.0 * float(i) + 1.0))
+    Nullable<float>(sum * 4.0);
+$$ LANGUAGE plfsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'f#-float8-make-pi', 'make_pi_lt', make_pi_n_fs(1000) < double precision '3.15';
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'f#-float8-make-pi', 'make_pi_gt', make_pi_n_fs(1000) > double precision '3.13';
+
 CREATE OR REPLACE FUNCTION updateArrayDoubleIndexFSharp(a float8[], b float8) RETURNS float8[] AS $$
 let dim = a.Rank
 match dim with

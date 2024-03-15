@@ -1,4 +1,4 @@
-all: pldotnet-whitepaper-dec22.pdf
+all: pldotnet-whitepaper-mar24.pdf
 
 # Local software dependencies:
 #     - pdflatex and bibtex, from xetex (or wherever)
@@ -19,12 +19,12 @@ img/%.png:
 
 interior_pdf: .venv.created $(BIG_IMGS)
 	. venv/bin/activate && \
-	pdflatex -shell-escape pldotnet-whitepaper-dec22.tex # `-shell-escape` is for minted
+	pdflatex -shell-escape pldotnet-whitepaper-mar24.tex # `-shell-escape` is for minted
 
-pldotnet-whitepaper-dec22.pdf: pldotnet-whitepaper-dec22.tex
+pldotnet-whitepaper-mar24.pdf: pldotnet-whitepaper-mar24.tex
 	(cd img && make)
 	make interior_pdf
-	bibtex pldotnet-whitepaper-dec22
+	bibtex pldotnet-whitepaper-mar24
 	rm -f $@
 	make interior_pdf
 
@@ -32,10 +32,10 @@ venvclean:
 	rm -rf .venv.created venv/
 
 lightclean:
-	rm -rf pldotnet-whitepaper-dec22.{aux,out,toc,log,lot,lof} _minted-pldotnet-whitepaper-dec22/
+	rm -rf pldotnet-whitepaper-mar24.{aux,out,toc,log,lot,lof} _minted-pldotnet-whitepaper-mar24/
 
 clean: lightclean
-	rm -f pldotnet-whitepaper-dec22.pdf
+	rm -f pldotnet-whitepaper-mar24.pdf
 	cd img && make clean
 
 veryclean: venvclean clean

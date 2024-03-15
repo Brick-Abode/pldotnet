@@ -132,15 +132,15 @@ SELECT 'c#-int4range-null-2array-arraynull', 'updateInt4RangeIndex3', updateInt4
 
 CREATE OR REPLACE FUNCTION IncreaseInt4Ranges(values_array INT4RANGE[]) RETURNS INT4RANGE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlRange<int> orig_value = (NpgsqlRange<int>)flatten_values.GetValue(i);
     NpgsqlRange<int> new_value = new NpgsqlRange<int>(orig_value.LowerBound + 1, orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound + 1, orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
-    
+
     flatten_values.SetValue((NpgsqlRange<int>)new_value, i);
 }
 return flatten_values;
@@ -171,15 +171,15 @@ SELECT 'c#-int8range-null-2array-arraynull', 'updateInt8RangeIndex3', updateInt8
 
 CREATE OR REPLACE FUNCTION IncreaseInt8Ranges(values_array INT8RANGE[]) RETURNS INT8RANGE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlRange<long> orig_value = (NpgsqlRange<long>)flatten_values.GetValue(i);
     NpgsqlRange<long> new_value = new NpgsqlRange<long>(orig_value.LowerBound + 1, orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound + 1, orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
-    
+
     flatten_values.SetValue((NpgsqlRange<long>)new_value, i);
 }
 return flatten_values;
@@ -210,15 +210,15 @@ SELECT 'c#-tsrange-null-2array-arraynull', 'updateTimestampRangeIndex3', updateT
 
 CREATE OR REPLACE FUNCTION IncreaseTimestampRanges(values_array TSRANGE[]) RETURNS TSRANGE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlRange<DateTime> orig_value = (NpgsqlRange<DateTime>)flatten_values.GetValue(i);
     NpgsqlRange<DateTime> new_value = new NpgsqlRange<DateTime>(orig_value.LowerBound.AddDays(1), orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound.AddDays(1), orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
-    
+
     flatten_values.SetValue((NpgsqlRange<DateTime>)new_value, i);
 }
 return flatten_values;
@@ -249,15 +249,15 @@ SELECT 'c#-tstzrange-null-2array-arraynull', 'updateTimestampTzRangeIndex3', upd
 
 CREATE OR REPLACE FUNCTION IncreaseTimestampTzRanges(values_array TSTZRANGE[]) RETURNS TSTZRANGE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlRange<DateTime> orig_value = (NpgsqlRange<DateTime>)flatten_values.GetValue(i);
     NpgsqlRange<DateTime> new_value = new NpgsqlRange<DateTime>(orig_value.LowerBound.AddDays(1), orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound.AddDays(1), orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
-    
+
     flatten_values.SetValue((NpgsqlRange<DateTime>)new_value, i);
 }
 return flatten_values;
@@ -288,15 +288,15 @@ SELECT 'c#-daterange-null-2array-arraynull', 'updateDateonlyRangeIndex3', update
 
 CREATE OR REPLACE FUNCTION IncreaseDateonlyRanges(values_array DATERANGE[]) RETURNS DATERANGE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlRange<DateOnly> orig_value = (NpgsqlRange<DateOnly>)flatten_values.GetValue(i);
     NpgsqlRange<DateOnly> new_value = new NpgsqlRange<DateOnly>(orig_value.LowerBound.AddDays(1), orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound.AddDays(1), orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
-    
+
     flatten_values.SetValue((NpgsqlRange<DateOnly>)new_value, i);
 }
 return flatten_values;

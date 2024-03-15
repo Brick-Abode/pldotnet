@@ -105,9 +105,9 @@ SELECT 'c#-date-null-2array-arraynull', 'updateArrayDateIndex3', updateArrayDate
 
 CREATE OR REPLACE FUNCTION IncreaseMonthDateArray(dates DATE[]) RETURNS DATE[] AS $$
 Array flatten_dates = Array.CreateInstance(typeof(object), dates.Length);
-ArrayHandler.FlatArray(dates, ref flatten_dates);
+ArrayManipulation.FlatArray(dates, ref flatten_dates);
 for(int i = 0; i < flatten_dates.Length; i++)
-{   
+{
     if (flatten_dates.GetValue(i) == null)
         continue;
 
@@ -116,7 +116,7 @@ for(int i = 0; i < flatten_dates.Length; i++)
     int month = orig_date.Month;
     int year = orig_date.Year;
     DateOnly new_date = new DateOnly(year,month+1,day);
-    
+
     flatten_dates.SetValue((DateOnly)new_date, i);
 }
 return flatten_dates;
@@ -152,16 +152,16 @@ SELECT 'c#-time-null-2array-arraynull', 'updateArrayTimeIndex3', updateArrayTime
 
 CREATE OR REPLACE FUNCTION IncreaseMinutesTimeArray(values_array TIME[], min_to_add INT) RETURNS TIME[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
 
     TimeOnly orig_value = (TimeOnly)flatten_values.GetValue(i);
     TimeOnly new_value = orig_value.AddMinutes((double) min_to_add);
-    
+
     flatten_values.SetValue((TimeOnly)new_value, i);
 }
 return flatten_values;
@@ -197,15 +197,15 @@ SELECT 'c#-timetz-null-2array-arraynull', 'updateArrayTimetzIndex3', updateArray
 
 CREATE OR REPLACE FUNCTION IncreaseMinutesTimetzArray(values_array TIMETZ[], min_to_add INT) RETURNS TIMETZ[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     DateTimeOffset orig_value = (DateTimeOffset)flatten_values.GetValue(i);
     DateTimeOffset new_value = orig_value.AddMinutes((double) min_to_add);
-    
+
     flatten_values.SetValue((DateTimeOffset)new_value, i);
 }
 return flatten_values;
@@ -239,15 +239,15 @@ SELECT 'c#-timestamp-null-2array-arraynull', 'updateArrayTimestampIndex2', updat
 
 CREATE OR REPLACE FUNCTION IncreaseTimestamps(values_array TIMESTAMP[], days_to_add INT) RETURNS TIMESTAMP[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     DateTime orig_value = (DateTime)flatten_values.GetValue(i);
     DateTime new_value = orig_value.AddDays((double)days_to_add);
-    
+
     flatten_values.SetValue((DateTime)new_value, i);
 }
 return flatten_values;
@@ -282,15 +282,15 @@ SELECT 'c#-timestamptz-null-2array-arraynull', 'updateArrayTimestamptzIndex2', u
 
 CREATE OR REPLACE FUNCTION IncreaseTimestampstz(values_array TIMESTAMP WITH TIME ZONE[], days_to_add INT) RETURNS TIMESTAMP WITH TIME ZONE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     DateTime orig_value = (DateTime)flatten_values.GetValue(i);
     DateTime new_value = orig_value.AddDays((double)days_to_add);
-    
+
     flatten_values.SetValue((DateTime)new_value, i);
 }
 return flatten_values;
@@ -327,15 +327,15 @@ SELECT 'c#-interval-null-2array-arraynull', 'updateArrayIntervalIndex3', updateA
 
 CREATE OR REPLACE FUNCTION IncreaseIntervals(values_array INTERVAL[],months_to_add INT, days_to_add INT) RETURNS INTERVAL[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlInterval orig_value = (NpgsqlInterval)flatten_values.GetValue(i);
     NpgsqlInterval new_value = new NpgsqlInterval(orig_value.Months + months_to_add, orig_value.Days + days_to_add, orig_value.Time);
-    
+
     flatten_values.SetValue((NpgsqlInterval)new_value, i);
 }
 return flatten_values;

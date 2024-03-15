@@ -1,4 +1,4 @@
---------- POINT 
+--------- POINT
 CREATE OR REPLACE FUNCTION middlePoint(pointa point, pointb point) RETURNS point AS $$
 if (pointa == null)
     pointa = new NpgsqlPoint(0, 0);
@@ -56,7 +56,8 @@ NpgsqlLine my_line = new NpgsqlLine(a,b,c);
 return my_line;
 $$ LANGUAGE plcsharp;
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
-SELECT 'c#-line', 'modifyCoefficients1', modifyCoefficients(LINE '{-1.5,2.75,-3.25}') = LINE '{1.50,-2.75,3.25}';INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-line', 'modifyCoefficients1', modifyCoefficients(LINE '{-1.5,2.75,-3.25}') = LINE '{1.50,-2.75,3.25}';
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'c#-line-null', 'modifyCoefficients2', modifyCoefficients(NULL::LINE) = LINE '{2.4, 8.2, -32.43}';
 
 CREATE OR REPLACE FUNCTION getMinimumDistance(orig_line LINE, orig_point POINT) RETURNS double precision AS $$
@@ -169,7 +170,7 @@ SELECT 'c#-polygon-null', 'addPointToPolygon2', addPointToPolygon(NULL::POLYGON,
 --------- CIRCLE
 CREATE OR REPLACE FUNCTION returnCircle(orig_circle CIRCLE) RETURNS CIRCLE AS $$
 return orig_circle;
-$$ LANGUAGE plcsharp STRICT; 
+$$ LANGUAGE plcsharp STRICT;
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'c#-circle', 'returnCircle', returnCircle(CIRCLE '2.5, 3.5, 12.78') ~= CIRCLE '<(2.5, 3.5), 12.78>';
 
@@ -197,15 +198,15 @@ SELECT 'c#-point-null-2array-arraynull', 'updateArrayPointIndex2', CAST(updateAr
 
 CREATE OR REPLACE FUNCTION IncreasePoints(values_array point[]) RETURNS point[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlPoint orig_value = (NpgsqlPoint)flatten_values.GetValue(i);
     NpgsqlPoint new_value = new NpgsqlPoint(orig_value.X + 1, orig_value.Y + 1);
-    
+
     flatten_values.SetValue((NpgsqlPoint)new_value, i);
 }
 return flatten_values;
@@ -234,15 +235,15 @@ SELECT 'c#-line-null-2array-arraynull', 'updateArrayLineIndex2', CAST(updateArra
 
 CREATE OR REPLACE FUNCTION IncreaseLines(values_array LINE[]) RETURNS LINE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlLine orig_value = (NpgsqlLine)flatten_values.GetValue(i);
     NpgsqlLine new_value = new NpgsqlLine(orig_value.A + 1, orig_value.B + 1, orig_value.C + 1);
-    
+
     flatten_values.SetValue((NpgsqlLine)new_value, i);
 }
 return flatten_values;
@@ -273,15 +274,15 @@ SELECT 'c#-lseg-null-2array-arraynull', 'updateArrayLSEGIndex2', CAST(updateArra
 
 CREATE OR REPLACE FUNCTION IncreaseLSEGs(values_array LSEG[]) RETURNS LSEG[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlLSeg orig_value = (NpgsqlLSeg)flatten_values.GetValue(i);
     NpgsqlLSeg new_value = new NpgsqlLSeg(new NpgsqlPoint(orig_value.Start.X + 1, orig_value.Start.Y + 1), new NpgsqlPoint(orig_value.End.X + 1, orig_value.End.Y + 1));
-    
+
     flatten_values.SetValue((NpgsqlLSeg)new_value, i);
 }
 return flatten_values;
@@ -312,15 +313,15 @@ SELECT 'c#-box-null-2array-arraynull', 'updateArrayBoxIndex2', CAST(updateArrayB
 
 CREATE OR REPLACE FUNCTION IncreaseBoxs(values_array BOX[]) RETURNS BOX[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlBox orig_value = (NpgsqlBox)flatten_values.GetValue(i);
     NpgsqlBox new_value = new NpgsqlBox(new NpgsqlPoint(orig_value.UpperRight.X + 1, orig_value.UpperRight.Y + 1), new NpgsqlPoint(orig_value.LowerLeft.X + 1, orig_value.LowerLeft.Y + 1));
-    
+
     flatten_values.SetValue((NpgsqlBox)new_value, i);
 }
 return flatten_values;
@@ -350,19 +351,19 @@ SELECT 'c#-path-null-2array-arraynull', 'updateArrayPathIndex2', CAST(updateArra
 
 CREATE OR REPLACE FUNCTION IncreasePaths(values_array PATH[]) RETURNS PATH[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlPath orig_value = (NpgsqlPath)flatten_values.GetValue(i);
-    
+
     NpgsqlPath new_value = new NpgsqlPath(orig_value.Count);
     foreach (NpgsqlPoint polygon_point in orig_value) {
         new_value.Add(new NpgsqlPoint(polygon_point.X + 1, polygon_point.Y + 1));
     }
-    
+
     flatten_values.SetValue((NpgsqlPath)new_value, i);
 }
 return flatten_values;
@@ -392,19 +393,19 @@ SELECT 'c#-polygon-null-2array-arraynull', 'updateArrayPolygonIndex2', CAST(upda
 
 CREATE OR REPLACE FUNCTION IncreasePolygons(values_array POLYGON[]) RETURNS POLYGON[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlPolygon orig_value = (NpgsqlPolygon)flatten_values.GetValue(i);
-    
+
     NpgsqlPolygon new_value = new NpgsqlPolygon(orig_value.Count);
     foreach (NpgsqlPoint polygon_point in orig_value) {
         new_value.Add(new NpgsqlPoint(polygon_point.X + 1, polygon_point.Y + 1));
     }
-    
+
     flatten_values.SetValue((NpgsqlPolygon)new_value, i);
 }
 return flatten_values;
@@ -435,15 +436,15 @@ SELECT 'c#-circle-null-2array-arraynull', 'updateArrayCircleIndex2', CAST(update
 
 CREATE OR REPLACE FUNCTION IncreaseCircles(values_array CIRCLE[]) RETURNS CIRCLE[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     NpgsqlCircle orig_value = (NpgsqlCircle)flatten_values.GetValue(i);
     NpgsqlCircle new_value = new NpgsqlCircle(orig_value.Center, orig_value.Radius + 1);
-    
+
     flatten_values.SetValue((NpgsqlCircle)new_value, i);
 }
 return flatten_values;

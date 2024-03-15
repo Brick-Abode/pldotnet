@@ -6,10 +6,10 @@ from itertools import groupby
 import sys, os, functools
 
 
-def manipulate_data_frame(filtered_df, fact):
+def manipulate_data_frame(filtered_df, fact, pl_reference):
     # Manipulate DataFrame to generate the heatmap
     heatmap_df = filtered_df.drop(["Category", "Test Case"], axis=1)
-    heatmap_df = heatmap_df.div(heatmap_df["plcsharp"], axis=0)
+    heatmap_df = heatmap_df.div(heatmap_df[pl_reference], axis=0)
 
     # Calculate the mean, max, and min of each column
     mean_values = heatmap_df.mean()
@@ -26,7 +26,7 @@ def manipulate_data_frame(filtered_df, fact):
 
     # Compute natural logarithmic
     heatmap_df = np.log(heatmap_df)
-    heatmap_df = heatmap_df.applymap(lambda x: x * fact if (x < 0) else x)
+    heatmap_df = heatmap_df.applymap(lambda x: x * abs(fact) if (x * fact < 0) else x)
 
     mean_values = np.concatenate((["Average", "Results"], mean_values))
     min_values = np.concatenate((["Best performance", "Results"], min_values))
@@ -81,12 +81,14 @@ def label_group_bar_table(ax, df):
         xpos -= 0.15
 
 
-def create_heatmap(pngfile, filtered_df, category=None):
-    # Constant defined to increase the scale of the green values (better than plcsharp)
-    fact = 2.0
+def create_heatmap(pngfile, filtered_df, pl_reference, category=None):
+    # Constant defined to increase the scale of the value
+    # If positive, scale the green values (better than the reference language)
+    # If negative, scale the red values (worse than the reference language)
+    fact = 5.0
 
     # Manipulated DataFrame with log values
-    heatmap_df, filtered_df = manipulate_data_frame(filtered_df, fact)
+    heatmap_df, filtered_df = manipulate_data_frame(filtered_df, fact, pl_reference)
 
     # Create figure
     a = 0.5
@@ -114,7 +116,7 @@ def create_heatmap(pngfile, filtered_df, category=None):
     for text in ax.texts:
         if text.get_text() != "0.0000":
             log_value = float(text.get_text())
-            log_value = log_value / fact if log_value < 0.0 else log_value
+            log_value = log_value / abs(fact) if log_value * fact < 0.0 else log_value
             original_value = np.exp(log_value)
             percentage_value = (original_value - 1.0) * 100.0
             text.set_text("{:.1f}%".format(percentage_value))
@@ -123,7 +125,7 @@ def create_heatmap(pngfile, filtered_df, category=None):
 
     if category is None or category == "":
         plt.title(
-            "Performance results against plcsharp (%)",
+            f"Performance results against {pl_reference} (%)",
             fontsize=24,
         )
         # Below 3 lines remove default labels
@@ -136,7 +138,7 @@ def create_heatmap(pngfile, filtered_df, category=None):
         plt.savefig(pngfile, dpi=300, bbox_inches="tight")
     else:
         plt.title(
-            f'Performance results for "{category}" tests against plcsharp (%)',
+            f'Performance results for "{category}" tests against {pl_reference} (%)',
             fontsize=24,
         )
         plt.savefig(f"heatmap_{category}.png", dpi=300, bbox_inches="tight")
@@ -159,10 +161,12 @@ def main(argv):
 
     # USAGE: you can pass "EXCLUDE_CATEGORIES=Array,Bool" as an environmental variable
     # USAGE: to see all categories, use "EXCLUDE_CATEGORIES="
-    default_exclude_categories = "Recursive"
-    exclude_categories = os.getenv("EXCLUDE_CATEGORIES", default_exclude_categories).split(",")
+    exclude_categories = os.getenv("EXCLUDE_CATEGORIES", "").split(",")
     exclude_tests = [ (df["Category"] != cat) for cat in exclude_categories ]
     exclude_test = functools.reduce(lambda x, y: x & y, exclude_tests)
+
+    # USAGE: you can pass "PL_REFERENCE=plpython" as an environmental variable
+    pl_reference = os.getenv("PL_REFERENCE", "").lower() or "plpython"
 
     # Whether should create the heatmap for each category
     by_category = False
@@ -172,13 +176,13 @@ def main(argv):
         categories = df["Category"].unique()
         for category in categories:
             filtered_df = filter_data_by_category(df, category)
-            create_heatmap(filtered_df, category)
+            create_heatmap(pngfile, filtered_df, pl_reference, category)
     else:
         # print("# DEBUG: pre-filtering, df[%s] is:\n%s" % (len(df), df))
         df = df.loc[exclude_test]
         # print("# DEBUG: post-filtering, df[%s] is:\n%s" % (len(df), df))
         # print("# DEBUG: tests are %s" % sorted(df["Test Case"]))
-        create_heatmap(pngfile, df)
+        create_heatmap(pngfile, df, pl_reference)
 
 
 main(sys.argv)

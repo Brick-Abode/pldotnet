@@ -36,15 +36,15 @@ SELECT 'c#-json-null-2array-arraynull', 'updateJsonArrayIndex2', updateJsonArray
 
 CREATE OR REPLACE FUNCTION ReplaceJsonsKey(values_array JSON[]) RETURNS JSON[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     string orig_value = (string)flatten_values.GetValue(i);
     string new_value = orig_value.Replace("name", "first_name");
-    
+
     flatten_values.SetValue((string)new_value, i);
 }
 return flatten_values;

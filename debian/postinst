@@ -1,19 +1,5 @@
 #!/bin/bash
-set -e
+echo "Post install script is running now"
 
-# Add nethost to ld.so search path.  We welcome more subtle solutions.
-DOTNET_VERSION=$(dotnet --info | grep 'Host' -A 3 | grep Version:|awk '{print $2}')
-DOTNET_LIBDIR=$(dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
-PLDOTNET_ENGINE_DIR=/var/lib/PlDotNET
-PLDOTNET_TEMPLATE_DIR=${PLDOTNET_ENGINE_DIR}/Templates
-PLDOTNET_TEMPLATE_DIR_MOD=$(echo ${PLDOTNET_TEMPLATE_DIR} | sed 's/\//\\\//g')
-PKG_LIBDIR=$(pg_config --pkglibdir | sed 's/\//\\\//g')
-echo "${DOTNET_LIBDIR}" > /etc/ld.so.conf.d/nethost_pldotnet.conf
-sed -i "s/@PKG_LIBDIR/${PKG_LIBDIR}/g" ${PLDOTNET_ENGINE_DIR}/Engine.cs
-sed -i "s/@PKG_LIBDIR/${PKG_LIBDIR}/g" ${PLDOTNET_ENGINE_DIR}/TypeHandlers/*.cs
-sed -i "s/@PKG_LIBDIR/${PKG_LIBDIR}/g" ${PLDOTNET_ENGINE_DIR}/FSharp/FSharpCompiler.fs
-sed -i "s/@PLDOTNET_TEMPLATE_DIR/${PLDOTNET_TEMPLATE_DIR_MOD}/g" ${PLDOTNET_ENGINE_DIR}/CodeGenerator.cs
-dotnet build ${PLDOTNET_ENGINE_DIR} -c Release
-runuser -u postgres -- psql -c "DROP EXTENSION IF EXISTS pldotnet CASCADE;"
-runuser -u postgres -- psql -c "CREATE EXTENSION pldotnet;"
-runuser -u postgres -- psql -c "DO \$\$ BEGIN CREATE ROLE root superuser createdb login createrole replication bypassrls; EXCEPTION WHEN duplicate_object THEN RAISE NOTICE '%, skipping', SQLERRM USING ERRCODE = SQLSTATE; END \$\$;"
+DOTNET_LIBDIR=$(dpkg -L dotnet-apphost-pack-6.0 | fgrep libnethost.so | head -1 | xargs dirname)
+ldconfig  $DOTNET_LIBDIR
