@@ -37,11 +37,11 @@ do $$
     string chinese = "你会说中文吗？";
     Elog.Info($"Do you speak Chinese? => {chinese}");
 
-    string japonese = "あなたは日本語を話しますか？";
-    Elog.Info($"Do you speak Japonese? => {japonese}");
+    string japanese = "あなたは日本語を話しますか？";
+    Elog.Info($"Do you speak Japanese? => {japanese}");
 
     string portuguese = "Você fala português?";
-    Elog.Info($"Do yo speak Portuguese? => {portuguese}");
+    Elog.Info($"Do you speak Portuguese? => {portuguese}");
 
     string russian = "а ты говоришь по русски?";
     Elog.Info($"Do you speak Russian? => {russian}");

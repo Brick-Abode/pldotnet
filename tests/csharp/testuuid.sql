@@ -28,7 +28,7 @@ CREATE OR REPLACE FUNCTION combineUUIDs(a UUID, b UUID) RETURNS UUID AS $$
 
     if (b == null)
         b = new Guid("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-    
+
     string aStr = a.ToString();
     string bStr = b.ToString();
     var aList = aStr.Split('-');
@@ -59,15 +59,15 @@ SELECT 'c#-uuid-null-2array-arraynull', 'updateUUIDArrayIndex3', updateUUIDArray
 
 CREATE OR REPLACE FUNCTION updateUUIDArray(values_array UUID[]) RETURNS UUID[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     string orig_value = (string)flatten_values.GetValue(i).ToString();
     Guid new_value = new Guid("aaaaaaaa" + orig_value.Substring(8));
-    
+
     flatten_values.SetValue((Guid)new_value, i);
 }
 return flatten_values;

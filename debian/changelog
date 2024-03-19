@@ -1,3 +1,16 @@
+pldotnet (0.99-rc1) unstable; urgency=medium
+
+  * Update to version 0.99, rc1
+  * Add SPI using Npgsql
+  * Add trigger support
+  * Add OUT/INOUT parameters
+  * Add RECORD support
+  * Add Set-Returning Function (SRF) support
+  * Add table function support
+  * Add lots of testing
+
+ -- Todd Lewis <tlewis@brickabode.com>  Fri, 15 Mar 2024 12:00:00 -0300
+
 pldotnet (0.9-1) unstable; urgency=medium
 
   * Initial release.

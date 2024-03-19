@@ -143,7 +143,7 @@ def make_fig(filename, data):
 
     fig.update_layout(
         title=title,
-        xaxis_title="Test",
+        xaxis_title="",
         yaxis_title="Relative execution time",
         legend_title="Language",
         title_x=0.5,
@@ -246,7 +246,8 @@ def graph_compare_n(data, *langs, inverted=True):
     av = average(comparison.values())
     debug("Average 2 is %s" % av, False)
 
-    default_exclude_categories = "Recursive"
+    # default_exclude_categories = "Recursive"
+    default_exclude_categories = ""
     exclude_categories = os.getenv("EXCLUDE_CATEGORIES", default_exclude_categories).split(",")
 
     # make_fig needs this:

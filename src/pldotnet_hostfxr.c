@@ -72,21 +72,34 @@ static void *pldotnet_dlsym(void *handle, const char *symbol) {
     return dlsym(handle, symbol);
 }
 
+// Returns 0 on success, (other) on error
 static int pldotnet_GetHostFxrPath(char_t *buffer, size_t bufferSize) {
     FILE *out = popen(
         "dpkg -L dotnet-hostfxr-6.0 | grep libhostfxr.so | head -1 | xargs "
         "dirname",
         "r");
     const char *aux = "/libhostfxr.so";
-    if (NULL == out) {
-        return 1;
-    }
+    size_t currentLength;
+    int written;
+
+    if (NULL == out) { return -11; }
+
     while (fgets(buffer, bufferSize, out) != NULL) puts(buffer);
-    buffer[strlen(buffer) - 1] = '\0';
-    strcat(buffer, aux);
+    buffer[strlen(buffer) - 1] = '\0';  // Removing the newline character
+    currentLength = strlen(buffer);
+
+    // Using snprintf to append the `aux` string
+    written = snprintf(buffer + currentLength,
+                       bufferSize - currentLength,
+                       "%s",
+                       aux);
     pclose(out);
+    if ((written < 0) || (written >= bufferSize - currentLength)) {
+        return -2;  // Indicate an snprintf error
+    }
     return 0;
 }
+
 
 int pldotnet_LoadHostfxr(void) {
     void *lib;

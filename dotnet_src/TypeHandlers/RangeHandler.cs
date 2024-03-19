@@ -15,6 +15,7 @@
 using System;
 using System.Runtime.InteropServices;
 using NpgsqlTypes;
+using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
@@ -59,6 +60,64 @@ namespace PlDotNET.Handler
                 upperInfinite > 0);
         }
 
+        /// <summary>
+        /// Formats the output range by adjusting the lower and upper bounds based on PostgreSQL standards.
+        /// </summary>
+        /// <param name="range">The input range to be formatted.</param>
+        /// <returns>A new NpgsqlRange object with adjusted bounds.</returns>
+        public NpgsqlRange<T> FormatOutputRange(NpgsqlRange<T> range)
+        {
+            T newLowerBound = range.LowerBound;
+            T newUpperBound = range.UpperBound;
+            bool lowerBoundIsInclusive = range.LowerBoundIsInclusive;
+            bool upperBoundIsInclusive = range.UpperBoundIsInclusive;
+            bool lowerBoundInfinite = range.LowerBoundInfinite;
+            bool upperBoundInfinite = range.UpperBoundInfinite;
+
+            // Adjust the lower bound
+            if (!lowerBoundIsInclusive && !lowerBoundInfinite)
+            {
+                if (typeof(T) == typeof(DateOnly))
+                {
+                    DateOnly lowerBound = (DateOnly)(object)range.LowerBound;
+                    newLowerBound = (T)(object)lowerBound.AddDays(1);
+                    lowerBoundIsInclusive = true;
+                }
+                else if (typeof(T) == typeof(int) || typeof(T) == typeof(long))
+                {
+                    dynamic lowerBound = range.LowerBound;
+                    newLowerBound = (T)(lowerBound + 1);
+                    lowerBoundIsInclusive = true;
+                }
+            }
+
+            // Adjust the upper bound
+            if (upperBoundIsInclusive && !upperBoundInfinite)
+            {
+                if (typeof(T) == typeof(DateOnly))
+                {
+                    DateOnly upperBound = (DateOnly)(object)range.UpperBound;
+                    newUpperBound = (T)(object)upperBound.AddDays(1);
+                    upperBoundIsInclusive = false;
+                }
+                else if (typeof(T) == typeof(int) || typeof(T) == typeof(long))
+                {
+                    dynamic upperBound = range.UpperBound;
+                    newUpperBound = (T)(upperBound + 1);
+                    upperBoundIsInclusive = false;
+                }
+            }
+
+            // Return a new range with adjusted bounds
+            return new NpgsqlRange<T>(
+                newLowerBound,
+                lowerBoundIsInclusive,
+                lowerBoundInfinite,
+                newUpperBound,
+                upperBoundIsInclusive,
+                upperBoundInfinite);
+        }
+
         /// <inheritdoc />
         public override IntPtr OutputValue(NpgsqlRange<T> value)
         {
@@ -67,6 +126,7 @@ namespace PlDotNET.Handler
                 return RangeConstructors.pldotnet_CreateEmptyDatumRange(this.ElementOID);
             }
 
+            value = FormatOutputRange(value);
             byte upperInfinite = (byte)(value.UpperBoundInfinite ? 1 : 0);
             byte lowerInfinite = (byte)(value.LowerBoundInfinite ? 1 : 0);
             byte upperInclusive = (byte)(value.UpperBoundIsInclusive ? 1 : 0);

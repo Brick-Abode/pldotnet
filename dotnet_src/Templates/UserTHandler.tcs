@@ -1,0 +1,97 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
+using Npgsql;
+using NpgsqlTypes;
+using PlDotNET.Common;
+using PlDotNET.Handler;
+
+namespace PlDotNET.UserSpace
+{
+    public static class UserHandler
+    {
+        // $handler_objects$
+
+        public static unsafe int CallUserTrigger(
+            IntPtr old_row_result,
+            IntPtr new_row_result,
+            string triggerName,
+            string triggerWhen,
+            string triggerLevel,
+            string triggerOperation,
+            int relationId,
+            string tableName,
+            string tableSchema,
+            string[] arguments)
+        {
+            int rv;
+            object[] old_row_orig = RecordHandlerObj.InputGetValue(old_row_result);
+            object[] new_row_orig = RecordHandlerObj.InputGetValue(new_row_result);
+            object[] old_row = (object[])old_row_orig.Clone();
+            object[] new_row = (object[])new_row_orig.Clone();
+
+            TriggerData tg = new TriggerData(
+                old_row,
+                new_row,
+                triggerName,
+                triggerWhen,
+                triggerLevel,
+                triggerOperation,
+                relationId,
+                tableName,
+                tableSchema,
+                arguments);
+
+            // $user_function_call$
+
+            if (rv == (int)ReturnMode.TriggerModify)
+            {
+                if ((triggerOperation != "INSERT") && (triggerOperation != "UPDATE"))
+                {
+                    Elog.Warning($"Ignoring modify on trigger.OPERATION = {triggerOperation}");
+                    rv = (int)ReturnMode.Normal;
+                }
+                else if (triggerLevel != "ROW")
+                {
+                    Elog.Warning($"Ignoring modify on trigger.LEVEL = {triggerLevel}");
+                    rv = (int)ReturnMode.Normal;
+                }
+                else if (triggerWhen == "AFTER")
+                {
+                    Elog.Warning($"Ignoring modify on trigger.WHEN = {triggerWhen}");
+                    rv = (int)ReturnMode.Normal;
+                }
+                else
+                {
+                    for (int i = 0; i < new_row.Length; i++)
+                    {
+                        // FIXME: we need to use NpgsqlType to force RecordHandler to
+                        // use precisely the right OID when creating the output Datum.
+                        // This current approach risks (string -> text) when we need
+                        // (string -> varchar), e.g.
+                        if (!ReferenceEquals(new_row_orig[i], new_row[i]))
+                        {
+                            if((new_row_orig[i]== null) || (new_row[i] == null))
+                            {
+                                RecordHandlerObj.OutputSetField(new_row[i], new_row_result, i);
+                            }
+                            else if (new_row_orig[i].GetType() == new_row[i].GetType())
+                            {
+                                RecordHandlerObj.OutputSetField(new_row[i], new_row_result, i);
+                            }
+                            else
+                            {
+                                Elog.Warning("Type of updated field does not match; NOT updating row");
+                            }
+                        }
+                    }
+                }
+            }
+            return rv;
+        }
+    }
+}

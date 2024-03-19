@@ -225,7 +225,7 @@ SELECT 'f#-line-null-3array-arraynull', 'updateArrayLineIndexFSharp3', CAST(upda
 
 CREATE OR REPLACE FUNCTION IncreaseLinesFSharp(values_array LINE[]) RETURNS LINE[] AS $$
     let flatten_values = Array.CreateInstance(typeof<NpgsqlLine>, values_array.Length)
-    ArrayHandler.FlatArray(values_array, ref flatten_values) |> ignore
+    ArrayManipulation.FlatArray(values_array, ref flatten_values) |> ignore
     for i in 0 .. flatten_values.Length - 1 do
         if System.Object.ReferenceEquals(flatten_values.GetValue(i), null) then
             ()
@@ -274,7 +274,7 @@ SELECT 'f#-lseg-null-3array-arraynull', 'updateArrayLSEGIndexFSharp3', CAST(upda
 
 CREATE OR REPLACE FUNCTION IncreaseLSEGsFSharp(values_array LSEG[]) RETURNS LSEG[] AS $$
 let flatten_values = Array.CreateInstance(typeof<NpgsqlLSeg>, values_array.Length)
-ArrayHandler.FlatArray(values_array, ref flatten_values) |> ignore
+ArrayManipulation.FlatArray(values_array, ref flatten_values) |> ignore
 for i in 0 .. flatten_values.Length - 1 do
     if System.Object.ReferenceEquals(flatten_values.GetValue(i), null) then
         ()
@@ -323,7 +323,7 @@ SELECT 'f#-box-null-3array-arraynull', 'updateArrayBoxIndexFSharp3', CAST(update
 
 CREATE OR REPLACE FUNCTION IncreaseBoxsFSharp(values_array BOX[]) RETURNS BOX[] AS $$
 let flatten_values = Array.CreateInstance(typeof<NpgsqlBox>, values_array.Length)
-ArrayHandler.FlatArray(values_array, ref flatten_values) |> ignore
+ArrayManipulation.FlatArray(values_array, ref flatten_values) |> ignore
 for i in 0 .. flatten_values.Length - 1 do
     if System.Object.ReferenceEquals(flatten_values.GetValue(i), null) then
         ()

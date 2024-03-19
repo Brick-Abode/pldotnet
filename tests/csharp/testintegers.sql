@@ -89,10 +89,10 @@ SELECT 'c#-int2-null-3array-arraynull', 'returnSmallIntArray3', returnSmallIntAr
 
 CREATE OR REPLACE FUNCTION sumSmallIntArray(small_integers smallint[]) RETURNS smallint AS $$
 Array flatten_small_integers = Array.CreateInstance(typeof(object), small_integers.Length);
-ArrayHandler.FlatArray(small_integers, ref flatten_small_integers);
+ArrayManipulation.FlatArray(small_integers, ref flatten_small_integers);
 short small_integers_sum = (short)0;
 for(int i = 0; i < flatten_small_integers.Length; i++)
-{   
+{
     if (flatten_small_integers.GetValue(i) == null)
         continue;
     small_integers_sum = (short)(small_integers_sum + (short)flatten_small_integers.GetValue(i));
@@ -136,10 +136,10 @@ SELECT 'c#-int4-null-3array-arraynull', 'returnIntegerArray3', returnIntegerArra
 
 CREATE OR REPLACE FUNCTION sumIntegerArray(integers integer[]) RETURNS integer AS $$
 Array flatten_integers = Array.CreateInstance(typeof(object), integers.Length);
-ArrayHandler.FlatArray(integers, ref flatten_integers);
+ArrayManipulation.FlatArray(integers, ref flatten_integers);
 int integers_sum = 0;
 for(int i = 0; i < flatten_integers.Length; i++)
-{   
+{
     if (flatten_integers.GetValue(i) == null)
         continue;
     integers_sum = integers_sum + (int)flatten_integers.GetValue(i);
@@ -183,10 +183,10 @@ SELECT 'c#-int8-null-3array-arraynull', 'returnBigIntegerArray3', returnBigInteg
 
 CREATE OR REPLACE FUNCTION sumBigIntegerArray(big_integers bigint[]) RETURNS bigint AS $$
 Array flatten_big_integers = Array.CreateInstance(typeof(object), big_integers.Length);
-ArrayHandler.FlatArray(big_integers, ref flatten_big_integers);
+ArrayManipulation.FlatArray(big_integers, ref flatten_big_integers);
 long big_integers_sum = 0;
 for(int i = 0; i < flatten_big_integers.Length; i++)
-{   
+{
     if (flatten_big_integers.GetValue(i) == null)
         continue;
     big_integers_sum = (long)(big_integers_sum + (long)flatten_big_integers.GetValue(i));

@@ -30,7 +30,7 @@
  * @param datum the datum object.
  * @return int16_t value.
  */
-extern int16_t pldotnet_GetInt16(void *datum);
+extern PGDLLEXPORT int16_t pldotnet_GetInt16(void *datum);
 
 /**
  * @brief Returns the int32_t value that corresponds to a PostgreSQL integer. It
@@ -39,7 +39,7 @@ extern int16_t pldotnet_GetInt16(void *datum);
  * @param datum the datum object.
  * @return int32_t value.
  */
-extern int32_t pldotnet_GetInt32(void *datum);
+extern PGDLLEXPORT int32_t pldotnet_GetInt32(void *datum);
 
 /**
  * @brief Returns the int64_t value that corresponds to a PostgreSQL big
@@ -48,7 +48,7 @@ extern int32_t pldotnet_GetInt32(void *datum);
  * @param datum the datum object.
  * @return int64_t value.
  */
-extern int64_t pldotnet_GetInt64(void *datum);
+extern PGDLLEXPORT int64_t pldotnet_GetInt64(void *datum);
 
 /**
  * @brief Returns the float value that corresponds to a PostgreSQL float. It is
@@ -57,7 +57,7 @@ extern int64_t pldotnet_GetInt64(void *datum);
  * @param datum the datum object.
  * @return float value.
  */
-extern float pldotnet_GetFloat(void *datum);
+extern PGDLLEXPORT float pldotnet_GetFloat(void *datum);
 
 /**
  * @brief Returns the float value that corresponds to a PostgreSQL double. It is
@@ -66,7 +66,7 @@ extern float pldotnet_GetFloat(void *datum);
  * @param datum the datum object.
  * @return double value.
  */
-extern double pldotnet_GetDouble(void *datum);
+extern PGDLLEXPORT double pldotnet_GetDouble(void *datum);
 
 /**
  * @brief Returns the boolean value that corresponds to a PostgreSQL boolean. It
@@ -75,7 +75,7 @@ extern double pldotnet_GetDouble(void *datum);
  * @param datum the datum object.
  * @return bool value.
  */
-extern bool pldotnet_GetBoolean(void *datum);
+extern PGDLLEXPORT bool pldotnet_GetBoolean(void *datum);
 
 /**
  * @brief Extracts the x and y coordinates from a PostgreSQL Point and
@@ -86,7 +86,8 @@ extern bool pldotnet_GetBoolean(void *datum);
  * @param x the x coordinate.
  * @param y the y coordinate.
  */
-extern void pldotnet_GetDatumPointAttributes(void *datum, double *x, double *y);
+extern PGDLLEXPORT void pldotnet_GetDatumPointAttributes(void *datum, double *x,
+                                                         double *y);
 
 /**
  * @brief Extracts the `a`, `b`, and `c` values from a PostgreSQL Line and
@@ -98,8 +99,8 @@ extern void pldotnet_GetDatumPointAttributes(void *datum, double *x, double *y);
  * @param b the line parameter.
  * @param c the line parameter.
  */
-extern void pldotnet_GetDatumLineAttributes(void *datum, double *a, double *b,
-                                            double *c);
+extern PGDLLEXPORT void pldotnet_GetDatumLineAttributes(void *datum, double *a,
+                                                        double *b, double *c);
 
 /**
  * @brief Extracts the coordinates of the points that make up a PostgreSQL Line
@@ -112,9 +113,8 @@ extern void pldotnet_GetDatumLineAttributes(void *datum, double *a, double *b,
  * @param x2 the x coordinate of the second point.
  * @param y2 the y coordinate of the second point.
  */
-extern void pldotnet_GetDatumLineSegmentAttributes(void *datum, double *x1,
-                                                   double *y1, double *x2,
-                                                   double *y2);
+extern PGDLLEXPORT void pldotnet_GetDatumLineSegmentAttributes(
+    void *datum, double *x1, double *y1, double *x2, double *y2);
 /**
  * @brief Extracts the coordinates of the points that make up a PostgreSQL Box
  * and writes them to the reference arguments `x1`, `y1`, `x2`, and `y2`, so the
@@ -126,8 +126,9 @@ extern void pldotnet_GetDatumLineSegmentAttributes(void *datum, double *x1,
  * @param x2 the x coordinate of the lower left corner.
  * @param y2 the y coordinate of the lower left corner.
  */
-extern void pldotnet_GetDatumBoxAttributes(void *datum, double *x1, double *y1,
-                                           double *x2, double *y2);
+extern PGDLLEXPORT void pldotnet_GetDatumBoxAttributes(void *datum, double *x1,
+                                                       double *y1, double *x2,
+                                                       double *y2);
 
 /**
  * @brief Extracts the number of points and whether the PostgreSQL Path is
@@ -138,8 +139,9 @@ extern void pldotnet_GetDatumBoxAttributes(void *datum, double *x1, double *y1,
  * @param pointNumber is the number of points of the PostgreSQL Path.
  * @param closed whether the Path is closed or not.
  */
-extern void pldotnet_GetDatumPathAttributes(void *datum, int *pointNumber,
-                                            int *closed);
+extern PGDLLEXPORT void pldotnet_GetDatumPathAttributes(void *datum,
+                                                        int *pointNumber,
+                                                        int *closed);
 
 /**
  * @brief Extracts the coordinates of the points that make up a PostgreSQL Path
@@ -152,8 +154,9 @@ extern void pldotnet_GetDatumPathAttributes(void *datum, int *pointNumber,
  * @param yCoordinates a pointer that references a double array with the y
  * coordinates.
  */
-extern void pldotnet_GetDatumPathCoordinates(void *datum, double *xCoordinates,
-                                             double *yCoordinates);
+extern PGDLLEXPORT void pldotnet_GetDatumPathCoordinates(void *datum,
+                                                         double *xCoordinates,
+                                                         double *yCoordinates);
 
 /**
  * @brief Extracts the number of points of a PostgreSQL Polygon and writes it to
@@ -162,7 +165,8 @@ extern void pldotnet_GetDatumPathCoordinates(void *datum, double *xCoordinates,
  * @param datum the datum object.
  * @param pointNumber references number of points.
  */
-extern void pldotnet_GetDatumPolygonAttributes(void *datum, int *pointNumber);
+extern PGDLLEXPORT void pldotnet_GetDatumPolygonAttributes(void *datum,
+                                                           int *pointNumber);
 
 /**
  * @brief Extracts the coordinates of the points that make up a PostgreSQL
@@ -173,9 +177,8 @@ extern void pldotnet_GetDatumPolygonAttributes(void *datum, int *pointNumber);
  * @param xCoordinates the array with the x coordinates.
  * @param yCoordinates the array with the y coordinates.
  */
-extern void pldotnet_GetDatumPolygonCoordinates(void *datum,
-                                                double *xCoordinates,
-                                                double *yCoordinates);
+extern PGDLLEXPORT void pldotnet_GetDatumPolygonCoordinates(
+    void *datum, double *xCoordinates, double *yCoordinates);
 
 /**
  * @brief Extracts the coordinates of the center point and the radius of a
@@ -187,8 +190,9 @@ extern void pldotnet_GetDatumPolygonCoordinates(void *datum,
  * @param y the y coordinate of the center point.
  * @param r the radius of the circle.
  */
-extern void pldotnet_GetDatumCircleAttributes(void *datum, double *x, double *y,
-                                              double *r);
+extern PGDLLEXPORT void pldotnet_GetDatumCircleAttributes(void *datum,
+                                                          double *x, double *y,
+                                                          double *r);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -199,7 +203,8 @@ extern void pldotnet_GetDatumCircleAttributes(void *datum, double *x, double *y,
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumTextAttributes(void *datum, int *len, char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumTextAttributes(void *datum, int *len,
+                                                        char **buf);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -210,7 +215,8 @@ extern void pldotnet_GetDatumTextAttributes(void *datum, int *len, char **buf);
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumCharAttributes(void *datum, int *len, char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumCharAttributes(void *datum, int *len,
+                                                        char **buf);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -221,8 +227,9 @@ extern void pldotnet_GetDatumCharAttributes(void *datum, int *len, char **buf);
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumVarCharAttributes(void *datum, int *len,
-                                               char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumVarCharAttributes(void *datum,
+                                                           int *len,
+                                                           char **buf);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -233,7 +240,8 @@ extern void pldotnet_GetDatumVarCharAttributes(void *datum, int *len,
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumByteaAttributes(void *datum, int *len, char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumByteaAttributes(void *datum, int *len,
+                                                         char **buf);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -244,7 +252,8 @@ extern void pldotnet_GetDatumByteaAttributes(void *datum, int *len, char **buf);
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumXmlAttributes(void *datum, int *len, char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumXmlAttributes(void *datum, int *len,
+                                                       char **buf);
 
 /**
  * @brief Extracts the length and the pointer to the array character from a
@@ -256,7 +265,8 @@ extern void pldotnet_GetDatumXmlAttributes(void *datum, int *len, char **buf);
  * @param len the number of characters.
  * @param buf a pointer that will point to the data content (char*).
  */
-extern void pldotnet_GetDatumJsonAttributes(void *datum, int *len, char **buf);
+extern PGDLLEXPORT void pldotnet_GetDatumJsonAttributes(void *datum, int *len,
+                                                        char **buf);
 
 /**
  * @brief Extracts the integer value corresponding to a PostgreSQL Date and
@@ -265,7 +275,7 @@ extern void pldotnet_GetDatumJsonAttributes(void *datum, int *len, char **buf);
  * @param datum the datum object.
  * @param date the int32 value that represents a Date in PostgreSQL.
  */
-extern void pldotnet_GetDatumDateAttributes(void *datum, int *date);
+extern PGDLLEXPORT void pldotnet_GetDatumDateAttributes(void *datum, int *date);
 
 /**
  * @brief Extracts the long value corresponding to a PostgreSQL Time and
@@ -274,7 +284,8 @@ extern void pldotnet_GetDatumDateAttributes(void *datum, int *date);
  * @param datum the datum object.
  * @param time the int64 value that represents a Date in PostgreSQL.
  */
-extern void pldotnet_GetDatumTimeAttributes(void *datum, long *time);
+extern PGDLLEXPORT void pldotnet_GetDatumTimeAttributes(void *datum,
+                                                        long *time);
 
 /**
  * @brief Extracts the long and integer values corresponding to a PostgreSQL
@@ -285,8 +296,9 @@ extern void pldotnet_GetDatumTimeAttributes(void *datum, long *time);
  * @param time is the int64 value that represents a Time in PostgreSQL.
  * @param zone the time zone.
  */
-extern void pldotnet_GetDatumTimeTzAttributes(void *datum, long *time,
-                                              int *zone);
+extern PGDLLEXPORT void pldotnet_GetDatumTimeTzAttributes(void *datum,
+                                                          long *time,
+                                                          int *zone);
 
 /**
  * @brief Extracts the long value corresponding to a PostgreSQL Timestamp and
@@ -297,7 +309,8 @@ extern void pldotnet_GetDatumTimeTzAttributes(void *datum, long *time,
  * @param timestamp is the int64 value that represents a Timestamp in
  * PostgreSQL.
  */
-extern void pldotnet_GetDatumTimestampAttributes(void *datum, long *timestamp);
+extern PGDLLEXPORT void pldotnet_GetDatumTimestampAttributes(void *datum,
+                                                             long *timestamp);
 
 /**
  * @brief Extracts the long value corresponding to a PostgreSQL Timestamp with
@@ -308,8 +321,8 @@ extern void pldotnet_GetDatumTimestampAttributes(void *datum, long *timestamp);
  * @param timestamp is the int64 value that represents a Timestamp in
  * PostgreSQL.
  */
-extern void pldotnet_GetDatumTimestampTzAttributes(void *datum,
-                                                   long *timestamp);
+extern PGDLLEXPORT void pldotnet_GetDatumTimestampTzAttributes(void *datum,
+                                                               long *timestamp);
 
 /**
  * @brief Extracts the time (number of ticks), day, and moth values from a
@@ -321,8 +334,10 @@ extern void pldotnet_GetDatumTimestampTzAttributes(void *datum,
  * @param day the day.
  * @param month the month.
  */
-extern void pldotnet_GetDatumIntervalAttributes(void *datum, long *time,
-                                                int *day, int *month);
+extern PGDLLEXPORT void pldotnet_GetDatumIntervalAttributes(void *datum,
+                                                            long *time,
+                                                            int *day,
+                                                            int *month);
 
 /**
  * @brief Extracts the unsigned char values from a PostgreSQL MAC Address and
@@ -333,8 +348,8 @@ extern void pldotnet_GetDatumIntervalAttributes(void *datum, long *time,
  * @param length the MAC address length.
  * @param bytes an array with the byte value that makes up the MAC address.
  */
-extern void pldotnet_GetDatumMacAddressAttributes(void *datum, int length,
-                                                  unsigned char *bytes);
+extern PGDLLEXPORT void pldotnet_GetDatumMacAddressAttributes(
+    void *datum, int length, unsigned char *bytes);
 
 /**
  * @brief Extracts the IPv4 or IPv6 information from a PostgreSQL INET or CIDR
@@ -347,8 +362,9 @@ extern void pldotnet_GetDatumMacAddressAttributes(void *datum, int length,
  * @param bytes the array with byte values.
  * @param netmask the number of bits in the netmask.
  */
-extern void pldotnet_GetDatumInetAttributes(void *datum, int *nelem,
-                                            unsigned char *bytes, int *netmask);
+extern PGDLLEXPORT void pldotnet_GetDatumInetAttributes(void *datum, int *nelem,
+                                                        unsigned char *bytes,
+                                                        int *netmask);
 
 /**
  * @brief Extracts the long value corresponding to a PostgreSQL Money and writes
@@ -357,7 +373,8 @@ extern void pldotnet_GetDatumInetAttributes(void *datum, int *nelem,
  * @param datum the datum object.
  * @param value is the long integer that represents the PostgreSQL Money.
  */
-extern void pldotnet_GetDatumMoneyAttributes(void *datum, long *value);
+extern PGDLLEXPORT void pldotnet_GetDatumMoneyAttributes(void *datum,
+                                                         long *value);
 
 /**
  * @brief Extracts the length and the memory address where the bits of a
@@ -369,8 +386,8 @@ extern void pldotnet_GetDatumMoneyAttributes(void *datum, long *value);
  * @param len the length of the bit string.
  * @param dat an unsigned char pointer pointing to the beginning of an array.
  */
-extern void pldotnet_GetDatumVarBitAttributes(void *datum, int *len,
-                                              bits8 **dat);
+extern PGDLLEXPORT void pldotnet_GetDatumVarBitAttributes(void *datum, int *len,
+                                                          bits8 **dat);
 
 /**
  * @brief Extracts the unsigned char values that make up a PostgreSQL UUID and
@@ -379,7 +396,8 @@ extern void pldotnet_GetDatumVarBitAttributes(void *datum, int *len,
  * @param datum the datum object.
  * @param data a pointer that references an array of unsigned char.
  */
-extern void pldotnet_GetDatumUuidAttributes(void *datum, unsigned char *data);
+extern PGDLLEXPORT void pldotnet_GetDatumUuidAttributes(void *datum,
+                                                        unsigned char *data);
 
 /**
  * @brief Extracts the information from a PostgreSQL Array and writes it to the
@@ -392,15 +410,16 @@ extern void pldotnet_GetDatumUuidAttributes(void *datum, unsigned char *data);
  * @param dims the array with the lengths of each dimension.
  * @param nullmap a pointer that references the nullmap of a PostgreSQL array.
  */
-extern void pldotnet_GetArrayAttributes(void *datum, int *typeId, int *nDims,
-                                        int *dims, uint8_t **nullmap);
+extern PGDLLEXPORT void pldotnet_GetArrayAttributes(void *datum, int *typeId,
+                                                    int *nDims, int *dims,
+                                                    uint8_t **nullmap);
 
 /**
  * @brief Get a maximum number of dimensions of a PostgreSQL Array.
  *
  * @return the maximum number of dimensions of a PostgreSQL Array.
  */
-extern int get_Maxdim(void);
+extern PGDLLEXPORT int get_Maxdim(void);
 
 /**
  * @brief Extracts the elements from a PostgreSQL Array and writes them to the
@@ -412,8 +431,8 @@ extern int get_Maxdim(void);
  * @param typeId the OID of the elements.
  * @return int an integer to control errors: 0 on success, other on failure.
  */
-extern int pldotnet_GetArrayDatum(Datum arrayDatum, Datum *results, int nElems,
-                                  int typeId);
+extern PGDLLEXPORT int pldotnet_GetArrayDatum(Datum arrayDatum, Datum *results,
+                                              int nElems, int typeId);
 
 /**
  * @brief Extracts the information from a PostgreSQL Range and writes it to the
@@ -425,9 +444,9 @@ extern int pldotnet_GetArrayDatum(Datum arrayDatum, Datum *results, int nElems,
  * @param lowerRange a pointer that references the lower RangeBound object.
  * @param upperDange a pointer that references the upper RangeBound object.
  */
-extern void pldotnet_GetDatumRangeAttributes(Datum inputDatum, bool *isEmpty,
-                                             RangeBound **lowerRange,
-                                             RangeBound **upperDange);
+extern PGDLLEXPORT void pldotnet_GetDatumRangeAttributes(
+    Datum inputDatum, bool *isEmpty, RangeBound **lowerRange,
+    RangeBound **upperDange);
 
 /**
  * @brief Extracts the information from the provided RangeBound object and
@@ -440,10 +459,38 @@ extern void pldotnet_GetDatumRangeAttributes(Datum inputDatum, bool *isEmpty,
  * @param inclusive whether the range bound is inclusive.
  * @param lower whether the range bound is lower.
  */
-extern void pldotnet_GetDatumRangeBoundAttributes(RangeBound *inputRange,
-                                                  Datum *rangeDatum,
-                                                  bool *infinite,
-                                                  bool *inclusive, bool *lower);
+extern PGDLLEXPORT void pldotnet_GetDatumRangeBoundAttributes(
+    RangeBound *inputRange, Datum *rangeDatum, bool *infinite, bool *inclusive,
+    bool *lower);
+
+/**
+ * @brief Get the number of attributes in a record.
+ *
+ * This function returns the number of attributes in a PostgreSQL record.
+ *
+ * @param recordDatum The Datum representing the record.
+ * @return The number of attributes in the record.
+ */
+extern PGDLLEXPORT int pldotnet_GetNumberOfRecordAttributes(Datum recordDatum);
+
+/**
+ * @brief Retrieves the attribute value from a record datum.
+ *
+ * This function is used to extract the value of a specific attribute from a
+ * record datum.
+ *
+ * @param recordDatum The record datum from which to extract the attribute
+ * value.
+ * @param attributeNumber The number of the attribute to retrieve.
+ * @param value Pointer to store the retrieved attribute value.
+ * @param isnull Pointer to store whether the attribute value is NULL or not.
+ * @param typeId Pointer to store the OID of the attribute type.
+ */
+extern PGDLLEXPORT int pldotnet_GetRecordAttributes(Datum recordDatum,
+                                                   int numAttrs,
+                                                   Datum *attrDatums,
+                                                   bool *isNulls,
+                                                   Oid *typeOids);
 
 ////////////////////////////////////
 /// Npgsql or .NET type -> Datum ///
@@ -456,7 +503,7 @@ extern void pldotnet_GetDatumRangeBoundAttributes(RangeBound *inputRange,
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumInt16(int16_t value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInt16(int16_t value);
 
 /**
  * @brief Creates a PostgreSQL integer from an int32_t value. It is used to
@@ -465,7 +512,7 @@ extern Datum pldotnet_CreateDatumInt16(int16_t value);
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumInt32(int32_t value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInt32(int32_t value);
 
 /**
  * @brief Creates a PostgreSQL big integer from an int64_t value. It is used to
@@ -474,7 +521,7 @@ extern Datum pldotnet_CreateDatumInt32(int32_t value);
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumInt64(int64_t value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInt64(int64_t value);
 
 /**
  * @brief Creates a PostgreSQL float from a float value. It is used to convert
@@ -483,7 +530,7 @@ extern Datum pldotnet_CreateDatumInt64(int64_t value);
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumFloat(float value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumFloat(float value);
 
 /**
  * @brief Creates a PostgreSQL double from a double value. It is used to convert
@@ -492,7 +539,7 @@ extern Datum pldotnet_CreateDatumFloat(float value);
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumDouble(double value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumDouble(double value);
 
 /**
  * @brief Creates a PostgreSQL double from a double. It is used to convert from
@@ -501,7 +548,7 @@ extern Datum pldotnet_CreateDatumDouble(double value);
  * @param value
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumBoolean(bool value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumBoolean(bool value);
 
 /**
  * @brief Creates a PostgreSQL Point from its coordinates. It is used to convert
@@ -511,7 +558,7 @@ extern Datum pldotnet_CreateDatumBoolean(bool value);
  * @param y
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumPoint(double x, double y);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumPoint(double x, double y);
 
 /**
  * @brief Creates a PostgreSQL Line from its parameters. It is used to convert
@@ -522,7 +569,7 @@ extern Datum pldotnet_CreateDatumPoint(double x, double y);
  * @param c
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumLine(double a, double b, double c);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumLine(double a, double b, double c);
 
 /**
  * @brief Creates a PostgreSQL Line Segment from its point coordinates. It is
@@ -534,8 +581,8 @@ extern Datum pldotnet_CreateDatumLine(double a, double b, double c);
  * @param y2 the y coordinate of the second point.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumLineSegment(double x1, double y1, double x2,
-                                             double y2);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumLineSegment(double x1, double y1,
+                                                         double x2, double y2);
 
 /**
  * @brief Creates a PostgreSQL Box from its point coordinates. It is used to
@@ -547,8 +594,8 @@ extern Datum pldotnet_CreateDatumLineSegment(double x1, double y1, double x2,
  * @param y2 the y coordinate of the lower left corner.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumBox(double x1, double y1, double x2,
-                                     double y2);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumBox(double x1, double y1,
+                                                 double x2, double y2);
 
 /**
  * @brief Creates a PostgreSQL Path from its point coordinates. It is used to
@@ -560,9 +607,9 @@ extern Datum pldotnet_CreateDatumBox(double x1, double y1, double x2,
  * @param yCoordinates the array with the y coordinate of the points.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumPath(int npts, int closed,
-                                      double *xCoordinates,
-                                      double *yCoordinates);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumPath(int npts, int closed,
+                                                  double *xCoordinates,
+                                                  double *yCoordinates);
 
 /**
  * @brief Creates a PostgreSQL Polygon from its point coordinates. It is used to
@@ -573,8 +620,9 @@ extern Datum pldotnet_CreateDatumPath(int npts, int closed,
  * @param yCoordinates the array with the y coordinate of the points.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumPolygon(int npts, double *xCoordinates,
-                                         double *yCoordinates);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumPolygon(int npts,
+                                                     double *xCoordinates,
+                                                     double *yCoordinates);
 
 /**
  * @brief Creates a PostgreSQL Circle from its properties. It is used to convert
@@ -585,7 +633,8 @@ extern Datum pldotnet_CreateDatumPolygon(int npts, double *xCoordinates,
  * @param r the radius of the circle.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumCircle(double x, double y, double r);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumCircle(double x, double y,
+                                                    double r);
 
 /**
  * @brief Creates a PostgreSQL Text. It is used to convert from a .NET type to a
@@ -595,7 +644,7 @@ extern Datum pldotnet_CreateDatumCircle(double x, double y, double r);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumText(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumText(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL Character(n). It is used to convert from a .NET
@@ -605,7 +654,7 @@ extern Datum pldotnet_CreateDatumText(int len, char *buf);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumChar(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumChar(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL Character Varying(n). It is used to convert from
@@ -615,7 +664,7 @@ extern Datum pldotnet_CreateDatumChar(int len, char *buf);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumVarChar(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumVarChar(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL Bytea. It is used to convert from a .NET type to
@@ -625,7 +674,7 @@ extern Datum pldotnet_CreateDatumVarChar(int len, char *buf);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumBytea(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumBytea(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL Xml. It is used to convert from a .NET type to a
@@ -635,7 +684,7 @@ extern Datum pldotnet_CreateDatumBytea(int len, char *buf);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumXml(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumXml(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL JSON. It is used to convert from a .NET type to a
@@ -646,7 +695,7 @@ extern Datum pldotnet_CreateDatumXml(int len, char *buf);
  * @param buf the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumJson(int len, char *buf);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumJson(int len, char *buf);
 
 /**
  * @brief Creates a PostgreSQL Date. It is used to convert from a .NET type to a
@@ -655,7 +704,7 @@ extern Datum pldotnet_CreateDatumJson(int len, char *buf);
  * @param date the integer value that represents a Date in PostgreSQL.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumDate(int date);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumDate(int date);
 
 /**
  * @brief Creates a PostgreSQL Time. It is used to convert from a .NET type to a
@@ -664,7 +713,7 @@ extern Datum pldotnet_CreateDatumDate(int date);
  * @param time the long integer value that represents a Time in PostgreSQL.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumTime(long time);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTime(long time);
 
 /**
  * @brief Creates a PostgreSQL Time with the time zone. It is used to convert
@@ -674,7 +723,7 @@ extern Datum pldotnet_CreateDatumTime(long time);
  * @param zone the zone value.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumTimeTz(long time, int zone);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimeTz(long time, int zone);
 
 /**
  * @brief Creates a PostgreSQL Timestamp without a time zone. It is used to
@@ -684,7 +733,7 @@ extern Datum pldotnet_CreateDatumTimeTz(long time, int zone);
  * PostgreSQL.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumTimestamp(long timestamp);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestamp(long timestamp);
 
 /**
  * @brief Creates a PostgreSQL Timestamp with the time zone. It is used to
@@ -694,7 +743,7 @@ extern Datum pldotnet_CreateDatumTimestamp(long timestamp);
  * PostgreSQL.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumTimestampTz(long timestamp);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestampTz(long timestamp);
 
 /**
  * @brief Creates a PostgreSQL Interval. It is used to convert from a .NET type
@@ -705,7 +754,8 @@ extern Datum pldotnet_CreateDatumTimestampTz(long timestamp);
  * @param month the number of months.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumInterval(long time, int day, int month);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInterval(long time, int day,
+                                                      int month);
 
 /**
  * @brief Creates a PostgreSQL MAC Address. It is used to convert from a .NET
@@ -715,7 +765,8 @@ extern Datum pldotnet_CreateDatumInterval(long time, int day, int month);
  * @param bytes the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumMacAddress(int length, unsigned char *bytes);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumMacAddress(int length,
+                                                        unsigned char *bytes);
 
 /**
  * @brief Creates a PostgreSQL INET. It is used to convert from a .NET type to a
@@ -726,8 +777,9 @@ extern Datum pldotnet_CreateDatumMacAddress(int length, unsigned char *bytes);
  * @param netmask the number of bits in the netmask.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumInet(int length, unsigned char *bytes,
-                                      int netmask);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInet(int length,
+                                                  unsigned char *bytes,
+                                                  int netmask);
 
 /**
  * @brief Creates PostgreSQL Money. It is used to convert from a .NET type to
@@ -736,7 +788,7 @@ extern Datum pldotnet_CreateDatumInet(int length, unsigned char *bytes,
  * @param value the long integer that represents the money in PostgreSQL
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumMoney(long value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumMoney(long value);
 
 /**
  * @brief Creates a PostgreSQL VarBit or Bit. It is used to convert from a .NET
@@ -746,7 +798,7 @@ extern Datum pldotnet_CreateDatumMoney(long value);
  * @param dat the array with byte values.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumVarBit(int len, bits8 *dat);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumVarBit(int len, bits8 *dat);
 
 /**
  * @brief Creates a PostgreSQL UUID. It is used to convert from a .NET type to a
@@ -754,7 +806,7 @@ extern Datum pldotnet_CreateDatumVarBit(int len, bits8 *dat);
  *
  * @param data the array with the UUID values.
  */
-extern Datum pldotnet_CreateDatumUuid(unsigned char *data);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumUuid(unsigned char *data);
 
 /**
  * @brief Creates an empty PostgreSQL range. It is used to convert from a .NET
@@ -763,7 +815,7 @@ extern Datum pldotnet_CreateDatumUuid(unsigned char *data);
  * @param rangeTypeId the Oid of the range.
  * @return Datum the empty datum object.
  */
-extern Datum pldotnet_CreateEmptyDatumRange(Oid rangeTypeId);
+extern PGDLLEXPORT Datum pldotnet_CreateEmptyDatumRange(Oid rangeTypeId);
 
 /**
  * @brief Creates a PostgreSQL range according to the provided Oid. It is used
@@ -778,10 +830,9 @@ extern Datum pldotnet_CreateEmptyDatumRange(Oid rangeTypeId);
  * @param upperInclusive
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumRange(Oid rtOid, Datum lowerDatum,
-                                       bool lowerInfinite, bool lowerInclusive,
-                                       Datum upperDatum, bool upperInfinite,
-                                       bool upperInclusive);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumRange(
+    Oid rtOid, Datum lowerDatum, bool lowerInfinite, bool lowerInclusive,
+    Datum upperDatum, bool upperInfinite, bool upperInclusive);
 
 /**
  * @brief Creates a PostgreSQL Array of the specified type. It is used to
@@ -794,8 +845,8 @@ extern Datum pldotnet_CreateDatumRange(Oid rtOid, Datum lowerDatum,
  * @param nulls the array that maps the null values of the datums variable.
  * @return Datum the datum object.
  */
-extern Datum pldotnet_CreateDatumArray(int elementId, int dimNumber,
-                                       int *dimLengths, Datum *datums,
-                                       bool *nulls);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumArray(int elementId, int dimNumber,
+                                                   int *dimLengths,
+                                                   Datum *datums, bool *nulls);
 
 #endif  // PLDOTNET_CONVERSIONS_H_

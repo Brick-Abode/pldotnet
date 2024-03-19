@@ -17,6 +17,7 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
+using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {

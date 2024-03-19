@@ -159,3 +159,158 @@ CREATE OR REPLACE FUNCTION middlePointDefaultCallDefault(pointa point, pointb po
 LANGUAGE plcsharp;
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'c#-point-null-dll', 'middlePointDefaultCallDefault', middlePointDefaultCallDefault(NULL::POINT, POINT(20.0,40.0)) ~= POINT(10.0,20.0);
+
+
+--- INOUT TESTS
+CREATE OR REPLACE FUNCTION inoutBasic0DLL(INOUT argument_0 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutBasic0'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-basic-0-dll', 'inoutBasic0DLL', inoutBasic0DLL(0) = 1;
+
+CREATE OR REPLACE FUNCTION inoutBasic1DLL(OUT argument_0 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutBasic1'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-basic-1-dll', 'inoutBasic1DLL', inoutBasic1DLL() = 1;
+
+CREATE OR REPLACE FUNCTION inputNull1DLL(INOUT argument_0 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull1'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-1-dll', 'inputNull1DLL', inputNull1DLL(11) IS NULL;
+
+CREATE OR REPLACE FUNCTION inputNull2DLL(INOUT argument_0 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull2'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-2-dll', 'inputNull2DLL', inputNull2DLL(NULL) = 3;
+
+CREATE OR REPLACE FUNCTION inputNull3DLL(OUT argument_0 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull3'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-3-dll', 'inputNull3DLL', inputNull3DLL() IS NULL;
+
+CREATE OR REPLACE FUNCTION inputNull4DLL(INOUT argument_0 INT, in argument_1 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull4'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-4-dll', 'inputNull4DLL', inputNull4DLL(11, 3) IS NULL;
+
+CREATE OR REPLACE FUNCTION inputNull5DLL(INOUT argument_0 INT, IN argument_1 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull5'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-5-dll', 'inputNull5DLL', inputNull5DLL(NULL, 3) = 3;
+
+CREATE OR REPLACE FUNCTION inputNull6DLL(IN argument_0 INT, OUT argument_1 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inputNull6'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-6-dll', 'inputNull6DLL', inputNull6DLL(1) IS NULL;
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-null-7', 'inputNull6DLL', inputNull6DLL(2) = 2;
+
+CREATE OR REPLACE FUNCTION inoutMultiarg1DLL(IN argument_0 INT, INOUT argument_1 INT, IN argument_2 INT, OUT argument_3 INT, OUT argument_4 INT, INOUT argument_5 INT, IN argument_6 INT, OUT argument_7 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutMultiarg1'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-multiarg-1-dll', 'inoutMultiarg1DLL', inoutMultiarg1DLL(0, 1, 2, NULL, 6) = ROW(2, 4, 5, 6, NULL::INT);
+
+CREATE OR REPLACE FUNCTION inoutMultiarg2DLL(INOUT argument_0 INT, OUT argument_1 INT, INOUT argument_2 INT, INOUT argument_3 INT, IN argument_4 INT, OUT argument_5 INT, IN argument_6 INT, OUT argument_7 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutMultiarg2'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-multiarg-2-dll', 'inoutMultiarg2DLL', inoutMultiarg2DLL(NULL, 2, 3, 4, 6) = ROW(1, 2, 3, NULL::INT, 6, 8);
+
+CREATE OR REPLACE FUNCTION inoutMultiarg3DLL(OUT argument_0 INT, IN argument_1 INT, IN argument_2 INT, OUT argument_3 INT, INOUT argument_4 INT, OUT argument_5 INT, IN argument_6 INT, INOUT argument_7 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutMultiarg3'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-multiarg-3-dll', 'inoutMultiarg3DLL', inoutMultiarg3DLL(1, 2, 4, 6, 7) = ROW(NULL::INT, 4, 5, 6, 8);
+
+CREATE OR REPLACE FUNCTION inoutMultiarg4DLL(IN argument_0 INT, INOUT argument_1 INT, IN argument_2 INT, OUT argument_3 INT, OUT argument_4 INT, INOUT argument_5 INT, INOUT argument_6 INT, IN argument_7 INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutMultiarg4'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-multiarg-4-dll', 'inoutMultiarg4DLL', inoutMultiarg4DLL(0, 1, 2, 5, 6, 7) = ROW(2, 4, 5, NULL::INT, 7);
+
+CREATE OR REPLACE FUNCTION inoutArray10DLL(INOUT values_array MACADDR[], OUT nulls INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutArray10'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-array-10-dll', 'inoutArray10DLL', inoutArray10DLL(
+    ARRAY[
+        MACADDR '08-00-2b-01-02-03',
+        MACADDR '09-00-2b-01-02-03',
+        null::macaddr,
+        MACADDR 'a8-00-2b-01-02-03',
+        null::macaddr
+    ]) = ROW(
+        ARRAY[
+            MACADDR '09-00-2b-01-02-03',
+            MACADDR '0a-00-2b-01-02-03',
+            null::macaddr,
+            MACADDR 'a9-00-2b-01-02-03',
+            null::macaddr
+        ], 2
+    );
+
+CREATE OR REPLACE FUNCTION inoutArray11DLL(OUT values_array MACADDR[], IN address MACADDR, IN count INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutArray11'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-array-11-dll', 'inoutArray11DLL', inoutArray11DLL(MACADDR '08-00-2b-01-02-03', 3) = 
+    ARRAY[
+            MACADDR '08-00-2b-01-02-03',
+            MACADDR '08-00-2b-01-02-03',
+            MACADDR '08-00-2b-01-02-03'
+        ];
+
+CREATE OR REPLACE FUNCTION inoutSimple10DLL(OUT checksum INT, IN address INET) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutSimple10'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-simple-10-dll', 'inoutSimple10DLL', inoutSimple10DLL(CIDR '192.168/24') = 360;
+
+CREATE OR REPLACE FUNCTION inoutSimple20DLL(INOUT address INET, IN pos INT, IN delta INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutSimple20'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-simple-20-dll', 'inoutSimple20DLL', inoutSimple20DLL(CIDR '192.168/24', 2, 3) = INET '192.168.3.0/24';
+
+CREATE OR REPLACE FUNCTION inoutSimple30DLL(OUT checksum INT, INOUT address INET, IN pos INT, IN delta INT) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutSimple30'
+LANGUAGE plcsharp STRICT;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-simple-30-dll', 'inoutSimple30DLL', inoutSimple30DLL(CIDR '192.168/24', 2, 3) = ROW(363, INET '192.168.3.0/24');
+
+CREATE OR REPLACE FUNCTION inoutObject10DLL(IN a text, INOUT b text) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutObject10'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-10-dll', 'inoutObject10DLL', inoutObject10DLL('red', 'blue') = 'red blue';
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-11-dll', 'inoutObject10DLL', inoutObject10DLL('red', NULL) = 'red ';
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-12-dll', 'inoutObject10DLL', inoutObject10DLL(NULL, 'blue') = ' blue';
+
+
+CREATE OR REPLACE FUNCTION inoutObject20DLL(IN a text, b text, OUT c text) AS
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.InoutTests!inoutObject20'
+LANGUAGE plcsharp;
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-20-dll', 'inoutObject20DLL', inoutObject20DLL('red', 'blue') = 'red blue';
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-21', 'inoutObject20DLL', inoutObject20DLL('red', NULL) = 'red ';
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-22', 'inoutObject20DLL', inoutObject20DLL(NULL, 'blue') = ' blue';
+
+INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
+SELECT 'c#-inout-object-23', 'inoutObject20DLL', inoutObject20DLL('🐂', '🥰') = '🐂 🥰'::TEXT;

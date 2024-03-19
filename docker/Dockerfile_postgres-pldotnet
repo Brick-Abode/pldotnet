@@ -1,0 +1,48 @@
+FROM postgres:15-bullseye
+
+# avoids tzdata prompt
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install PostgreSQL and other dependencies
+RUN apt update && \
+    apt install -y \
+    wget \
+    libglib2.0-dev \
+    lsb-release \
+    sudo
+
+# Install Dotnet
+RUN wget -q \
+		https://packages.microsoft.com/config/$(lsb_release -i | cut -f2 -d'	' | sed 's/.*/\L&/')/$(lsb_release -r | cut -f2 -d'	')/packages-microsoft-prod.deb \
+		-O packages-microsoft-prod.deb
+
+RUN dpkg -i packages-microsoft-prod.deb
+
+RUN rm packages-microsoft-prod.deb
+
+RUN apt update && \
+    apt install -y \
+    dotnet-sdk-6.0 \
+    dotnet-runtime-6.0 \
+    dotnet-hostfxr-6.0
+
+# Install pldotnet
+COPY ./debian/packages /app/pldotnet/packages
+RUN dpkg -i /app/pldotnet/packages/postgresql-15-pldotnet_0.9-1_amd64.deb
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Set the locale
+RUN locale-gen en_US.UTF-8
+RUN update-locale LANG=en_US.UTF-8
+
+# pgdata
+ARG PGDATA
+ENV PGDATA=${PGDATA}
+
+# TODO: Change this using wget from the official repository
+COPY ./docker/scripts/install_pldotnet_deb.sh /docker-entrypoint-initdb.d/install_pldotnet_deb.sh
+
+RUN apt-get clean

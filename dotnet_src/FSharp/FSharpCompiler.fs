@@ -26,22 +26,15 @@ open System.Reflection
 open System.Runtime.InteropServices
 open System.Runtime.Loader
 open System.Text
-
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text
 open FSharp.Compiler.IO
+open PlDotNET.Common
 
 /// <summary>
 /// The FSharpCompiler type provides methods for compiling F# source code.
 /// </summary>
 type FSharpCompiler() =
-
-    /// <summary>
-    /// C function declared in pldotnet_main.h.
-    /// See ::pldotnet_Elog().
-    /// </summary>
-    [<DllImport("@PKG_LIBDIR/pldotnet.so", CallingConvention=CallingConvention.Cdecl)>]
-    static extern void pldotnet_Elog(int level, string nessage)
 
     /// <summary>
     /// The F# checker used for compiling F# source code.
@@ -58,7 +51,7 @@ type FSharpCompiler() =
     /// <param name="temporaryPath">The temporary path to save the compiled assembly.</param>
     /// <param name="sourceCode">The F# source code to be compiled.</param>
     /// <param name="extraAssemblies">An array of strings containing the paths to any extra assemblies that should be included in the compilation.</param>
-    /// <returns>The path to the generated DLL, or an empty string if the compilation failed.</returns>
+    /// <returns> A MemoryStream with the content of the generated DLL, or null compilation failed.</returns>
     static member CompileFSharpSourceCode (functionId: uint) (temporaryPath: string) (sourceCode: string) (extraAssemblies: string[]) : MemoryStream =
         let functionIdString = string functionId
         let fileName = "UserHandler_" + functionIdString
@@ -91,7 +84,49 @@ type FSharpCompiler() =
             sb.AppendLine($"Here are the compilation results:") |> ignore
             for e in errors do
                 sb.AppendLine(e.ToString()) |> ignore
-            pldotnet_Elog(19, sb.ToString())
+            Elog.Warning(sb.ToString())
+            failwith "PL.NET could not compile the generated F# code."
+            null
+
+    /// <summary>
+    /// Compiles the given F# source code and returns the path to the generated DLL.
+    /// If the compilation fails, an error message is logged and an exception is thrown.
+    /// </summary>
+    /// <param name="functionId">The ID of the function.</param>
+    /// <param name="temporaryPath">The temporary path to save the compiled assembly.</param>
+    /// <param name="sourceCode">The F# source code to be compiled.</param>
+    /// <param name="extraAssemblies">An array of strings containing the paths to any extra assemblies that should be included in the compilation.</param>
+    /// <returns>The path to the generated DLL, or null if the compilation failed.</returns>
+    static member CompileFSharpSourceCodeAsDLL (functionId: uint) (temporaryPath: string) (sourceCode: string) (extraAssemblies: string[]) : string =
+        let functionIdString = string functionId
+        let fileName = "UserFunction" + functionIdString
+        let fakeInputFile : string = Path.ChangeExtension(Path.Combine(temporaryPath, fileName), ".fs")
+        let outputFile : string = Path.ChangeExtension(fakeInputFile, ".dll")
+        let options = FSharpCompiler.GetAllFlags fakeInputFile outputFile extraAssemblies
+
+        let files = [| (fakeInputFile, sourceCode) |]
+        let virtualFileSystem = VirtualFileSystem(files, FileSystem)
+        FileSystem <- VirtualFileSystem(files, FileSystem)
+
+        Elog.Info("Executing f# compiler");
+
+        let errors, exitCode =
+            FSharpCompiler.checker.Compile(options)
+                |> Async.RunSynchronously
+
+        match (exitCode) with
+        | 0 ->
+            outputFile
+        | _ ->
+            let sb = new System.Text.StringBuilder()
+            sb.AppendLine($"PL.NET could not compile the following F# generated code:") |> ignore
+            sb.AppendLine($"**********") |> ignore
+            sb.AppendLine(sourceCode) |> ignore
+            sb.AppendLine($"**********") |> ignore
+            sb.AppendLine($"Here are the compilation results:") |> ignore
+            for e in errors do
+                sb.AppendLine(e.ToString()) |> ignore
+            Elog.Warning(sb.ToString())
             failwith "PL.NET could not compile the generated F# code."
             null
 

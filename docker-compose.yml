@@ -1,5 +1,3 @@
-version: '3.4'
-
 x-interactive: &interactive
   tty: true        # docker run -t
   stdin_open: true # docker run -i
@@ -10,6 +8,7 @@ x-command: &command
 
 x-pgdata: &pgdata
   PGDATA: /var/lib/postgresql/data
+  PGLOG: /var/log/postgresql/postgresql-main.log
 
 x-build-args: &build-args
   context: .
@@ -21,42 +20,49 @@ x-environment: &environment
     USE_DOTNETBUILD: "FALSE"
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
+    DATABASE_CONNECTION_STRING: "Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres"
     <<: *pgdata
 
 x-ports: &ports
   ports:
     - "5432:5432"
 
-networks:
-  db_network:
-    name: pldotnet_network
-
 services:
-  pldotnet-ubuntu22: &pldotnet-current-container
-    container_name: pldotnet-ubuntu22
-    image: pldotnet:ubuntu22
-    <<: *interactive
-    <<: *command
+  pldotnet-ubuntu22-dev: &pldotnet-current-container
+    container_name: pldotnet-ubuntu22-dev
+    image: pldotnet:ubuntu22-dev
+    <<: [*interactive, *command, *environment, *ports]
     build:
-      dockerfile: docker/Dockerfile_ubuntu22
+      dockerfile: docker/Dockerfile_ubuntu22-dev
       <<: *build-args
-    <<: *environment
-    <<: *ports
-    networks:
-      db_network:
     volumes:
       - ./:/app/pldotnet/
       - ./postgres-data/ubuntu22:/var/lib/postgresql/data
 
+  pldotnet-ubuntu22:
+    container_name: pldotnet-ubuntu22
+    image: pldotnet:ubuntu22
+    <<: [*interactive, *environment, *ports]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile_ubuntu22
+
+  postgres-pldotnet:
+    container_name: postgres-pldotnet
+    image: postgres-pldotnet:15-bullseye
+    <<: [*interactive, *environment, *ports]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile_postgres-pldotnet
+
   pldotnet-build:
     container_name: pldotnet-build
     image: pldotnet:build
-    <<: *interactive
-    command: sh -c "bash /app/pldotnet/docker/scripts/build_packages.sh"
+    <<: [*interactive, *environment]
+    command: sh -c "make pldotnet-build-debian-packages"
     build:
       dockerfile: docker/Dockerfile_deb-build
       <<: *build-args
-    <<: *environment
     volumes:
       - ./dotnet_src/:/app/pldotnet/dotnet_src/
       - ./src/:/app/pldotnet/src/
@@ -64,26 +70,23 @@ services:
       - ./pldotnet.control:/app/pldotnet/pldotnet.control
       - ./pldotnet--0.9.sql:/app/pldotnet/pldotnet--0.9.sql
       - ./tests/:/app/pldotnet/tests/
+      - ./automated_test_results/:/app/pldotnet/automated_test_results/
       - ./debian/packages/:/app/pldotnet/debian/packages/
       - ./debian/changelog:/app/pldotnet/debian/changelog
       - ./debian/control.in:/app/pldotnet/debian/control.in
       - ./debian/copyright:/app/pldotnet/debian/copyright
       - ./debian/pgversions:/app/pldotnet/debian/pgversions
-      - ./debian/postinst:/app/pldotnet/debian/postinst
-      - ./debian/postrm:/app/pldotnet/debian/postrm
-      - ./debian/preinst:/app/pldotnet/debian/preinst
-      - ./debian/prerm:/app/pldotnet/debian/prerm
       - ./debian/rules:/app/pldotnet/debian/rules
+      - ./debian/postinst:/app/pldotnet/debian/postinst
 
   pldotnet-build-arm:
     container_name: pldotnet-build-arm
     image: pldotnet:build
-    <<: *interactive
+    <<: [*interactive, *environment]
     command: sh -c "bash /app/pldotnet/docker/scripts/build_packages.sh"
     build:
       dockerfile: docker/Dockerfile_ubuntu-build-arm
       <<: *build-args
-    <<: *environment
     volumes:
       - ./src/:/app/pldotnet/src/
       - ./Makefile:/app/pldotnet/Makefile
@@ -92,7 +95,3 @@ services:
       - ./debian/packages/:/app/pldotnet/debian/packages/
       - ./debian/pgversions-arm:/app/pldotnet/debian/pgversions
       - ./debian/rules:/app/pldotnet/debian/rules
-      - ./debian/prerm:/app/pldotnet/debian/prerm
-      - ./debian/preinst:/app/pldotnet/debian/preinst
-      - ./debian/postrm:/app/pldotnet/debian/postrm
-      - ./debian/postinst:/app/pldotnet/debian/postinst

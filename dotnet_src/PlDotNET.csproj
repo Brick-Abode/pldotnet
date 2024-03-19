@@ -4,23 +4,50 @@
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Uncomment the next line to enable FSharp Service Compiler in the build -->
+    <!-- <DefineConstants>ENABLE_FCS</DefineConstants> -->
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="FSharp\FSharpCompiler.fsproj" />
+   <ItemGroup>
+    <Content Remove="Common\**" />
+    <Compile Remove="Common\**" />
+    <EmbeddedResource Remove="Common\**" />
+    <None Remove="Common\**" />
+    <Content Remove="FSharp\**" />
+    <Compile Remove="FSharp\**" />
+    <EmbeddedResource Remove="FSharp\**" />
+    <None Remove="FSharp\**" />
+    <Content Remove="npgsql\**" />
+    <Compile Remove="npgsql\**" />
+    <EmbeddedResource Remove="npgsql\**" />
+    <None Remove="npgsql\**" />
+    <Content Remove="TypeHandlers\**" />
+    <Compile Remove="TypeHandlers\**" />
+    <EmbeddedResource Remove="TypeHandlers\**" />
+    <None Remove="TypeHandlers\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
-    <PackageReference Include="Npgsql" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Stylecop.Analyzers" Version="1.1.118">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.ComponentModel.Primitives" Version="4.3.0" />
   </ItemGroup>
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="npgsql\src\Npgsql\Npgsql.csproj" />
+    <ProjectReference Include="npgsql\test\Npgsql.Tests\Npgsql.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(DefineConstants.Contains('ENABLE_FCS'))">
+    <ProjectReference Include="FSharp\PlDotNET.FSharp.fsproj" />
+  </ItemGroup>
 
 </Project>

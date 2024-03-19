@@ -8,7 +8,7 @@ Homepage: http://www.brickabode.com/pldotnet/
 
 Package: postgresql-PGVERSION-pldotnet
 Architecture: any
-Depends: dotnet-runtime-6.0 (>= 6.0), dotnet-sdk-6.0 (>= 6.0), dotnet-hostfxr-6.0 (>=6.0), postgresql-PGVERSION, ${postgresql:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: dotnet-runtime-6.0 (>= 6.0), dotnet-sdk-6.0 (>= 6.0), dotnet-hostfxr-6.0 (>=6.0), dotnet-apphost-pack-6.0 (>=6.0), dotnet-host (>=6.0), dotnet-runtime-deps-6.0 (>=6.0), dotnet-targeting-pack-6.0 (>=6.0), postgresql-PGVERSION, ${postgresql:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Provides: postgresql-PGVERSION-pldotnet
 Description: PL/.NET a.k.a (pldotnet) adds Microsoft's .NET framework to PostgreSQL by
  introducing both the C# and F# as loadable procedural language.
@@ -18,3 +18,5 @@ Description: PL/.NET a.k.a (pldotnet) adds Microsoft's .NET framework to Postgre
  This package provides a procedural language interface to .NET C# and F# from
  PostgreSQL. Procedural languages are used to write functions
  which can be called in database queries.
+
+

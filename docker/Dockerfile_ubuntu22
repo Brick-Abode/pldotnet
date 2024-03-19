@@ -3,26 +3,61 @@ FROM ubuntu:22.04
 # avoids tzdata prompt
 ARG DEBIAN_FRONTEND=noninteractive
 
-# app files
-COPY . /app/pldotnet/
-WORKDIR /app/pldotnet
+# Install PostgreSQL and other dependencies
+RUN apt update && \
+    apt install -y \
+    wget \
+    libglib2.0-dev \
+    lsb-release \
+    postgresql-14 \
+    postgresql-common \
+    postgresql-server-dev-all \
+    sudo
 
-# Do all the things
-RUN apt update &&  apt install make
-RUN make -f /app/pldotnet/docker/scripts/Makefile-builder ubuntu22_install
+# Install Dotnet
+RUN wget -q \
+		https://packages.microsoft.com/config/$(lsb_release -i | cut -f2 -d'	' | sed 's/.*/\L&/')/$(lsb_release -r | cut -f2 -d'	')/packages-microsoft-prod.deb \
+		-O packages-microsoft-prod.deb
 
-# cluster creation requirements; locale settings
-RUN make -f /app/pldotnet/docker/scripts/Makefile-builder install_cluster_requirements
+RUN dpkg -i packages-microsoft-prod.deb
+
+RUN rm packages-microsoft-prod.deb
+
+RUN apt update && \
+    apt install -y \
+    dotnet-runtime-deps-6.0 \
+    dotnet-hostfxr-6.0=6.0.8-1 \
+    dotnet-runtime-6.0=6.0.8-1 \
+    dotnet-sdk-6.0=6.0.400-1
+
+# Install pldotnet
+COPY ./debian/packages /app/pldotnet/packages
+RUN dpkg -i /app/pldotnet/packages/postgresql-14-pldotnet_0.9-1_amd64.deb
+
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# Set the locale
+RUN locale-gen en_US.UTF-8
+RUN update-locale LANG=en_US.UTF-8
+
 # pgdata
 ARG PGDATA
 ENV PGDATA=${PGDATA}
 
-# creating persistent cluster and installing extension
-RUN make -f /app/pldotnet/docker/scripts/Makefile-builder create_cluster_and_install_extension
+# TODO: Change this using wget from the official repository
+COPY ./docker/scripts/install_pldotnet_deb.sh /install_pldotnet_deb.sh
+COPY ./docker/scripts/ubuntu22_entrypoint.sh /ubuntu22_entrypoint.sh
 
-ENTRYPOINT [ "bash", "/app/pldotnet/docker/scripts/start_pg_cluster.sh" ]
+# Start PostgreSQL service
+# RUN service postgresql start
+RUN ./install_pldotnet_deb.sh
+
+RUN apt-get clean
+RUN apt-get autoremove
+
+WORKDIR /var/lib/PlDotNET/samples
+
+ENTRYPOINT /ubuntu22_entrypoint.sh

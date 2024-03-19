@@ -1,0 +1,28 @@
+FROM ubuntu:22.04
+
+# avoids tzdata prompt
+ARG DEBIAN_FRONTEND=noninteractive
+
+# app files
+COPY . /app/pldotnet/
+WORKDIR /app/pldotnet
+
+# Do all the things
+RUN apt update &&  apt install make
+RUN make -f /app/pldotnet/docker/scripts/Makefile-builder ubuntu22_install
+
+# cluster creation requirements; locale settings
+RUN make -f /app/pldotnet/docker/scripts/Makefile-builder install_cluster_requirements
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# pgdata
+ARG PGDATA
+ENV PGDATA=${PGDATA}
+
+# creating persistent cluster and installing extension
+RUN make -f /app/pldotnet/docker/scripts/Makefile-builder create_cluster_and_install_extension
+
+ENTRYPOINT [ "bash", "/app/pldotnet/docker/scripts/start_pg_cluster.sh" ]

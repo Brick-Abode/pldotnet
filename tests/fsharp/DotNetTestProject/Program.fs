@@ -119,3 +119,73 @@ type TestFSharpClass() =
             a.SetValue(newValue, 0, 0, 0) |> ignore
             a
         | _ -> a
+
+type InoutTestsFSharpClass() =
+    
+    static member fsInoutAllthreeS (a: int) (b: int) : Nullable<int> * Nullable<int> = 
+        Nullable(b+1), Nullable(a+b)
+
+    static member fsInoutAllthree (a: Nullable<int>) (b: Nullable<int>) : Nullable<int> * Nullable<int> = 
+        if a.HasValue && b.HasValue then
+            Nullable(a.Value + 1), Nullable(a.Value + b.Value)
+        else
+            Nullable(), Nullable()
+
+    static member fsInoutAllthreearray (a: int) (b: int) : Nullable<int> * Array = 
+        let c = b + 1
+        let arr = Array.CreateInstance(typeof<int16>, 3, 3)
+        arr.SetValue((int16)a, 0, 0)
+        arr.SetValue((int16)a, 1, 1)
+        arr.SetValue((int16)a, 2, 2)
+        Nullable(c), arr
+
+    static member inoutMultiarg1FsS (a0: int) (a1: int) (a2: int) (a5: int) (a6: int) : Nullable<int> * Nullable<int> * Nullable<int> * Nullable<int> * Nullable<int> = 
+        if a0 <> 0 then
+            raise <| SystemException("Failed assertion: a0")
+        if  a1 <> 1 then
+            raise <| SystemException("Failed assertion: a1")
+        if  a2 <> 2 then
+            raise <| SystemException("Failed assertion: a2")
+        if a5 <> 5 then
+            raise <| SystemException("Failed assertion: a5")
+        if  a6 <> 6 then
+            raise <| SystemException("Failed assertion: a6")
+
+        (Nullable(2), Nullable(4), Nullable(5), Nullable(6), Nullable(7))
+
+    static member inoutMultiarg1Fs (a0: Nullable<int>) (a1: Nullable<int>) (a2: Nullable<int>) (a5: Nullable<int>) (a6: Nullable<int>) : Nullable<int> * Nullable<int> * Nullable<int> * Nullable<int> * Nullable<int> = 
+        if a0.HasValue && a0.Value <> 0 then
+            raise <| SystemException("Failed assertion: a0")
+        if a1.HasValue && a1.Value <> 1 then
+            raise <| SystemException("Failed assertion: a1")
+        if a2.HasValue && a2.Value <> 2 then
+            raise <| SystemException("Failed assertion: a2")
+        if a5.HasValue then
+            raise <| SystemException("Failed assertion: a5")
+        if a6.HasValue && a6.Value <> 6 then
+            raise <| SystemException("Failed assertion: a6")
+
+        (Nullable(2), Nullable(4), Nullable(5), Nullable(6), Nullable())
+
+    static member inoutMrray10FsS (input_array: Array) : Array = 
+        let count = input_array.Length
+        let output = Array.CreateInstance(typeof<obj>, count)
+        for i = 0 to count - 1 do
+            output.SetValue(input_array.GetValue(i), i)
+        if count > 3 then
+            output.SetValue(Nullable() :> obj, 3)
+        output
+    
+    static member inoutMrray11FsS (address: PhysicalAddress) (count: int) : Array = 
+        let output = Array.CreateInstance(typeof<obj>, count)
+        for i = 0 to count - 1 do
+            output.SetValue(address :> obj, i)
+        if count > 3 then
+            output.SetValue(Nullable() :> obj, 3)
+        output
+
+    static member inoutMbject10Fs (a: string) (b: string) : string = 
+        a + " " + b;
+    
+    static member inoutMbject20Fs (a: string) (b: string) : string = 
+        a + " " + b;

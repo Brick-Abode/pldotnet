@@ -366,4 +366,324 @@ namespace TestDLLFunctions.OtherTests
             return new_point;
         }
     }
+
+    public class InoutTests
+    {
+        public static void inoutBasic0(ref int? argument_0)
+        {
+            if (argument_0 != 0)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = 1;
+        }
+
+        public static void inoutBasic1(out int? argument_0)
+        {
+            argument_0 = 1;
+        }
+
+        public static void inputNull1(ref int? argument_0)
+        {
+            if (argument_0 is null)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = null;
+        }
+
+        public static void inputNull2(ref int? argument_0)
+        {
+            if (argument_0 != null)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = 3;
+        }
+
+        public static void inputNull3(out int? argument_0)
+        {
+            argument_0 = null;
+        }
+
+        public static void inputNull4(ref int? argument_0, int? argument_1)
+        {
+            if (argument_0 is null)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            if (argument_1 != 3)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = null;
+        }
+
+        public static void inputNull5(ref int? argument_0, int? argument_1)
+        {
+            if (argument_0 != null)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            if (argument_1 != 3)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = 3;
+        }
+
+        public static void inputNull6(int? argument_0, out int? argument_1)
+        {
+            if (argument_0 == 1)
+            {
+                argument_1 = null;
+            }
+            else if (argument_0 == 2)
+            {
+                argument_1 = 2;
+            }
+            else
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+        }
+
+        public static void inoutMultiarg1(int? argument_0, ref int? argument_1, int? argument_2, out int? argument_3, out int? argument_4, ref int? argument_5, int? argument_6, out int? argument_7)
+        {
+            if (argument_0 != 0)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            if (argument_1 != 1)
+            {
+                throw new SystemException($"Failed assertion: argument_1 = {argument_1}");
+            }
+
+            argument_1 = 2;
+            if (argument_2 != 2)
+            {
+                throw new SystemException($"Failed assertion: argument_2 = {argument_2}");
+            }
+
+            argument_3 = 4;
+            argument_4 = 5;
+            if (argument_5 != null)
+            {
+                throw new SystemException($"Failed assertion: argument_5 = {argument_5}");
+            }
+
+            argument_5 = 6;
+            if (argument_6 != 6)
+            {
+                throw new SystemException($"Failed assertion: argument_6 = {argument_6}");
+            }
+
+            argument_7 = null;
+        }
+
+        public static void inoutMultiarg2(ref int? argument_0, out int? argument_1, ref int? argument_2, ref int? argument_3, int? argument_4, out int? argument_5, int? argument_6, out int? argument_7)
+        {
+            if (argument_0 != null)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            argument_0 = 1;
+            argument_1 = 2;
+            if (argument_2 != 2)
+            {
+                throw new SystemException($"Failed assertion: argument_2 = {argument_2}");
+            }
+
+            argument_2 = 3;
+            if (argument_3 != 3)
+            {
+                throw new SystemException($"Failed assertion: argument_3 = {argument_3}");
+            }
+
+            argument_3 = null;
+            if (argument_4 != 4)
+            {
+                throw new SystemException($"Failed assertion: argument_4 = {argument_4}");
+            }
+
+            argument_5 = 6;
+            if (argument_6 != 6)
+            {
+                throw new SystemException($"Failed assertion: argument_6 = {argument_6}");
+            }
+
+            argument_7 = 8;
+        }
+
+        public static void inoutMultiarg3(out int? argument_0, int? argument_1, int? argument_2, out int? argument_3, ref int? argument_4, out int? argument_5, int? argument_6, ref int? argument_7)
+        {
+            argument_0 = null;
+            if (argument_1 != 1)
+            {
+                throw new SystemException($"Failed assertion: argument_1 = {argument_1}");
+            }
+
+            if (argument_2 != 2)
+            {
+                throw new SystemException($"Failed assertion: argument_2 = {argument_2}");
+            }
+
+            argument_3 = 4;
+            if (argument_4 != 4)
+            {
+                throw new SystemException($"Failed assertion: argument_4 = {argument_4}");
+            }
+
+            argument_4 = 5;
+            argument_5 = 6;
+            if (argument_6 != 6)
+            {
+                throw new SystemException($"Failed assertion: argument_6 = {argument_6}");
+            }
+
+            if (argument_7 != 7)
+            {
+                throw new SystemException($"Failed assertion: argument_7 = {argument_7}");
+            }
+
+            argument_7 = 8;
+        }
+
+        public static void inoutMultiarg4(int argument_0, ref int? argument_1, int argument_2, out int? argument_3, out int? argument_4, ref int? argument_5, ref int? argument_6, int argument_7)
+        {
+            if (argument_0 != 0)
+            {
+                throw new SystemException($"Failed assertion: argument_0 = {argument_0}");
+            }
+
+            if (argument_1 != 1)
+            {
+                throw new SystemException($"Failed assertion: argument_1 = {argument_1}");
+            }
+
+            argument_1 = 2;
+            if (argument_2 != 2)
+            {
+                throw new SystemException($"Failed assertion: argument_2 = {argument_2}");
+            }
+
+            argument_3 = 4;
+            argument_4 = 5;
+            if (argument_5 != 5)
+            {
+                throw new SystemException($"Failed assertion: argument_5 = {argument_5}");
+            }
+
+            argument_5 = null;
+            if (argument_6 != 6)
+            {
+                throw new SystemException($"Failed assertion: argument_6 = {argument_6}");
+            }
+
+            argument_6 = 7;
+            if (argument_7 != 7)
+            {
+                throw new SystemException($"Failed assertion: argument_7 = {argument_7}");
+            }
+        }
+
+        public static void inoutArray10(ref Array? values_array, out int? nulls)
+        {
+            Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
+            TestDLLFunctions.TestClass.FlatArray(values_array, ref flatten_values);
+            nulls = 0;
+            for (int i = 0; i < flatten_values.Length; i++)
+            {
+                if (flatten_values.GetValue(i) == null)
+                {
+                    nulls++;
+                    continue;
+                }
+
+                PhysicalAddress orig_value = (PhysicalAddress)flatten_values.GetValue(i);
+                byte[] bytes = orig_value.GetAddressBytes();
+                bytes[0] += 1;
+                PhysicalAddress new_value = new (bytes);
+                flatten_values.SetValue((PhysicalAddress)new_value, i);
+            }
+
+            values_array = flatten_values;
+        }
+
+        public static void inoutArray11(out Array? values_array, PhysicalAddress address, int count)
+        {
+            Array output = Array.CreateInstance(typeof(object), count);
+            for (int i = 0; i < count; i++)
+            {
+                output.SetValue((PhysicalAddress)address, i);
+            }
+
+            values_array = output;
+        }
+
+        public static void inoutSimple10(out int? checksum, (IPAddress Address, int Netmask) address)
+        {
+            int i;
+
+            // get bytes
+            byte[] bytes = address.Address.GetAddressBytes();
+
+            // compute checksum
+            checksum = 0;
+            for (i = 0; i < bytes.Length; i++)
+            {
+                checksum += bytes[i];
+            }
+        }
+
+        public static void inoutSimple20(ref (IPAddress Address, int Netmask)? address, int pos, int delta)
+        {
+            // compute new address
+            (IPAddress address1, int netmask) = address ?? (IPAddress.Parse("1.1.1.1"), 8);
+            byte[] bytes = address1.GetAddressBytes();
+            bytes[pos] += (byte)delta;
+            address = (new IPAddress(bytes), netmask);
+        }
+
+        public static void inoutSimple30(out int? checksum, ref (IPAddress Address, int Netmask)? address, int pos, int delta)
+        {
+            int i;
+
+            // compute new address
+            (IPAddress address1, int netmask) = address ?? (IPAddress.Parse("1.1.1.1"), 8);
+            byte[] bytes = address1.GetAddressBytes();
+            bytes[pos] += (byte)delta;
+            address = (new IPAddress(bytes), netmask);
+
+            // compute checksum
+            checksum = 0;
+            for (i = 0; i < bytes.Length; i++)
+            {
+                checksum += bytes[i];
+            }
+        }
+
+        public static void inoutObject10(string? a, ref string? b)
+        {
+            a ??= string.Empty;
+            b ??= string.Empty;
+            b = a + " " + b;
+        }
+
+        public static void inoutObject20(string? a, string? b, out string? c)
+        {
+            a ??= string.Empty;
+            b ??= string.Empty;
+            c = a + " " + b;
+        }
+    }
 }

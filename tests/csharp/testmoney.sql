@@ -49,15 +49,15 @@ SELECT 'c#-money-null-2array-arraynull', 'updateMoneyArrayIndex3', updateMoneyAr
 
 CREATE OR REPLACE FUNCTION IncreaseMoney(values_array MONEY[]) RETURNS MONEY[] AS $$
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
-ArrayHandler.FlatArray(values_array, ref flatten_values);
+ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
-{   
+{
     if (flatten_values.GetValue(i) == null)
         continue;
 
     decimal orig_value = (decimal)flatten_values.GetValue(i);
     decimal new_value = orig_value + 1;
-    
+
     flatten_values.SetValue((decimal)new_value, i);
 }
 return flatten_values;

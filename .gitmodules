@@ -1,0 +1,4 @@
+[submodule "dotnet_src/npgsql"]
+	path = dotnet_src/npgsql
+	url = git@github.com:Brick-Abode/npgsql.git
+	branch = main-pldotnet

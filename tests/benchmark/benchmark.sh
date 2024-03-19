@@ -20,4 +20,4 @@ do
 done
 
 sed -i "s/;/\t/g" $FILENAME
-cp $FILENAME docs/img/pldotnet-performance-data.csv
+cp $FILENAME "docs/img/pldotnet-performance-data-${TIMESTAMP:0:10}.csv"
