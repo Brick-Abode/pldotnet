@@ -200,6 +200,14 @@ stress-test:
 
 benchmark-tests:
 	mkdir -p automated_test_results
+	echo "CREATE TYPE Person AS (\
+	    name            text,\
+	    age             integer,\
+	    weight          double precision,\
+	    height          real,\
+	    salary          double precision,\
+	    married         boolean\
+	);" | (sudo -u $(DBUSER) psql)
 	cat tests/benchmark/python/init-extension.sql | (sudo -u $(DBUSER) psql)
 	echo "ALTER DATABASE postgres SET pljava.libjvm_location TO '$$(sudo find /usr -name libjvm.so | head -n 1)';" | sudo -u $(DBUSER) psql
 	cat tests/benchmark/java/init-extension.sql | (sudo -u $(DBUSER) psql)

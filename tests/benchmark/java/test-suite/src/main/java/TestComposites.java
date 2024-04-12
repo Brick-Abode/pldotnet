@@ -7,16 +7,17 @@ import org.postgresql.pljava.annotation.Function;
 import static org.postgresql.pljava.annotation.Function.Effects.IMMUTABLE;
 
 import org.postgresql.pljava.annotation.Function;
+import org.postgresql.pljava.annotation.SQLType;
 
 public class TestComposites {
     @Function
-    public static int helloPersonAgeJava(ResultSet per) throws SQLException {
+    public static int helloPersonAgeJava(@SQLType("Person") ResultSet per) throws SQLException {
         return per.getInt(2);
     }
 
     
-    @Function
-    public static boolean helloPersonJava(ResultSet per, ResultSet receiver) throws SQLException {
+    @Function(type="Person")
+    public static boolean helloPersonJava(@SQLType("Person") ResultSet per, ResultSet receiver) throws SQLException {
         int n = 1;
         int age = per.getInt(2);
 

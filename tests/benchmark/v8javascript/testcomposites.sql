@@ -1,12 +1,3 @@
-CREATE TYPE Person AS (
-    name            text,
-    age             integer,
-    weight          double precision,
-    height          real,
-    salary          double precision,
-    married         boolean
-);
-
 CREATE OR REPLACE FUNCTION helloPersonAgeV8(per Person) RETURNS integer AS $$
     var res = "Hello M(r)(s). "+per.name+"! Your age "+per.age+", "+per.weight+", "+per.height+", "+per.salary+". "+per.married;
     return per.age;

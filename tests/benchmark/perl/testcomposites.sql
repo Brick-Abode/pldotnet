@@ -1,12 +1,3 @@
-CREATE TYPE Person AS (
-    name            text,
-    age             integer,
-    weight          double precision,
-    height          real,
-    salary          double precision,
-    married         boolean
-);
-
 CREATE OR REPLACE FUNCTION helloPersonAgePerl(per Person) RETURNS integer AS $$
 my ($person) = @_;
 return $person->{age};
