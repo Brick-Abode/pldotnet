@@ -1,6 +1,7 @@
 # Makefile for PL/.NET
 
 UNAME = $(shell uname)
+PYTHON ?= python3
 SED ?= sed
 DBUSER ?= postgres
 
@@ -115,21 +116,23 @@ pldotnet-ubuntu:
 	docker-compose run --rm pldotnet-ubuntu22 bash
 
 pldotnet-postgres:
-	make clean && make && make pldotnet-install
+	$(MAKE) clean
+	$(MAKE)
+	$(MAKE) pldotnet-install
 	sudo -u $(DBUSER) psql
 
 build-package:
 	docker-compose up pldotnet-build | tee package-build-log.txt
 
 build-package-bash:
-	make build-package
+	$(MAKE) build-package
 	docker-compose run --rm pldotnet-build bash
 
 build-package-arm:
 	docker-compose up pldotnet-build-arm | tee package-build-arm-log.txt
 
 build-package-arm-bash:
-	make build-package-arm
+	$(MAKE) build-package-arm
 	docker-compose run --rm pldotnet-build-arm bash
 
 pre-tests-script:
@@ -153,15 +156,15 @@ XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
 RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
 
 pldotnet-tests:
-	make pre-tests-script
+	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS)
 
 csharp-tests:
-	make pre-tests-script
+	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS) --filter Language=CSharp
 
 fsharp-tests:
-	make pre-tests-script
+	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS) --filter Language=FSharp
 
 csharp-tests-cats:
@@ -177,20 +180,20 @@ fsharp-tests-cats:
 	done
 
 pldotnet-tests-sql:
-	make pre-tests-script
-	make csharp-tests-cats
-	make fsharp-tests-cats
-	make post-tests-script
+	$(MAKE) pre-tests-script
+	$(MAKE) csharp-tests-cats
+	$(MAKE) fsharp-tests-cats
+	$(MAKE) post-tests-script
 
 csharp-tests-sql:
-	make pre-tests-script
-	make csharp-tests-cats
-	make post-tests-script
+	$(MAKE) pre-tests-script
+	$(MAKE) csharp-tests-cats
+	$(MAKE) post-tests-script
 
 fsharp-tests-sql:
-	make pre-tests-script
-	make fsharp-tests-cats
-	make post-tests-script
+	$(MAKE) pre-tests-script
+	$(MAKE) fsharp-tests-cats
+	$(MAKE) post-tests-script
 
 stress-test:
 	mkdir -p automated_test_results
@@ -214,15 +217,15 @@ benchmark-tests:
 	bash tests/benchmark/benchmark.sh
 
 spi-tests:
-	make pre-tests-script
+	$(MAKE) pre-tests-script
 	cat tests/csharp/testspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testspi.out
 	cat tests/fsharp/testfsspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testfsspi.out
-	make post-tests-script
+	$(MAKE) post-tests-script
 
 npgsql-tests:
 	bash tests/npgsql/run_tests.sh
-	python3 tests/npgsql/process_npgsql_results.py
+	$(PYTHON) tests/npgsql/process_npgsql_results.py
 
 npgsql-working-tests:
 	bash tests/npgsql/run_working_tests.sh
-	python3 tests/npgsql/process_npgsql_results.py
+	$(PYTHON) tests/npgsql/process_npgsql_results.py
