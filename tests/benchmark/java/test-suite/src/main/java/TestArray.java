@@ -1,5 +1,6 @@
 package com.example.proj;
 
+import java.math.BigDecimal;
 import org.postgresql.pljava.annotation.Function;
 
 public class TestArray {
@@ -9,8 +10,8 @@ public class TestArray {
     }
 
     @Function
-    public static double sumArrayNumJava(double[] a) {
-        return a[0] + a[1] + a[2];
+    public static BigDecimal sumArrayNumJava(BigDecimal[] a) {
+        return a[0].add(a[1]).add(a[2]);
     }
 
     @Function

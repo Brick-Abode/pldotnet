@@ -74,18 +74,7 @@ stress-test:
 	sudo bash stress_test/stress_test.sh
 
 benchmark-tests:
-	mkdir -p automated_test_results
-	cat benchmark/python/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/java/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/perl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/lua/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/tcl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/r/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat benchmark/v8javascript/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cd $(CURRENT_DIR)/benchmark/java/test-suite && mvn install && cd $(CURRENT_DIR)/
-	echo "select sqlj.install_jar('file:$(CURRENT_DIR)/benchmark/java/test-suite/target/test-suite-1.0.0.jar', 'testsuite', true);" | (sudo -u $(DBUSER) psql)
-	echo "select sqlj.set_classpath('public', 'testsuite');" | (sudo -u $(DBUSER) psql)
-	bash benchmark/benchmark.sh
+	echo "Use the top-level Makefile for make benchmark-tests" && false
 
 spi-tests:
 	make pre-tests-script
