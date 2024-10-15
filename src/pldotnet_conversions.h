@@ -285,7 +285,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumDateAttributes(void *datum, int *date);
  * @param time the int64 value that represents a Date in PostgreSQL.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumTimeAttributes(void *datum,
-                                                        long *time);
+                                                        int64_t *time);
 
 /**
  * @brief Extracts the long and integer values corresponding to a PostgreSQL
@@ -297,7 +297,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumTimeAttributes(void *datum,
  * @param zone the time zone.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumTimeTzAttributes(void *datum,
-                                                          long *time,
+                                                          int64_t *time,
                                                           int *zone);
 
 /**
@@ -310,7 +310,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumTimeTzAttributes(void *datum,
  * PostgreSQL.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumTimestampAttributes(void *datum,
-                                                             long *timestamp);
+                                                             int64_t *timestamp);
 
 /**
  * @brief Extracts the long value corresponding to a PostgreSQL Timestamp with
@@ -322,7 +322,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumTimestampAttributes(void *datum,
  * PostgreSQL.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumTimestampTzAttributes(void *datum,
-                                                               long *timestamp);
+                                                               int64_t *timestamp);
 
 /**
  * @brief Extracts the time (number of ticks), day, and moth values from a
@@ -335,7 +335,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumTimestampTzAttributes(void *datum,
  * @param month the month.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumIntervalAttributes(void *datum,
-                                                            long *time,
+                                                            int64_t *time,
                                                             int *day,
                                                             int *month);
 
@@ -374,7 +374,7 @@ extern PGDLLEXPORT void pldotnet_GetDatumInetAttributes(void *datum, int *nelem,
  * @param value is the long integer that represents the PostgreSQL Money.
  */
 extern PGDLLEXPORT void pldotnet_GetDatumMoneyAttributes(void *datum,
-                                                         long *value);
+                                                         int64_t *value);
 
 /**
  * @brief Extracts the length and the memory address where the bits of a
@@ -713,7 +713,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumDate(int date);
  * @param time the long integer value that represents a Time in PostgreSQL.
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumTime(long time);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTime(int64_t time);
 
 /**
  * @brief Creates a PostgreSQL Time with the time zone. It is used to convert
@@ -723,7 +723,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumTime(long time);
  * @param zone the zone value.
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumTimeTz(long time, int zone);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimeTz(int64_t time, int zone);
 
 /**
  * @brief Creates a PostgreSQL Timestamp without a time zone. It is used to
@@ -733,7 +733,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumTimeTz(long time, int zone);
  * PostgreSQL.
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestamp(long timestamp);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestamp(int64_t timestamp);
 
 /**
  * @brief Creates a PostgreSQL Timestamp with the time zone. It is used to
@@ -743,7 +743,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestamp(long timestamp);
  * PostgreSQL.
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestampTz(long timestamp);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestampTz(int64_t timestamp);
 
 /**
  * @brief Creates a PostgreSQL Interval. It is used to convert from a .NET type
@@ -754,7 +754,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumTimestampTz(long timestamp);
  * @param month the number of months.
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumInterval(long time, int day,
+extern PGDLLEXPORT Datum pldotnet_CreateDatumInterval(int64_t time, int day,
                                                       int month);
 
 /**
@@ -788,7 +788,7 @@ extern PGDLLEXPORT Datum pldotnet_CreateDatumInet(int length,
  * @param value the long integer that represents the money in PostgreSQL
  * @return Datum the datum object.
  */
-extern PGDLLEXPORT Datum pldotnet_CreateDatumMoney(long value);
+extern PGDLLEXPORT Datum pldotnet_CreateDatumMoney(int64_t value);
 
 /**
  * @brief Creates a PostgreSQL VarBit or Bit. It is used to convert from a .NET

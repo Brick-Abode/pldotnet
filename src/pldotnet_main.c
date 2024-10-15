@@ -603,7 +603,7 @@ static void srf_MemoryContextCallback(void *cbdp) {
                             NULL, 0, NULL, NULL);
     if (res != RETURN_SRF_DONE) {
         elog(WARNING,
-             "BAD: Got result (%d) from freeing call %u on function %lu", res,
+             "BAD: Got result (%d) from freeing call %u on function %llu", res,
              cbd->functionId, cbd->call_id);
     }
 }
@@ -938,8 +938,7 @@ static Datum pldotnet_CompileAndRunUserFunction(const FunctionCallInfo fcinfo,
                                           // find the enumerator in the cache
 
             // create and register the callback for garbage collection
-            cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
-                funcctx->multi_call_memory_ctx, sizeof(cb_data));
+            cbd = (cb_data *)MemoryContextAlloc(funcctx->multi_call_memory_ctx, sizeof(cb_data));
 
             cbd->cb_record.arg = cbd;
             cbd->cb_record.func = srf_MemoryContextCallback;
