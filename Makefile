@@ -18,7 +18,7 @@ ifeq ($(UNAME), Linux)
 	DOTNET_LIBDIR  ?= $(shell dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
 	DOTNET_HOSTLIB ?= -L$(DOTNET_LIBDIR) -lnethost -Wl,-rpath $(DOTNET_LIBDIR)
 	PLDOTNET_ENGINE_ROOT ?= /var/lib
-	PG_CONFIG = pg_config
+	PG_CONFIG ?= pg_config
 	PKG_LIBDIR = $(shell $(PG_CONFIG) --pkglibdir)
 	PG_INCDIR = $(shell $(PG_CONFIG) --includedir-server )
 endif
@@ -30,10 +30,11 @@ ifeq ($(UNAME), Darwin)
 	DOTNET_HOSTDIR ?= $(shell find /usr/local/share/dotnet -name hostfxr.h | head -1 | xargs dirname)
 	DOTNET_LIBDIR  ?= $(shell find /usr/local/share/dotnet -name hostfxr.h | head -1 | xargs dirname)
 	DOTNET_HOSTLIB ?= -L$(DOTNET_LIBDIR) -Wl,-rpath,$(DOTNET_LIBDIR) -lglib-2.0 -lnethost
-	PLDOTNET_ENGINE_ROOT = $(HOME)/dev/pldotnet/tmp/dotnet_install
-	PG_CONFIG = $(HOME)/postgresql-15/bin/pg_config
-	PKG_LIBDIR = $(HOME)/postgresql-15/lib/
-	PG_INCDIR = $(HOME)/postgresql-15/include/server
+	PLDOTNET_ENGINE_ROOT ?= /tmp/pldotnet
+
+	PG_CONFIG ?= pg_config
+	PKG_LIBDIR = $(shell $(PG_CONFIG) --pkglibdir)
+	PG_INCDIR = $(shell $(PG_CONFIG) --includedir-server )
 endif
 
 GLIB_INC := `pkg-config --cflags --libs glib-2.0`
@@ -62,7 +63,6 @@ ifeq ($(UNAME), Darwin)
 	PG_CPPFLAGS = -isystem $(DOTNET_HOSTDIR) -isystem $(PG_INCDIR) $(GLIB_INC) \
 			  -Iinc -DLINUX $(DEFINE_DOTNET_BUILD) $(PLDOTNET_ENGINE_DIR) \
 			  -DPKG_LIBDIR=$(PKG_LIBDIR)
-	PGXS = $(HOME)/postgresql-15/lib/pgxs/src/makefiles/pgxs.mk
 endif
 
 SHLIB_LINK = $(DOTNET_HOSTLIB) $(GLIB_INC)
