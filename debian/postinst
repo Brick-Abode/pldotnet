@@ -1,5 +1,5 @@
 #!/bin/bash
 echo "Post install script is running now"
 
-DOTNET_LIBDIR=$(dpkg -L dotnet-apphost-pack-6.0 | fgrep libnethost.so | head -1 | xargs dirname)
+DOTNET_LIBDIR=$(dpkg -L dotnet-apphost-pack-9.0 | fgrep libnethost.so | head -1 | xargs dirname)
 ldconfig  $DOTNET_LIBDIR

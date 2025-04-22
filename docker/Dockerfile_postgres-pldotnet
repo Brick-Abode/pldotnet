@@ -22,9 +22,9 @@ RUN rm packages-microsoft-prod.deb
 
 RUN apt update && \
     apt install -y \
-    dotnet-sdk-6.0 \
-    dotnet-runtime-6.0 \
-    dotnet-hostfxr-6.0
+    dotnet-sdk-9.0 \
+    dotnet-runtime-9.0 \
+    dotnet-hostfxr-9.0
 
 # Install pldotnet
 COPY ./debian/packages /app/pldotnet/packages

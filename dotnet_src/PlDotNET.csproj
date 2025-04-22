@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Uncomment the next line to enable FSharp Service Compiler in the build -->
     <!-- <DefineConstants>ENABLE_FCS</DefineConstants> -->
   </PropertyGroup>
 
-   <ItemGroup>
+  <ItemGroup>
     <Content Remove="Common\**" />
     <Compile Remove="Common\**" />
     <EmbeddedResource Remove="Common\**" />

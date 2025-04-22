@@ -10,7 +10,7 @@ using System.Linq;
 public class MiddlePointStrictCallStrictTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.TestClass!middlePointStrict'
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net9.0/CSharpTest.dll:TestDLLFunctions.OtherTests.TestClass!middlePointStrict'
     ";
 
     public MiddlePointStrictCallStrictTests()

@@ -10,7 +10,7 @@ using System.Linq;
 public class Mult2InTFsharpDllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net6.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!mult2IntFSharp'
+'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net9.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!mult2IntFSharp'
     ";
 
     public Mult2InTFsharpDllTests()

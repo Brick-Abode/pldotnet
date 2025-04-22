@@ -471,9 +471,9 @@ Datum plfsharp_validator(PG_FUNCTION_ARGS) {
 
 bool pldotnet_BuildPaths(void) {
     const char json_path_suffix[] =
-        "/bin/Release/net6.0/PlDotNET."
+        "/bin/Release/net9.0/PlDotNET."
         "runtimeconfig.json";
-    const char dll_path_suffix[] = "/bin/Release/net6.0/PlDotNET.dll";
+    const char dll_path_suffix[] = "/bin/Release/net9.0/PlDotNET.dll";
 
     SNPRINTF(path_config.prefix, MAXPGPATH, "%s", root_path);
     SNPRINTF(path_config.config_path, MAXPGPATH, "%s%s", root_path,

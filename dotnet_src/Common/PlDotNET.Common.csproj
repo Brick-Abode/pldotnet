@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <Authors>Brick Abode</Authors>
-    <Description>PlDotNET.Common contains the classes and methods that user can access through plcsharp or plfsharp.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <Description>PlDotNET.Common contains the classes and methods that user can access through
+      plcsharp or plfsharp.</Description>
+    <TargetFramework>net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

@@ -12,20 +12,20 @@ installed on your system:
 
 - [PostgreSQL](https://www.postgresql.org/) 10 or greater
   - Refer to the [PostgreSQL download
-  page](https://www.postgresql.org/download/) for instructions.
-- [.NET](https://learn.microsoft.com/en-us/dotnet/) 6.0 or greater
+    page](https://www.postgresql.org/download/) for instructions.
+- [.NET](https://learn.microsoft.com/en-us/dotnet/) 9.0 or greater
   - Refer to [Microsoft installation
-  page](https://learn.microsoft.com/en-us/dotnet/core/install/) for
-  instructions.
+    page](https://learn.microsoft.com/en-us/dotnet/core/install/) for
+    instructions.
 
-*pldotnet* also requires `libglib2.0` and `make`. You can install them
+_pldotnet_ also requires `libglib2.0` and `make`. You can install them
 using the following command:
 
 ```bash
 sudo apt install -y libglib2.0 make
 ```
 
-## 1.2. Installing *pldotnet*
+## 1.2. Installing _pldotnet_
 
 1- Download the Debian package for pldotnet from the Brick Abode website,
 selecting the package that corresponds to your version of PostgreSQL.
@@ -40,7 +40,7 @@ sudo dpkg -i postgres-*-pldotnet_0.9-1_amd64.deb
 
 To build Debian packages for pldotnet using Docker, you need to have
 `docker` and `docker-compose` installed on your system. Refer to
-the [Docker documentation]((https://docs.docker.com/desktop/)) for
+the [Docker documentation](<(https://docs.docker.com/desktop/)>) for
 installation instructions.
 
 Before building the packages, specify the version of PostgreSQL you are
@@ -142,6 +142,7 @@ After executing the tests, the terminal will display the results, indicating
 the success or failure of the tests.
 
 - All tests pass: a green message confirms that all tests have been successful.
+
   ```bash
   Passed!  - Failed:     0, Passed:   881, Skipped:     0, Total:   881, Duration: 27 s
   ```
@@ -208,7 +209,7 @@ Run the xUnit tests to ensure the pldotnet's functionality with C# and F# is
 intact. The commands are as follows:
 
 - For both C# and F# tests: This command runs all xUnit tests covering both
-C# and F# features.
+  C# and F# features.
 
   ```bash
   make pldotnet-tests
@@ -233,14 +234,14 @@ C# and F# features.
 While SQL tests in the pldotnet suite may not provide as detailed insights as
 xUnit tests, they are invaluable for illustrating potential use cases and
 serving as examples for the PostgreSQL community. Here's how to interpret and
- utilize the SQL test results effectively:
+utilize the SQL test results effectively:
 
 1. Direct Results: SQL tests primarily reveal discrepancies in expected versus
-  actual outcomes directly through assertion results, which are recorded in
-  a results table. This immediate feedback is useful for quick checks.
+   actual outcomes directly through assertion results, which are recorded in
+   a results table. This immediate feedback is useful for quick checks.
 2. Limited Diagnostics: Unlike xUnit tests, SQL tests do not inherently provide
-  detailed error messages or stack traces. Issues beyond simple assertion
-  failures require a more hands-on approach to diagnose.
+   detailed error messages or stack traces. Issues beyond simple assertion
+   failures require a more hands-on approach to diagnose.
 
 After the tests are executed, the results are tabulated and displayed in the
 terminal, as illustrated below:
@@ -277,7 +278,7 @@ For tests that fail due to reasons other than a mismatched expected result
 (e.g., compilation errors,runtime exceptions), further investigation is
 required. During the test execution, detailed logs are stored in an
 `automated_test_results` directory within the working directory. These files
- contain valuable information about the execution of each test.
+contain valuable information about the execution of each test.
 
 #### 1.5.2.2. Running the tests
 
@@ -285,7 +286,7 @@ Direct SQL tests provide a low-level examination of pldotnet's behavior with
 SQL operations. Execute these to run the tests in SQL:
 
 - For both C# and F# tests: Run all the tests written in SQL for both C#
-and F#.
+  and F#.
 
   ```bash
   make pldotnet-tests-sql

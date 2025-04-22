@@ -10,7 +10,7 @@ using System.Linq;
 public class IncreaseMacAddress8DllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.TestClass!increasemacaddress8'
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net9.0/CSharpTest.dll:TestDLLFunctions.TestClass!increasemacaddress8'
     ";
 
     public IncreaseMacAddress8DllTests()

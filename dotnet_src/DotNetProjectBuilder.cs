@@ -201,7 +201,7 @@ namespace PlDotNET
                 return string.Empty;
             }
 
-            string releasePath = Path.GetFullPath(this.DestinationProjectPath + $"/bin/Release/net6.0/");
+            string releasePath = Path.GetFullPath(this.DestinationProjectPath + $"/bin/Release/net9.0/");
             return releasePath + $"{this.ProjectName}.dll";
         }
 

@@ -10,7 +10,7 @@ using System.Linq;
 public class IncreaseInT8RangesDllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.TestClass!increaseint8ranges'
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net9.0/CSharpTest.dll:TestDLLFunctions.TestClass!increaseint8ranges'
     ";
 
     public IncreaseInT8RangesDllTests()

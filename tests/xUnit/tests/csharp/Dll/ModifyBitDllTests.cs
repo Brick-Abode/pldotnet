@@ -10,7 +10,7 @@ using System.Linq;
 public class ModifyBitDllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.TestClass!modifybit'
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net9.0/CSharpTest.dll:TestDLLFunctions.TestClass!modifybit'
     ";
 
     public ModifyBitDllTests()

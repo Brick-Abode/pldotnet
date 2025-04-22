@@ -75,7 +75,7 @@ static void *pldotnet_dlsym(void *handle, const char *symbol) {
 // Returns 0 on success, (other) on error
 static int pldotnet_GetHostFxrPath(char_t *buffer, size_t bufferSize) {
     FILE *out = popen(
-        "dpkg -L dotnet-hostfxr-6.0 | grep libhostfxr.so | head -1 | xargs "
+        "dpkg -L dotnet-hostfxr-9.0 | grep libhostfxr.so | head -1 | xargs "
         "dirname",
         "r");
     const char *aux = "/libhostfxr.so";

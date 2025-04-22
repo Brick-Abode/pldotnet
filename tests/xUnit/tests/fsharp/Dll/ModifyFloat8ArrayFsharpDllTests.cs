@@ -10,7 +10,7 @@ using System.Linq;
 public class ModifyFloat8ArrayFsharpDllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net6.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!modifyFloat8ArrayFSharp'
+'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net9.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!modifyFloat8ArrayFSharp'
     ";
 
     public ModifyFloat8ArrayFsharpDllTests()

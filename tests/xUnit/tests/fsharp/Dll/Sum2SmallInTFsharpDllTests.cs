@@ -10,7 +10,7 @@ using System.Linq;
 public class Sum2SmallInTFsharpDllTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net6.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!sum2SmallIntFSharp'
+'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net9.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!sum2SmallIntFSharp'
     ";
 
     public Sum2SmallInTFsharpDllTests()

@@ -15,16 +15,16 @@ add_dotnet: apt_update
 
 install_dotnet_deb: add_dotnet
 	echo "# ENVIRONMENT SETUP: running $@"
-	apt install -y dotnet-sdk-6.0
-	apt install -y dotnet-runtime-6.0
-	apt install -y dotnet-hostfxr-6.0
+	apt install -y dotnet-sdk-9.0
+	apt install -y dotnet-runtime-9.0
+	apt install -y dotnet-hostfxr-9.0
 	apt install -y debhelper
 
 install_dotnet_ubuntu: add_dotnet
 	echo "# ENVIRONMENT SETUP: running $@"
-	apt install -y dotnet-hostfxr-6.0=6.0.8-1
-	apt install -y dotnet-runtime-6.0=6.0.8-1
-	apt install -y dotnet-sdk-6.0=6.0.400-1
+	apt install -y dotnet-hostfxr-9.0=9.0.8-1
+	apt install -y dotnet-runtime-9.0=9.0.8-1
+	apt install -y dotnet-sdk-9.0=9.0.400-1
 
 install_requirements: apt_update
 	echo "# ENVIRONMENT SETUP: running $@"

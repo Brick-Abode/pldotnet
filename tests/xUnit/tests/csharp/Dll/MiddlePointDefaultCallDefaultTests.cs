@@ -10,7 +10,7 @@ using System.Linq;
 public class MiddlePointDefaultCallDefaultTests : PlDotNetTest
 {
     private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.OtherTests.TestClass!middlePointDefault'
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net9.0/CSharpTest.dll:TestDLLFunctions.OtherTests.TestClass!middlePointDefault'
     ";
 
     public MiddlePointDefaultCallDefaultTests()
