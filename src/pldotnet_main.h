@@ -16,6 +16,7 @@
 #ifndef PLDOTNET_MAIN_H_
 #define PLDOTNET_MAIN_H_
 
+#include <stddef.h>
 #include <postgres.h>
 #include <access/htup_details.h>
 #include <catalog/pg_proc.h>

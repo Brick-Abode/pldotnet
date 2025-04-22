@@ -16,6 +16,7 @@
 #ifndef PLDOTNET_CONVERSIONS_H_
 #define PLDOTNET_CONVERSIONS_H_
 
+#include <stddef.h>
 #include "pldotnet_main.h"
 #include <utils/rangetypes.h>
 

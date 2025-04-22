@@ -14,8 +14,8 @@ PLDOTNET_TEMPLATE_DIR = $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Templates
 
 # Linux support
 ifeq ($(UNAME), Linux)
-	DOTNET_HOSTDIR ?= $(shell dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
-	DOTNET_LIBDIR  ?= $(shell dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
+	DOTNET_HOSTDIR ?= $(shell dpkg -L dotnet-apphost-pack-9.0 | grep hostfxr.h | head -1 | xargs dirname)
+	DOTNET_LIBDIR  ?= $(shell dpkg -L dotnet-apphost-pack-9.0 | grep hostfxr.h | head -1 | xargs dirname)
 	DOTNET_HOSTLIB ?= -L$(DOTNET_LIBDIR) -lnethost -Wl,-rpath $(DOTNET_LIBDIR)
 	PLDOTNET_ENGINE_ROOT ?= /var/lib
 	PG_CONFIG = pg_config

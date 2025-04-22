@@ -21,6 +21,7 @@
  *
  */
 
+#include <stddef.h>
 #include <postgres.h>
 #include <executor/spi.h>
 

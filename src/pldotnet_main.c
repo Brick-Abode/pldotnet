@@ -938,8 +938,14 @@ static Datum pldotnet_CompileAndRunUserFunction(const FunctionCallInfo fcinfo,
                                           // find the enumerator in the cache
 
             // create and register the callback for garbage collection
-            cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
-                funcctx->multi_call_memory_ctx, sizeof(cb_data));
+            // For versions >= 17, the function call receives 3 arguments
+            #if PG_VERSION_NUM >= 170000
+                cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
+                    funcctx->multi_call_memory_ctx, sizeof(cb_data), false);
+            #else
+                cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
+                    funcctx->multi_call_memory_ctx, sizeof(cb_data));
+            #endif
 
             cbd->cb_record.arg = cbd;
             cbd->cb_record.func = srf_MemoryContextCallback;
