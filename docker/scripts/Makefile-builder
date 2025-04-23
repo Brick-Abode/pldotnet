@@ -22,9 +22,9 @@ install_dotnet_deb: add_dotnet
 
 install_dotnet_ubuntu: add_dotnet
 	echo "# ENVIRONMENT SETUP: running $@"
-	apt install -y dotnet-hostfxr-9.0=9.0.8-1
-	apt install -y dotnet-runtime-9.0=9.0.8-1
-	apt install -y dotnet-sdk-9.0=9.0.400-1
+	apt install -y dotnet-hostfxr-9.0
+	apt install -y dotnet-runtime-9.0
+	apt install -y dotnet-sdk-9.0
 
 install_requirements: apt_update
 	echo "# ENVIRONMENT SETUP: running $@"
