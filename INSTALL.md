@@ -108,6 +108,8 @@ command and specify the path to the package file:
 dpkg -i path/to/package.deb
 ```
 
+<!-- TODO Talk about "CREATE EXTENSION pldotnet;" -->
+
 ## 1.5. Conducting pldotnet Tests
 
 pldotnet includes comprehensive tests to verify the functionality of all
@@ -204,6 +206,8 @@ In case of a failure, the terminal provides detailed information about the natur
   ```
 
 #### 1.5.1.2. Running the tests
+
+<!-- TODO add DATABASE_CONNECTION_STRING info -->
 
 Run the xUnit tests to ensure the pldotnet's functionality with C# and F# is
 intact. The commands are as follows:
