@@ -96,7 +96,7 @@ clean container, you can use the following instructions:
 docker-compose run --rm pldotnet-build-arm bash
 
 # Install pldotnet inside the container
-dpkg -i debian/packages/postgresql-15-pldotnet_0.9-1_arm64.deb
+dpkg -i debian/packages/postgresql-17-pldotnet_0.99-rc1_amd64.deb
 ```
 
 ## 1.4. Installing the built packages
@@ -108,9 +108,28 @@ command and specify the path to the package file:
 dpkg -i path/to/package.deb
 ```
 
-<!-- TODO Talk about "CREATE EXTENSION pldotnet;" -->
+## 1.5. Creating the Extension
 
-## 1.5. Conducting pldotnet Tests
+After installing pldotnet, you need to create the extension in your
+PostgreSQL database. You can do this by running the following command
+in the PostgreSQL command line interface (psql):
+
+```sql
+CREATE EXTENSION pldotnet;
+```
+
+This command will create the pldotnet extension in your current
+database. You can verify that the extension has been created by
+running the following command:
+
+```sql
+SELECT * FROM pg_extension WHERE extname = 'pldotnet';
+```
+
+This should return a row with the name of the extension, its version,
+and other information.
+
+## 1.6. Conducting pldotnet Tests
 
 pldotnet includes comprehensive tests to verify the functionality of all
 implemented features and supported data types. These tests are categorized
@@ -122,9 +141,9 @@ to C# and F# languages, respectively.
 For convenience, pldotnet provides `make` targets to facilitate the execution
 of these tests:
 
-### 1.5.1. xUnit Tests
+### 1.6.1. xUnit Tests
 
-#### 1.5.1.1. Understanding tests results
+#### 1.6.1.1. Understanding tests results
 
 The xUnit testing framework is designed to provide comprehensive feedback on
 the pldotnet tests, pinpointing the exact step where a failure occurs.
@@ -205,9 +224,35 @@ In case of a failure, the terminal provides detailed information about the natur
       String expectedResult) in /app/pldotnet/tests/xUnit/tests/csharp/Integers/Sum2IntegerTests.cs:line 48
   ```
 
-#### 1.5.1.2. Running the tests
+#### 1.6.1.2. Environment variables
 
-<!-- TODO add DATABASE_CONNECTION_STRING info -->
+To run the tests, first you need to set the `DATABASE_CONNECTION_STRING`
+environment variable to the connection string of your PostgreSQL
+database. You can do this by running the following command in your
+terminal:
+
+```bash
+export DATABASE_CONNECTION_STRING="Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres"
+```
+
+Replace the values in the connection string with your own database
+credentials. Make sure to set this variable before running the tests.
+
+Alternatively, you can set the `DATABASE_CONNECTION_STRING` variable
+in your shell configuration file (e.g., `.bashrc`, `.zshrc`) to make
+it persistent across terminal sessions.
+
+If you prefer to set the variable only for the command you are running,
+you can do so by prefixing the command with the variable assignment:
+
+```bash
+DATABASE_CONNECTION_STRING="..." make pldotnet-tests
+```
+
+This will set the `DATABASE_CONNECTION_STRING` variable only for the
+duration of the command.
+
+#### 1.6.1.3. Running the tests
 
 Run the xUnit tests to ensure the pldotnet's functionality with C# and F# is
 intact. The commands are as follows:
@@ -231,9 +276,9 @@ intact. The commands are as follows:
   make fsharp-tests
   ```
 
-### 1.5.2. SQL Tests
+### 1.6.2. SQL Tests
 
-#### 1.5.2.1. Understanding tests results
+#### 1.6.2.1. Understanding tests results
 
 While SQL tests in the pldotnet suite may not provide as detailed insights as
 xUnit tests, they are invaluable for illustrating potential use cases and
@@ -284,7 +329,7 @@ required. During the test execution, detailed logs are stored in an
 `automated_test_results` directory within the working directory. These files
 contain valuable information about the execution of each test.
 
-#### 1.5.2.2. Running the tests
+#### 1.6.2.2. Running the tests
 
 Direct SQL tests provide a low-level examination of pldotnet's behavior with
 SQL operations. Execute these to run the tests in SQL:
