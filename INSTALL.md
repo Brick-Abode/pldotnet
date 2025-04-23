@@ -1,358 +1,249 @@
-# 1. Installation Guide
+# 📦 pldotnet Installation Guide
 
-This guide provides quick instructions for installing pldotnet
-and its dependencies. You can find more detailed instructions on
-how to install pldotnet and run verification tests in the [GitHub
-wiki](https://github.com/Brick-Abode/pldotnet/wiki/).
+This guide provides concise yet complete instructions for installing **pldotnet** and its dependencies. For advanced configurations and full troubleshooting, refer to our [GitHub Wiki](https://github.com/Brick-Abode/pldotnet/wiki/).
 
-## 1.1. Requirements
+---
 
-Before installing pldotnet, make sure that you have the following software
-installed on your system:
+## 1. Prerequisites
 
-- [PostgreSQL](https://www.postgresql.org/) 10 or greater
-  - Refer to the [PostgreSQL download
-    page](https://www.postgresql.org/download/) for instructions.
-- [.NET](https://learn.microsoft.com/en-us/dotnet/) 9.0 or greater
-  - Refer to [Microsoft installation
-    page](https://learn.microsoft.com/en-us/dotnet/core/install/) for
-    instructions.
+Ensure your system includes the following dependencies **before proceeding**:
 
-_pldotnet_ also requires `libglib2.0` and `make`. You can install them
-using the following command:
+### Required Software
+
+- **PostgreSQL** 10 or higher
+  👉 [Download PostgreSQL](https://www.postgresql.org/download/)
+
+- **.NET SDK** 9.0 or higher
+  👉 [Install .NET SDK](https://learn.microsoft.com/en-us/dotnet/core/install/)
+
+- **System Packages** for Debian-based Linux distributions:
 
 ```bash
 sudo apt install -y libglib2.0 make
 ```
 
-## 1.2. Installing _pldotnet_
+---
 
-1- Download the Debian package for pldotnet from the Brick Abode website,
-selecting the package that corresponds to your version of PostgreSQL.
+## 2. Installing _pldotnet_
 
-2- Install the package using the following command:
+### 2.1. Download the Package
+
+Visit the [Releases Page](https://github.com/Brick-Abode/pldotnet/releases) and download the `.deb` file that matches your installed version of PostgreSQL.
+
+### 2.2. Install the Package
 
 ```bash
-sudo dpkg -i postgres-*-pldotnet_0.9-1_amd64.deb
+sudo dpkg -i postgresql-*-pldotnet_0.99-rc1_amd64.deb
 ```
 
-## 1.3. Building Debian packages
+Be sure to replace the wildcard with your actual downloaded filename.
 
-To build Debian packages for pldotnet using Docker, you need to have
-`docker` and `docker-compose` installed on your system. Refer to
-the [Docker documentation](<(https://docs.docker.com/desktop/)>) for
-installation instructions.
+---
 
-Before building the packages, specify the version of PostgreSQL you are
-using in the `pldotnet/debian/pgversions` file.
+## 3. Building Debian Packages (Optional)
 
-To build the pldotnet packages, follow these steps:
+If you want to build the `.deb` packages manually using Docker:
+
+### 3.1. Requirements
+
+- `docker`
+- `docker-compose`
+
+👉 Follow the [Docker installation guide](https://docs.docker.com/desktop/) if you haven't installed it yet.
+
+### 3.2. Setup and Build
 
 ```bash
-# Clone the pldotnet repository:
+# Clone the repository
 git clone https://github.com/Brick-Abode/pldotnet.git
-
-# Change into the repository directory:
 cd pldotnet
 
 # Initialize submodules
 git submodule update --init --recursive
 
-# Create a docker container to build the packages
+# Specify PostgreSQL versions to target (add one per line)
+echo "15" > debian/pgversions
+
+# Build the package
 docker-compose up pldotnet-build
 ```
 
-The packages will be stored in the `pldotnet/debian/packages` directory.
-
-If you want to try out pldotnet before installing it on your system,
-you can use a Docker container by running the following commands:
+The generated `.deb` files will be available in:
 
 ```bash
-# Create a docker container and open the bash terminal
-docker-compose run --rm pldotnet-build bash
+debian/packages/
+```
 
-# Install pldotnet inside the container
+### 3.3. Try it in Docker (Sandboxed Testing)
+
+```bash
+docker-compose run --rm pldotnet-build bash
+# Then inside the container:
 dpkg -i debian/packages/postgres-15-pldotnet_0.9-1_amd64.deb
 ```
 
-### 1.3.1. Debian packages for ARM processors
+---
 
-To create pldotnet packages for installation on ARM processors,
-specify the version of PostgreSQL you are using in the
-`pldotnet/debian/pgversions-arm` file. Then, run the following command
-from the pldotnet directory:
+## 4. ARM Architecture Builds
+
+To build packages compatible with ARM systems:
+
+1. Specify PostgreSQL versions in `debian/pgversions-arm`.
+2. Execute the build:
 
 ```bash
-# Create a docker container to build the ARM packages
 docker-compose up pldotnet-build-arm
 ```
 
-After building the packages, they will be stored in the
-`pldotnet/debian/packages` directory. If you want to install them in a
-clean container, you can use the following instructions:
+3. Test and install in an isolated container:
 
 ```bash
-# Create a docker container and open the bash terminal
 docker-compose run --rm pldotnet-build-arm bash
-
-# Install pldotnet inside the container
+# Inside the container:
 dpkg -i debian/packages/postgresql-17-pldotnet_0.99-rc1_amd64.deb
 ```
 
-## 1.4. Installing the built packages
+---
 
-To install the pldotnet packages that you have built, use the `dpkg -i`
-command and specify the path to the package file:
+## 5. Installing Built Packages
+
+Use `dpkg` to install your local `.deb` build:
 
 ```bash
 dpkg -i path/to/package.deb
 ```
 
-## 1.5. Creating the Extension
+---
 
-After installing pldotnet, you need to create the extension in your
-PostgreSQL database. You can do this by running the following command
-in the PostgreSQL command line interface (psql):
+## 6. Creating the Extension
+
+After installation, enable the extension inside PostgreSQL:
 
 ```sql
 CREATE EXTENSION pldotnet;
 ```
 
-This command will create the pldotnet extension in your current
-database. You can verify that the extension has been created by
-running the following command:
+Confirm it's active:
 
 ```sql
 SELECT * FROM pg_extension WHERE extname = 'pldotnet';
 ```
 
-This should return a row with the name of the extension, its version,
-and other information.
+---
 
-## 1.6. Conducting pldotnet Tests
+## 7. Running Tests
 
-pldotnet includes comprehensive tests to verify the functionality of all
-implemented features and supported data types. These tests are categorized
-into two formats: xUnit tests utilizing the Npgsql library, and direct SQL
-tests. Explore the xUnit tests within the `tests/xUnit` directory and the
-SQL tests in the `tests/csharp` and `tests/fsharp` directories, corresponding
-to C# and F# languages, respectively.
+pldotnet includes two test formats:
 
-For convenience, pldotnet provides `make` targets to facilitate the execution
-of these tests:
+- **xUnit Tests**: Validate all C# and F# bindings.
+- **SQL Tests**: Direct PostgreSQL SQL-based assertions.
 
-### 1.6.1. xUnit Tests
+### 7.1. Environment Setup
 
-#### 1.6.1.1. Understanding tests results
-
-The xUnit testing framework is designed to provide comprehensive feedback on
-the pldotnet tests, pinpointing the exact step where a failure occurs.
-Understanding these results is crucial for debugging and enhancing the
-reliability of the pldotnet. Here's how to interpret the outcomes:
-
-There are three possible failure scenarios for a pldotnet tests:
-
-1.Function Creation Failure: This occurs when there are compilation errors
-during the function creation process.
-2.Function Execution Failure: This happens when an error is thrown during
-the execution of C# or F# functions.
-3.Assertion Error: This is identified when a function's actual return value
-does not match the expected outcome.
-
-After executing the tests, the terminal will display the results, indicating
-the success or failure of the tests.
-
-- All tests pass: a green message confirms that all tests have been successful.
-
-  ```bash
-  Passed!  - Failed:     0, Passed:   881, Skipped:     0, Total:   881, Duration: 27 s
-  ```
-
-- Some tests fail: a red message indicates the number of failed tests.
-
-  ```bash
-  Failed!  - Failed:     15, Passed:   866, Skipped:     0, Total:   881, Duration: 26 s
-  ```
-
-In case of a failure, the terminal provides detailed information about the nature and location of the issue:
-
-- Compiling generated code: `Failed to create function in .NET`
-
-  ```bash
-  Failed Sum2IntegerTests.TestSum2Integer(featureName: "c#-int4", testName: "sum2Integer1",
-    input: "32770, 100", expectedResult: "= INTEGER '32870'") [51 ms]
-  Error Message:
-   Failed to create function in .NET
-  Expected: True
-  Actual:   False
-    Stack Trace:
-      at PlDotNetTest.RunGenericTest(String featureName, String testName, String input,
-        String expectedResult) in /app/pldotnet/tests/xUnit/PlDotNetTest.cs:line 348
-      at Sum2IntegerTests.TestSum2Integer(String featureName, String testName, String input,
-        String expectedResult) in /app/pldotnet/tests/xUnit/tests/csharp/Integers/Sum2IntegerTests.cs:line 48
-  ```
-
-- Executing function: `Failed to execute the function`
-
-  ```bash
-  Failed Sum2IntegerTests.TestSum2Integer(featureName: "c#-int4", testName: "sum2Integer1",
-    input: "32770, 100", expectedResult: "= INTEGER '32870'") [52 ms]
-  Error Message:
-   Failed to execute the function.
-  Expected: True
-  Actual:   False
-    Stack Trace:
-      at PlDotNetTest.RunGenericTest(String featureName, String testName, String input,
-        String expectedResult) in /app/pldotnet/tests/xUnit/PlDotNetTest.cs:line 349
-      at Sum2IntegerTests.TestSum2Integer(String featureName, String testName, String input,
-        String expectedResult) in /app/pldotnet/tests/xUnit/tests/csharp/Integers/Sum2IntegerTests.cs:line 48
-  ```
-
-- Returned unexpected value: `Test did not return the expected value`
-
-  ```bash
-  Failed Sum2IntegerTests.TestSum2Integer(featureName: "c#-int4", testName: "sum2Integer1",
-  input: "32770, 100", expectedResult: "= INTEGER '3287'") [36 ms]
-  Error Message:
-   Test did not return the expected value.
-  Expected: True
-  Actual:   False
-    Stack Trace:
-      at PlDotNetTest.RunGenericTest(String featureName, String testName, String input,
-      String expectedResult) in /app/pldotnet/tests/xUnit/PlDotNetTest.cs:line 352
-      at Sum2IntegerTests.TestSum2Integer(String featureName, String testName, String input,
-      String expectedResult) in /app/pldotnet/tests/xUnit/tests/csharp/Integers/Sum2IntegerTests.cs:line 48
-  ```
-
-#### 1.6.1.2. Environment variables
-
-To run the tests, first you need to set the `DATABASE_CONNECTION_STRING`
-environment variable to the connection string of your PostgreSQL
-database. You can do this by running the following command in your
-terminal:
+Set your PostgreSQL connection string for test execution:
 
 ```bash
 export DATABASE_CONNECTION_STRING="Host=127.0.0.1;Port=5432;Username=postgres;Password=postgres;Database=postgres"
 ```
 
-Replace the values in the connection string with your own database
-credentials. Make sure to set this variable before running the tests.
-
-Alternatively, you can set the `DATABASE_CONNECTION_STRING` variable
-in your shell configuration file (e.g., `.bashrc`, `.zshrc`) to make
-it persistent across terminal sessions.
-
-If you prefer to set the variable only for the command you are running,
-you can do so by prefixing the command with the variable assignment:
+You can also prefix commands:
 
 ```bash
 DATABASE_CONNECTION_STRING="..." make pldotnet-tests
 ```
 
-This will set the `DATABASE_CONNECTION_STRING` variable only for the
-duration of the command.
+### 7.2. Running xUnit Tests
 
-#### 1.6.1.3. Running the tests
+#### 7.2.1. Commands
 
-Run the xUnit tests to ensure the pldotnet's functionality with C# and F# is
-intact. The commands are as follows:
+- All tests:
 
-- For both C# and F# tests: This command runs all xUnit tests covering both
-  C# and F# features.
+```bash
+make pldotnet-tests
+```
 
-  ```bash
-  make pldotnet-tests
-  ```
+- C# only:
 
-- For C# tests only: Use this to specifically test C# related features.
+```bash
+make csharp-tests
+```
 
-  ```bash
-    make csharp-tests
-  ```
+- F# only:
 
-- For F# tests only: This target runs the F# functionalities.
+```bash
+make fsharp-tests
+```
 
-  ```bash
-  make fsharp-tests
-  ```
+#### 7.2.2. Understanding Results
 
-### 1.6.2. SQL Tests
+- ✅ All pass:
 
-#### 1.6.2.1. Understanding tests results
+```bash
+Passed!  - Failed:     0, Passed:   881, Skipped:     0, Total:   881
+```
 
-While SQL tests in the pldotnet suite may not provide as detailed insights as
-xUnit tests, they are invaluable for illustrating potential use cases and
-serving as examples for the PostgreSQL community. Here's how to interpret and
-utilize the SQL test results effectively:
+- ❌ Some fail:
 
-1. Direct Results: SQL tests primarily reveal discrepancies in expected versus
-   actual outcomes directly through assertion results, which are recorded in
-   a results table. This immediate feedback is useful for quick checks.
-2. Limited Diagnostics: Unlike xUnit tests, SQL tests do not inherently provide
-   detailed error messages or stack traces. Issues beyond simple assertion
-   failures require a more hands-on approach to diagnose.
+```bash
+Failed!  - Failed:    15, Passed:   866, Skipped:     0, Total:   881
+```
 
-After the tests are executed, the results are tabulated and displayed in the
-terminal, as illustrated below:
+Failures are categorized:
 
-- Result Table: A table showing the feature, test name, and result (pass or fail)
-  for each test is printed. Here's a sample format:
+- **Compilation Error**: Function fails to compile
+- **Runtime Error**: Function throws at execution
+- **Assertion Error**: Output differs from expected
 
-  ```
-  | Feature       | Test Name             | Result |
-  |---------------|-----------------------|--------|
-  | c#-bit        | modifybit1            | t      |
-  | c#-bit-null   | modifybit2            | t      |
-  | c#-varbit     | modifyvarbit1         | t      |
-  | c#-varbit-null| modifyvarbit2         | t      |
-  | c#-varbit     | concatenatevarbit1    | t      |
-  | c#-varbit     | concatenatevarbit2    | t      |
-  ...
-  ...
-  ...
-  ```
+Each failure includes the failing test name, expected value, actual result, and stack trace.
 
-- Aggregated Results: Following the detailed table, a summarized count of
-  passed and failed tests is provided, offering a quick overview of the test
-  suite's health.
+### 7.3. Running SQL Tests
 
-  ```
-  | Result | Count |
-  |--------|-------|
-  | f      | 1     |
-  | t      | 996   |
-  ```
+#### 7.3.1. Commands
 
-For tests that fail due to reasons other than a mismatched expected result
-(e.g., compilation errors,runtime exceptions), further investigation is
-required. During the test execution, detailed logs are stored in an
-`automated_test_results` directory within the working directory. These files
-contain valuable information about the execution of each test.
+- All:
 
-#### 1.6.2.2. Running the tests
+```bash
+make pldotnet-tests-sql
+```
 
-Direct SQL tests provide a low-level examination of pldotnet's behavior with
-SQL operations. Execute these to run the tests in SQL:
+- C# only:
 
-- For both C# and F# tests: Run all the tests written in SQL for both C#
-  and F#.
+```bash
+make csharp-tests-sql
+```
 
-  ```bash
-  make pldotnet-tests-sql
-  ```
+- F# only:
 
-- For C# tests only: Run the C# tests in SQL.
+```bash
+make fsharp-tests-sql
+```
 
-  ```bash
-    make csharp-tests-sql
-  ```
+#### 7.3.2. Understanding Results
 
-- For F# tests only: Execute the F# tests written in SQL.
+SQL test output includes:
 
-  ```bash
-  make fsharp-tests-sql
-  ```
+- A **table** listing features, test names, and pass/fail status
+- A **summary** count of passed/failed cases
 
-Utilize these commands to ensure the robustness and reliability of pldotnet
-before deployment. For any issues or more detailed instructions, refer to the
-corresponding test directories or contact the support team.
+```
+| Feature       | Test Name             | Result |
+|---------------|-----------------------|--------|
+| c#-bit        | modifybit1            | t      |
+| c#-varbit     | concatenatevarbit2    | t      |
+...
+
+| Result | Count |
+|--------|-------|
+| t      | 996   |
+| f      | 1     |
+```
+
+Detailed logs are saved in:
+
+```bash
+automated_test_results/
+```
+
+---
+
+For advanced setup and full documentation, visit the [official wiki](https://github.com/Brick-Abode/pldotnet/wiki/).
