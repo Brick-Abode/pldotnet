@@ -79,7 +79,7 @@ debian/packages/
 ```bash
 docker-compose run --rm pldotnet-build bash
 # Then inside the container:
-dpkg -i debian/packages/postgres-15-pldotnet_0.9-1_amd64.deb
+dpkg -i debian/packages/postgresql-17-pldotnet_0.99-rc1_amd64.deb
 ```
 
 ---
@@ -100,7 +100,7 @@ docker-compose up pldotnet-build-arm
 ```bash
 docker-compose run --rm pldotnet-build-arm bash
 # Inside the container:
-dpkg -i debian/packages/postgresql-17-pldotnet_0.99-rc1_amd64.deb
+dpkg -i debian/packages/postgresql-17-pldotnet_0.99-rc1_arm64.deb
 ```
 
 ---
