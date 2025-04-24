@@ -5,12 +5,20 @@
 FROM ubuntu:25.04 AS base
 ARG DOTNET_VERSION=9.0
 ARG POSTGRES_VERSION=17
+ARG POSTGRES_PORT=5432
+ARG POSTGRES_PASSWORD=postgres
 
 ENV DOTNET_VERSION=$DOTNET_VERSION
 ENV POSTGRES_VERSION=$POSTGRES_VERSION
+ENV POSTGRES_PORT=$POSTGRES_PORT
+ENV POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+ENV DATABASE_CONNECTION_STRING="Host=127.0.0.1;Port=$POSTGRES_PORT;Username=postgres;Password=$POSTGRES_PASSWORD;Database=postgres"
 
 # Update apt
 RUN apt update && apt upgrade -y
+
+# Install make
+RUN apt install -y make
 
 # Install .NET SDK
 RUN apt install -y dotnet-sdk-$DOTNET_VERSION dotnet-runtime-$DOTNET_VERSION
@@ -28,7 +36,7 @@ RUN apt install -y libglib2.0-dev
 FROM base AS build
 
 ## Install builk dependencies
-RUN apt install -y devscripts build-essential lintian make
+RUN apt install -y devscripts build-essential lintian
 
 # Copy application source code
 WORKDIR /app
@@ -58,11 +66,14 @@ COPY --from=build /app/debian/packages/postgresql-$POSTGRES_VERSION-pldotnet_0.9
 
 # Install the application deb package
 RUN dpkg -i /app/debian/packages/postgresql-$POSTGRES_VERSION-pldotnet_0.99-rc1_amd64.deb
+
 # Remove the deb package after installation
 RUN rm -rf /app
 
 # Create the Extension on the DB
-RUN pg_ctlcluster $POSTGRES_VERSION main start && runuser -u postgres -- psql -c 'CREATE EXTENSION pldotnet;'
+RUN pg_ctlcluster $POSTGRES_VERSION main start \
+&& runuser -u postgres -- psql -c 'CREATE EXTENSION pldotnet;' \
+&& runuser -u postgres -- psql -c "ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';"
 
 # Create a Healthcheck to verify that PostgreSQL is running and the extension is installed
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \

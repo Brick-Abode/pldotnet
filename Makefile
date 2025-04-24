@@ -78,6 +78,10 @@ endif
 
 SHELL := /bin/bash
 
+#########
+# BUILD #
+#########
+
 .PHONY: build-clean
 build-clean:
 	rm -rf ../postgresql-*-pldotnet*deb ../pldotnet_*.build ../pldotnet_*.changes ../pldotnet_*.buildinfo
@@ -105,5 +109,37 @@ build:
 	  --output type=local,dest=./debian/packages \
 	  --build-arg DOTNET_VERSION=$$DOTNET_VERSION \
 	  --build-arg POSTGRES_VERSION=$$POSTGRES_VERSION \
-	  --build-arg POSTGRES_DB=$$POSTGRES_DB \
+	  --build-arg POSTGRES_PORT=$$POSTGRES_PORT \
+	  --build-arg POSTGRES_PASSWORD=$$POSTGRES_PASSWORD \
 	  .
+
+########
+# TEST #
+########
+
+# xUnit test directory
+XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
+# Command to run xUnit tests
+RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
+
+pre-tests-script:
+	dotnet build $(CURRENT_DIR)/tests/csharp/DotNetTestProject -c Release
+	dotnet build $(CURRENT_DIR)/tests/fsharp/DotNetTestProject -c Release
+	mkdir -p automated_test_results
+	find automated_test_results -mindepth 1 -delete
+	runuser -u $(DBUSER) -- psql -c 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);'
+
+.PHONY: pldotnet-tests
+test-local:
+	$(MAKE) pre-tests-script
+	$(RUN_XUNIT_TESTS)
+
+.PHONY: test-docker
+test-docker:
+	docker exec -it pldotnet-runtime mkdir -p /app/pldotnet
+	docker cp Makefile pldotnet-runtime:/app/pldotnet/Makefile
+	docker cp tests pldotnet-runtime:/app/pldotnet/tests
+	docker cp src pldotnet-runtime:/app/pldotnet/src
+	docker cp dotnet_src pldotnet-runtime:/app/pldotnet/dotnet_src
+	docker cp pldotnet--0.9.sql pldotnet-runtime:/app/pldotnet
+	docker exec -w "/app/pldotnet" -it pldotnet-runtime make test-local
