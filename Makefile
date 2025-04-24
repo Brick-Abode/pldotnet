@@ -78,6 +78,12 @@ endif
 
 SHELL := /bin/bash
 
+.PHONY: build-clean
+build-clean:
+	rm -rf ../postgresql-*-pldotnet*deb ../pldotnet_*.build ../pldotnet_*.changes ../pldotnet_*.buildinfo
+	rm -rf build-*
+	rm -rf debian/.debhelper debian/postgresql-*-pldotnet* debian/control debian/debhelper-build-stamp debian/files
+
 .PHONY: build-local
 build-local:
 	rm -f debian/packages/postgresql-*-pldotnet_*.deb
@@ -85,7 +91,7 @@ build-local:
 	debuild -b -uc -us --lintian-opts --suppress-tags=initial-upload-closes-no-bugs,custom-library-search-path --profile debian
 	mkdir -p debian/packages
 	cp ../postgresql-*-pldotnet_*.deb debian/packages/
-	rm -rf ../postgresql-*-pldotnet_*.deb
+	$(MAKE) build-clean
 
 .PHONY: build
 build:
