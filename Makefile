@@ -97,8 +97,8 @@ build-local:
 	cp ../postgresql-*-pldotnet_*.deb debian/packages/
 	$(MAKE) build-clean
 
-.PHONY: build
-build:
+.PHONY: build-docker
+build-docker:
 	@echo "[INFO] Loading environment from .env"
 	@set -a && \
 	. ./.env && \
@@ -122,6 +122,7 @@ XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
 # Command to run xUnit tests
 RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
 
+.PHONY: pre-tests-script
 pre-tests-script:
 	dotnet build $(CURRENT_DIR)/tests/csharp/DotNetTestProject -c Release
 	dotnet build $(CURRENT_DIR)/tests/fsharp/DotNetTestProject -c Release
@@ -129,7 +130,7 @@ pre-tests-script:
 	find automated_test_results -mindepth 1 -delete
 	runuser -u $(DBUSER) -- psql -c 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);'
 
-.PHONY: pldotnet-tests
+.PHONY: test-local
 test-local:
 	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS)
