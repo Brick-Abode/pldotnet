@@ -5,11 +5,9 @@
 FROM ubuntu:25.04 AS base
 ARG DOTNET_VERSION=9.0
 ARG POSTGRES_VERSION=17
-ARG POSTGRES_DB=postgres
 
 ENV DOTNET_VERSION=$DOTNET_VERSION
 ENV POSTGRES_VERSION=$POSTGRES_VERSION
-ENV POSTGRES_DB=$POSTGRES_DB
 
 # Update apt
 RUN apt update && apt upgrade -y
@@ -42,7 +40,8 @@ RUN make build-local
 #############
 # ARTIFACTS #
 #############
-# This image is used to store the artifacts
+# This image is used to store the artifacts which are outputted by the build stage.
+# It is used to copy the artifacts from the image to the user's local machine when calling `make build`.
 FROM scratch AS artifacts
 
 # Copy the built application from the build stage
@@ -63,11 +62,11 @@ RUN dpkg -i /app/debian/packages/postgresql-$POSTGRES_VERSION-pldotnet_0.99-rc1_
 RUN rm -rf /app
 
 # Create the Extension on the DB
-RUN pg_ctlcluster $POSTGRES_VERSION main start && runuser -u postgres -- psql -d $POSTGRES_DB -w -c 'CREATE EXTENSION pldotnet;'
+RUN pg_ctlcluster $POSTGRES_VERSION main start && runuser -u postgres -- psql -c 'CREATE EXTENSION pldotnet;'
 
 # Create a Healthcheck to verify that PostgreSQL is running and the extension is installed
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
-  CMD runuser -u postgres -- psql -d $POSTGRES_DB -tAc "SELECT extname FROM pg_extension WHERE extname = 'pldotnet';" | grep -q pldotnet || exit 1
+  CMD runuser -u postgres -- psql -tAc "SELECT extname FROM pg_extension WHERE extname = 'pldotnet';" | grep -q pldotnet || exit 1
 
 # Start the PostgreSQL service and tail the log file
 CMD ["/bin/bash", "-c", "pg_ctlcluster $POSTGRES_VERSION main start && tail -f /var/log/postgresql/postgresql-$POSTGRES_VERSION-main.log"]
