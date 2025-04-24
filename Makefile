@@ -1,5 +1,4 @@
 # Makefile for PL/.NET
-
 UNAME = $(shell uname)
 PYTHON ?= python3
 SED ?= sed
@@ -82,12 +81,14 @@ SHELL := /bin/bash
 # BUILD #
 #########
 
+# Cleans up built temporary files
 .PHONY: build-clean
 build-clean:
 	rm -rf ../postgresql-*-pldotnet*deb ../pldotnet_*.build ../pldotnet_*.changes ../pldotnet_*.buildinfo
 	rm -rf build-*
 	rm -rf debian/.debhelper debian/postgresql-*-pldotnet* debian/control debian/debhelper-build-stamp debian/files
 
+# Builds PL.NET in the local machine
 .PHONY: build-local
 build-local:
 	rm -f debian/packages/postgresql-*-pldotnet_*.deb
@@ -97,12 +98,19 @@ build-local:
 	cp ../postgresql-*-pldotnet_*.deb debian/packages/
 	$(MAKE) build-clean
 
+# Builds PL.NET in a Docker container
+# It also copies the built files to the local machine
+# Requires .env file with the following variables:
+# DOTNET_VERSION
+# POSTGRES_VERSION
+# POSTGRES_PORT
+# POSTGRES_PASSWORD
 .PHONY: build-docker
 build-docker:
 	@echo "[INFO] Loading environment from .env"
-	@set -a && \
-	. ./.env && \
-	set +a && \
+	set -a && \
+    . ./.env && \
+    set +a && \
 	echo "[INFO] Building with Docker buildx. .NET $$DOTNET_VERSION / PostgreSQL $$POSTGRES_VERSION" && \
 	docker buildx build \
 	  --target artifacts \
@@ -121,6 +129,11 @@ build-docker:
 XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
 # Command to run xUnit tests
 RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
+# Where to put the test files
+APP_DIR ?= /app/pldotnet
+# The name of the running PL/.NET container
+PLDOTNET_CONTAINER ?= pldotnet-runtime
+# Builds tests and prepares the database for running them
 
 .PHONY: pre-tests-script
 pre-tests-script:
@@ -130,17 +143,21 @@ pre-tests-script:
 	find automated_test_results -mindepth 1 -delete
 	runuser -u $(DBUSER) -- psql -c 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);'
 
+# Runs tests locally, on the current machine
 .PHONY: test-local
 test-local:
 	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS)
 
+# Runs tests in a running Docker container
+# Assumes that the container is running and named pldotnet-runtime,
+# as defined in the docker-compose.yml file.
 .PHONY: test-docker
 test-docker:
-	docker exec -it pldotnet-runtime mkdir -p /app/pldotnet
-	docker cp Makefile pldotnet-runtime:/app/pldotnet/Makefile
-	docker cp tests pldotnet-runtime:/app/pldotnet/tests
-	docker cp src pldotnet-runtime:/app/pldotnet/src
-	docker cp dotnet_src pldotnet-runtime:/app/pldotnet/dotnet_src
-	docker cp pldotnet--0.9.sql pldotnet-runtime:/app/pldotnet
-	docker exec -w "/app/pldotnet" -it pldotnet-runtime make test-local
+	docker exec -it ${PLDOTNET_CONTAINER} mkdir -p ${APP_DIR}
+	docker cp Makefile ${PLDOTNET_CONTAINER}:${APP_DIR}/Makefile
+	docker cp tests ${PLDOTNET_CONTAINER}:${APP_DIR}/tests
+	docker cp src ${PLDOTNET_CONTAINER}:${APP_DIR}/src
+	docker cp dotnet_src ${PLDOTNET_CONTAINER}:${APP_DIR}/dotnet_src
+	docker cp pldotnet--0.9.sql ${PLDOTNET_CONTAINER}:${APP_DIR}
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make test-local
