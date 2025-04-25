@@ -24,6 +24,8 @@ RUN apt install -y make
 RUN apt install -y dotnet-sdk-$DOTNET_VERSION dotnet-runtime-$DOTNET_VERSION
 
 # Install PostgreSQL
+RUN apt install -y postgresql-common
+RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
 RUN apt install -y postgresql-$POSTGRES_VERSION
 
 # Install dependencies
@@ -36,11 +38,14 @@ RUN apt install -y libglib2.0-dev
 FROM base AS build
 
 ## Install build dependencies
-RUN apt install -y devscripts build-essential lintian debhelper postgresql-server-dev-$POSTGRES_VERSION
+RUN apt install -y devscripts build-essential lintian debhelper postgresql-server-dev-all
 
 # Copy application source code
 WORKDIR /app
 COPY . .
+
+# Replace the content of debian/pgversions with the PostgreSQL version
+RUN echo $POSTGRES_VERSION > debian/pgversions
 
 # Build the application
 RUN make build-local

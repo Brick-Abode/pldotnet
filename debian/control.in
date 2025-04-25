@@ -2,7 +2,7 @@ Source: pldotnet
 Priority: optional
 Section: database
 Maintainer: Todd Lewis <tlewis@brickabode.com>
-Build-Depends: debhelper (>= 9), pkg-config, postgresql-server-dev-PGVERSION (>= PGVERSION~)
+Build-Depends: debhelper (>= 9), pkg-config, postgresql-server-dev-all (>= 158~)
 Standards-Version: 0.9
 Homepage: http://www.brickabode.com/pldotnet/
 
