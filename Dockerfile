@@ -24,7 +24,7 @@ RUN apt install -y make
 RUN apt install -y dotnet-sdk-$DOTNET_VERSION dotnet-runtime-$DOTNET_VERSION
 
 # Install PostgreSQL
-RUN apt install -y postgresql-$POSTGRES_VERSION debhelper postgresql-server-dev-all
+RUN apt install -y postgresql-$POSTGRES_VERSION
 
 # Install dependencies
 RUN apt install -y libglib2.0-dev
@@ -35,8 +35,8 @@ RUN apt install -y libglib2.0-dev
 # This image is used to build the application
 FROM base AS build
 
-## Install builk dependencies
-RUN apt install -y devscripts build-essential lintian
+## Install build dependencies
+RUN apt install -y devscripts build-essential lintian debhelper postgresql-server-dev-$POSTGRES_VERSION
 
 # Copy application source code
 WORKDIR /app
