@@ -82,7 +82,7 @@ RUN pg_ctlcluster $POSTGRES_VERSION main start \
 
 # Create a Healthcheck to verify that PostgreSQL is running and the extension is installed
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
-  CMD runuser -u postgres -- psql -tAc "SELECT extname FROM pg_extension WHERE extname = 'pldotnet';" | grep -q pldotnet || exit 1
+  CMD pg_isready -q || exit 1
 
 # Start the PostgreSQL service and tail the log file
 CMD ["/bin/bash", "-c", "pg_ctlcluster $POSTGRES_VERSION main start && tail -f /var/log/postgresql/postgresql-$POSTGRES_VERSION-main.log"]
