@@ -17,13 +17,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
+using Npgsql.Plugins;
 using NpgsqlTypes;
 using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
-    public static class DatumConversion
+    public class DatumConversion : IDatumConversion
     {
+        private DatumConversion()
+        {
+            DatumConversionProvider.Register(this);
+        }
+
+        public static readonly DatumConversion Instance = new DatumConversion();
+
         public static BoolHandler BoolHandlerObj = new ();
         public static ShortHandler ShortHandlerObj = new ();
         public static IntHandler IntHandlerObj = new ();
@@ -212,7 +220,7 @@ namespace PlDotNET.Handler
         /// <returns>
         /// Returns The TypeHandler name.
         /// </returns>
-        public static string GetTypeHandlerName(uint id)
+        public string GetTypeHandlerName(uint id)
         {
             switch (id)
             {
@@ -306,7 +314,7 @@ namespace PlDotNET.Handler
             }
         }
 
-        public static object InputValue(IntPtr datum, OID type, bool arrayAllowsNullElements = false)
+        public object InputValue(IntPtr datum, OID type, bool arrayAllowsNullElements = false)
         {
             return (object)type switch
             {
@@ -396,7 +404,7 @@ namespace PlDotNET.Handler
         }
 
 #nullable enable
-        public static object? InputNullableValue(IntPtr datum, OID type, bool isNull, bool arrayAllowsNullElements = false)
+        public object? InputNullableValue(IntPtr datum, OID type, bool isNull, bool arrayAllowsNullElements = false)
         {
             return (object)type switch
             {
@@ -487,7 +495,7 @@ namespace PlDotNET.Handler
 #nullable disable
 
 #nullable enable
-        public static IntPtr OutputNullableValue(OID type, object? value)
+        public IntPtr OutputNullableValue(OID type, object? value)
         {
             if (DBNull.Value.Equals(value))
             {
@@ -582,7 +590,7 @@ namespace PlDotNET.Handler
         }
 #nullable disable
 
-        public static Type GetFieldType(OID type)
+        public Type GetFieldType(OID type)
         {
             if (ArrayTypes.ContainsKey(type))
             {

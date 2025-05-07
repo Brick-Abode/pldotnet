@@ -221,12 +221,12 @@ namespace PlDotNET
 
             if ((OID)this.ReturnTypeId != OID.VOIDOID)
             {
-                allHandlers.Add(DatumConversion.GetTypeHandlerName(this.ReturnTypeId));
+                allHandlers.Add(DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId));
             }
 
             for (int i = 0; i < this.ParamTypes.Length; i++)
             {
-                allHandlers.Add(DatumConversion.GetTypeHandlerName(this.ParamTypes[i]));
+                allHandlers.Add(DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]));
             }
 
             return allHandlers.Distinct().ToList();
@@ -760,7 +760,7 @@ namespace PlDotNET
 
                 if (this.InputModes.Contains(paramMode))
                 {
-                    string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string null_input = this.SupportNullInput ? $", isnull[{i - skips}]" : string.Empty;
 
                     string inputMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ?
@@ -1003,7 +1003,7 @@ namespace PlDotNET
             {
                 sb.AppendLine($"// Handling normal function return (no INOUT/OUT arguments)");
                 string output_handler = DatumConversion.ArrayTypes.ContainsKey((OID)this.ReturnTypeId) ? "OutputNullableArray" : "OutputNullableValue";
-                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{output_handler}(result);");
+                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{output_handler}(result);");
                 sb.AppendLine($"OutputResult.SetDatumResult(resultDatum, result == null, output, 0, {this.ReturnTypeId});");
             }
             else if (this.NumOutputValues == 1)
@@ -1019,7 +1019,7 @@ namespace PlDotNET
                 }
 
                 sb.AppendLine($"// Handling single OUT return value `{outResultName}`, in slot {output_parameter_offset}");
-                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outHandler}({outResultName});");
+                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outHandler}({outResultName});");
                 sb.AppendLine($"OutputResult.SetDatumResult(resultDatum, {outResultName} == null, output, 0, {this.ReturnTypeId});");
             }
             else if (this.NumOutputValues > 1)
@@ -1036,7 +1036,7 @@ namespace PlDotNET
                         continue;
                     }
 
-                    string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     var outResultName = $"argument_{i}";
                     var outputHandler = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "OutputNullableArray" : "OutputNullableValue";
                     sb.AppendLine($"// Adding output-mode ({((char)this.ParamModes[i]).ToString()}) argument {i} for oid {this.ReturnTypeId}");
@@ -1279,12 +1279,12 @@ namespace PlDotNET
                 // Because F# is a functional language, it does not support INOUT or OUT arguments like C# does.
                 // Instead, IN and INOUT are treated as normal arguments, and INOUT and OUT get `output_{i}` variables
                 // to receive their return values.
-                string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                 string argType = (this.OutputModes.Contains(this.ParamModes[i]) || this.SupportNullInput) ? $"{this.DotnetTypes[i]}?" : this.DotnetTypes[i];
 
                 if (this.InputModes.Contains(this.ParamModes[i]))
                 {
-                    string handlerName = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string handlerName = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string null_input = this.SupportNullInput ? $", isnull[{i - skips}]" : string.Empty;
                     string inputMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ?
                         (this.SupportNullInput ? "InputNullableArray" : "InputArray") :
@@ -1378,7 +1378,7 @@ namespace PlDotNET
                 string isnull = ClassTypes.Contains(returnType) ? "Object.ReferenceEquals(result, null)" : "not result.HasValue";
                 sb.AppendLine($"// Handling normal function return (no INOUT/OUT arguments)");
 
-                string makeDatum = $"let resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outputHandler}(result)";
+                string makeDatum = $"let resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outputHandler}(result)";
                 sb.AppendLine(makeDatum);
                 string setDatum = $"OutputResult.SetDatumResult(resultDatum, {isnull}, output, 0, uint32 {this.ReturnTypeId})";
                 sb.AppendLine(setDatum);
@@ -1390,7 +1390,7 @@ namespace PlDotNET
             {
                 if (this.OutputModes.Contains(this.ParamModes[i]))
                 {
-                    string outputTypeHandler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string outputTypeHandler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string type = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "Array" : DatumConversion.SupportedTypesStr[(OID)this.ParamTypes[i]];
                     string returnType = EnsureFSharpType(type);
                     string outputHandlerMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "OutputNullableArray" : "OutputNullableValue";

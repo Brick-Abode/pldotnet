@@ -44,6 +44,7 @@
   <ItemGroup>
     <ProjectReference Include="npgsql\src\Npgsql\Npgsql.csproj" />
     <ProjectReference Include="npgsql\test\Npgsql.Tests\Npgsql.Tests.csproj" />
+    <ProjectReference Include="TypeHandlers\PlDotNET.Handlers.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="$(DefineConstants.Contains('ENABLE_FCS'))">
