@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\npgsql\src\Npgsql\NpgsqlTypes\NpgsqlTypes.csproj" />
-    <ProjectReference Include="..\npgsql\src\Npgsql\Npgsql.csproj" />
     <ProjectReference Include="..\Common\PlDotNET.Common.csproj" />
   </ItemGroup>
 

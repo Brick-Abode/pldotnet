@@ -17,9 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
-using Npgsql.Plugins;
 using NpgsqlTypes;
-using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {

@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using NpgsqlTypes;
 using PlDotNET.Common;
 using PlDotNET.Handler;
 
