@@ -44,6 +44,9 @@
   <ItemGroup>
     <ProjectReference Include="npgsql\src\Npgsql\Npgsql.csproj" />
     <ProjectReference Include="npgsql\test\Npgsql.Tests\Npgsql.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="TypeHandlers\PlDotNET.Handlers.csproj" />
   </ItemGroup>
 

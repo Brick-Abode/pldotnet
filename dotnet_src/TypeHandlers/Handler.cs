@@ -25,11 +25,6 @@ namespace PlDotNET.Handler
 {
     public class DatumConversion : IDatumConversion
     {
-        private DatumConversion()
-        {
-            DatumConversionProvider.Register(this);
-        }
-
         public static readonly DatumConversion Instance = new DatumConversion();
 
         public static BoolHandler BoolHandlerObj = new ();
@@ -213,6 +208,11 @@ namespace PlDotNET.Handler
             { OID.VOIDOID, "void" },
             { OID.RECORDOID, "Object?[]" },
         };
+
+        private DatumConversion()
+        {
+            DatumConversionProvider.Register(this);
+        }
 
         /// <summary>
         /// Returns the handler object NAME for the specified OID.
