@@ -21,4 +21,4 @@ services:
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-      - .:/app
+      - .:/app/pldotnet

@@ -80,9 +80,5 @@ RUN pg_ctlcluster $POSTGRES_VERSION main start \
 && runuser -u postgres -- psql -c 'CREATE EXTENSION pldotnet;' \
 && runuser -u postgres -- psql -c "ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';"
 
-# Create a Healthcheck to verify that PostgreSQL is running and the extension is installed
-HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
-  CMD pg_isready -q || exit 1
-
 # Start the PostgreSQL service and tail the log file
 CMD ["/bin/bash", "-c", "pg_ctlcluster $POSTGRES_VERSION main start && tail -f /var/log/postgresql/postgresql-$POSTGRES_VERSION-main.log"]
