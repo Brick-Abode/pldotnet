@@ -655,8 +655,13 @@ static void result_FromTuple(pldotnet_Result *result, HeapTuple tuple,
         attr = TupleDescAttr(desc, i);
 
         if (attr->attisdropped) continue;
-        if (attr->attgenerated && (!include_generated))
-            continue; /* don't include unless requested */
+
+        // In PG version < 12, there is no attgenerated field
+        // In PG version >= 12, attgenerated is true for generated columns
+        #if PG_VERSION_NUM >= 120000
+            if (attr->attgenerated && (!include_generated))
+                continue; /* don't include unless requested */
+        #endif
 
         datum = heap_getattr(tuple, i + 1, desc, &is_null);
 

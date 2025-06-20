@@ -18,6 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.FSharp.Core;
+using NpgsqlTypes;
 using PlDotNET.Common;
 
 namespace PlDotNET.Handler

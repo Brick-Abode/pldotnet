@@ -1,5 +1,4 @@
 # Makefile for PL/.NET
-
 UNAME = $(shell uname)
 PYTHON ?= python3
 SED ?= sed
@@ -76,156 +75,87 @@ ifeq ($(UNAME), Linux)
 	CP_CHOWN += && chown -R postgres $(PLDOTNET_ENGINE_ROOT)/PlDotNET
 endif
 
-pldotnet-install: pldotnet-uninstall install
-	$(CP_CHOWN)
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Common/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/TypeHandlers/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/npgsql/src/Npgsql/PlDotNET/*.cs
-	$(SED) -i 's/@PLDOTNET_TEMPLATE_DIR/$(shell echo $(PLDOTNET_TEMPLATE_DIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/CodeGenerator.cs
-	$(SED) -i 's/@PLDOTNET_TEMPLATE_DIR/$(shell echo $(PLDOTNET_TEMPLATE_DIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Engine.cs
-	$(BUILD_PLDOTNET_PROJECT)
+SHELL := /bin/bash
 
-pldotnet-uninstall: uninstall
-	rm -rf $(PLDOTNET_ENGINE_ROOT)/PlDotNET
+#########
+# BUILD #
+#########
 
-pldotnet-build-debian-packages:
-	$(MAKE) documentation
+# Cleans up built temporary files
+.PHONY: build-clean
+build-clean:
+	rm -rf ../postgresql-*-pldotnet*deb ../pldotnet_*.build ../pldotnet_*.changes ../pldotnet_*.buildinfo
+	rm -rf build-*
+	rm -rf debian/.debhelper debian/postgresql-*-pldotnet* debian/control debian/debhelper-build-stamp debian/files
+
+# Builds PL.NET in the local machine
+.PHONY: build-local
+build-local:
 	rm -f debian/packages/postgresql-*-pldotnet_*.deb
 	pg_buildext updatecontrol
 	debuild -b -uc -us --lintian-opts --suppress-tags=initial-upload-closes-no-bugs,custom-library-search-path --profile debian
 	mkdir -p debian/packages
 	cp ../postgresql-*-pldotnet_*.deb debian/packages/
-	rm -rf ../postgresql-*-pldotnet_*.deb
+	$(MAKE) build-clean
 
-cpplint:
-	cpplint --filter=-readability/casting,-build/include_subdir,-runtime/int,-runtime/printf,-build/header_guard src/*.c src/*.h
+# Builds PL.NET in a Docker container
+# It also copies the built files to the local machine
+# Requires .env file with the following variables:
+# DOTNET_VERSION
+# POSTGRES_VERSION
+# POSTGRES_PORT
+# POSTGRES_PASSWORD
+.PHONY: build-docker
+build-docker:
+	@echo "[INFO] Loading environment from .env"
+	set -a && \
+    . ./.env && \
+    set +a && \
+	echo "[INFO] Building with Docker buildx. .NET $$DOTNET_VERSION / PostgreSQL $$POSTGRES_VERSION" && \
+	docker buildx build \
+	  --target artifacts \
+	  --output type=local,dest=./debian/packages \
+	  --build-arg DOTNET_VERSION=$$DOTNET_VERSION \
+	  --build-arg POSTGRES_VERSION=$$POSTGRES_VERSION \
+	  --build-arg POSTGRES_PORT=$$POSTGRES_PORT \
+	  --build-arg POSTGRES_PASSWORD=$$POSTGRES_PASSWORD \
+	  .
 
-documentation:
-	doxygen docs/Doxyfile
-
-clean-docker:
-	# These might fail if there are no containers and/or images
-	# first you remove the containers
-	-docker ps -a|grep -v CREATED|awk '{print $$1}'| xargs docker rm
-	# second, you remove the images
-	-docker images|grep -v CREATED|awk '{print $$3}'| xargs docker rmi
-	rm -rf postgres-data
-
-pldotnet-ubuntu:
-	docker-compose run --rm pldotnet-ubuntu22 bash
-
-pldotnet-postgres:
-	$(MAKE) clean
-	$(MAKE)
-	$(MAKE) pldotnet-install
-	sudo -u $(DBUSER) psql
-
-build-package:
-	docker-compose up pldotnet-build | tee package-build-log.txt
-
-build-package-bash:
-	$(MAKE) build-package
-	docker-compose run --rm pldotnet-build bash
-
-build-package-arm:
-	docker-compose up pldotnet-build-arm | tee package-build-arm-log.txt
-
-build-package-arm-bash:
-	$(MAKE) build-package-arm
-	docker-compose run --rm pldotnet-build-arm bash
-
-pre-tests-script:
-	dotnet build $(CURRENT_DIR)/tests/csharp/DotNetTestProject -c Release
-	dotnet build $(CURRENT_DIR)/tests/fsharp/DotNetTestProject -c Release
-	mkdir -p automated_test_results
-	find automated_test_results -mindepth 1 -delete
-	echo 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);' | (sudo -u $(DBUSER)  psql)
-
-post-tests-script:
-	cd $(CURRENT_DIR)/tests/csharp/DotNetTestProject/ && rm -rf bin obj
-	cd $(CURRENT_DIR)/tests/fsharp/DotNetTestProject/ && rm -rf bin obj
-	cd $(CURRENT_DIR)/
-	echo 'SELECT FEATURE, TEST_NAME, RESULT from automated_test_results;' | (sudo -u $(DBUSER)  psql 2>&1) | tee automated_test_results/automated_test_results.out
-	echo 'SELECT RESULT, COUNT(1) FROM automated_test_results GROUP BY RESULT;' | (sudo -u $(DBUSER)  psql)
-
+########
+# TEST #
+########
 
 # xUnit test directory
 XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
 # Command to run xUnit tests
 RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
+# Where to put the test files
+APP_DIR ?= /app/pldotnet
+# The name of the running PL/.NET container
+PLDOTNET_CONTAINER ?= pldotnet-runtime
+# Builds tests and prepares the database for running them
 
-pldotnet-tests:
+.PHONY: pre-tests-script
+pre-tests-script:
+	dotnet build $(CURRENT_DIR)/tests/csharp/DotNetTestProject -c Release
+	dotnet build $(CURRENT_DIR)/tests/fsharp/DotNetTestProject -c Release
+	mkdir -p automated_test_results
+	find automated_test_results -mindepth 1 -delete
+	runuser -u $(DBUSER) -- psql -c 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);'
+
+# Runs tests locally, on the current machine
+.PHONY: test-local
+test-local:
 	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS)
 
-csharp-tests:
-	$(MAKE) pre-tests-script
-	$(RUN_XUNIT_TESTS) --filter Language=CSharp
+# Runs tests in a running Docker container
+# Assumes that the container is running and named pldotnet-runtime,
+# as defined in the docker-compose.yml file.
+.PHONY: test-docker
+test-docker:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make test-local
 
-fsharp-tests:
-	$(MAKE) pre-tests-script
-	$(RUN_XUNIT_TESTS) --filter Language=FSharp
-
-csharp-tests-cats:
-	for sqlfile in tests/csharp/*.sql; do \
-		echo "Running $$sqlfile"; \
-		cat $$sqlfile | (sudo -u postgres psql 2>&1) | tee automated_test_results/`basename $$sqlfile .sql`.out; \
-	done
-
-fsharp-tests-cats:
-	for sqlfile in tests/fsharp/*.sql; do \
-		echo "Running $$sqlfile"; \
-		cat $$sqlfile | (sudo -u postgres psql 2>&1) | tee automated_test_results/`basename $$sqlfile .sql`.out; \
-	done
-
-pldotnet-tests-sql:
-	$(MAKE) pre-tests-script
-	$(MAKE) csharp-tests-cats
-	$(MAKE) fsharp-tests-cats
-	$(MAKE) post-tests-script
-
-csharp-tests-sql:
-	$(MAKE) pre-tests-script
-	$(MAKE) csharp-tests-cats
-	$(MAKE) post-tests-script
-
-fsharp-tests-sql:
-	$(MAKE) pre-tests-script
-	$(MAKE) fsharp-tests-cats
-	$(MAKE) post-tests-script
-
-stress-test:
-	mkdir -p automated_test_results
-	find automated_test_results -mindepth 1 -delete
-	echo 'DROP TABLE automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);' | (sudo -u $(DBUSER) psql)
-	sudo bash tests/stress_test/stress_test.sh
-
-benchmark-tests:
-	mkdir -p automated_test_results
-	cat tests/benchmark/python/init-extension.sql | (sudo -u $(DBUSER) psql)
-	echo "ALTER DATABASE postgres SET pljava.libjvm_location TO '$$(sudo find /usr -name libjvm.so | head -n 1)';" | sudo -u $(DBUSER) psql
-	cat tests/benchmark/java/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/perl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/lua/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/tcl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/r/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/v8javascript/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cd $(CURRENT_DIR)/tests/benchmark/java/test-suite && mvn install && cd $(CURRENT_DIR)/
-	echo "select sqlj.install_jar('file:$(CURRENT_DIR)/tests/benchmark/java/test-suite/target/test-suite-1.0.0.jar', 'testsuite', true);" | (sudo -u $(DBUSER) psql)
-	echo "select sqlj.set_classpath('public', 'testsuite');" | (sudo -u $(DBUSER) psql)
-	bash tests/benchmark/benchmark.sh
-
-spi-tests:
-	$(MAKE) pre-tests-script
-	cat tests/csharp/testspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testspi.out
-	cat tests/fsharp/testfsspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testfsspi.out
-	$(MAKE) post-tests-script
-
-npgsql-tests:
-	bash tests/npgsql/run_tests.sh
-	$(PYTHON) tests/npgsql/process_npgsql_results.py
-
-npgsql-working-tests:
-	bash tests/npgsql/run_working_tests.sh
-	$(PYTHON) tests/npgsql/process_npgsql_results.py
+.PHONY: test-docker-sql
+test-docker-sql:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} ./tests/npgsql/run_tests.sh

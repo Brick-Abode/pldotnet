@@ -18,6 +18,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\dotnet_src\npgsql\src\Npgsql\NpgsqlTypes\NpgsqlTypes.csproj" />
+    <ProjectReference Include="..\..\..\dotnet_src\npgsql\src\Npgsql\Npgsql.csproj" />
   </ItemGroup>
 </Project>
