@@ -155,3 +155,7 @@ test-local:
 .PHONY: test-docker
 test-docker:
 	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make test-local
+
+.PHONY: test-docker-sql
+test-docker-sql:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} ./tests/npgsql/run_tests.sh

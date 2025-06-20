@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using NpgsqlTypes;
+using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
@@ -207,7 +208,7 @@ namespace PlDotNET.Handler
             { OID.RECORDOID, "Object?[]" },
         };
 
-        private DatumConversion()
+        public DatumConversion()
         {
             DatumConversionProvider.Register(this);
         }
