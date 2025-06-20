@@ -121,6 +121,19 @@ build-docker:
 	  --build-arg POSTGRES_PASSWORD=$$POSTGRES_PASSWORD \
 	  .
 
+
+#######
+# RUN #
+#######
+
+.PHONY: dev
+dev:
+	docker compose -f docker-compose-dev.yml up --build
+
+.PHONY: run
+dev:
+	docker compose up --build
+
 ########
 # TEST #
 ########
