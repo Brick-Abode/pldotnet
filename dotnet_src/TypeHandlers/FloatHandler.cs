@@ -14,7 +14,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {

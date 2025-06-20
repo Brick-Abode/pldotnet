@@ -20,3 +20,5 @@ services:
         POSTGRES_PORT: ${POSTGRES_PORT}
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - .:/app/pldotnet

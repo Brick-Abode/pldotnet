@@ -146,6 +146,7 @@ namespace PlDotNET
             trustedAssembliesPaths.Add(typeof(NullLoggerFactory).Assembly.Location);
             trustedAssembliesPaths.Add(typeof(NpgsqlCommand).Assembly.Location);
             trustedAssembliesPaths.Add(typeof(CommandTests).Assembly.Location);
+            trustedAssembliesPaths.Add(typeof(DatumConversion).Assembly.Location);
 
             #if ENABLE_FCS
             trustedAssembliesPaths.Add(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location);
@@ -180,6 +181,7 @@ namespace PlDotNET
                 "Npgsql.Tests",
                 "NpgsqlTypes",
                 "PlDotNET.Common",
+                "PlDotNET.Handlers",
             };
 
             List<PortableExecutableReference> references = trustedAssembliesPaths

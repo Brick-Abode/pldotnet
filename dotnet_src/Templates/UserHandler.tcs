@@ -24,6 +24,8 @@ namespace PlDotNET.UserSpace
         public static unsafe int CallUserFunction(List<IntPtr> arguments, IntPtr output, ulong call_id, int call_mode, bool[] isnull)
         {
             #line 1
+            DatumConversion DatumConversionObj = DatumConversion.Instance;
+            
             // $srf_begin$
 
             // $create_arguments$

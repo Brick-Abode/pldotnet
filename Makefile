@@ -154,10 +154,8 @@ test-local:
 # as defined in the docker-compose.yml file.
 .PHONY: test-docker
 test-docker:
-	docker exec -it ${PLDOTNET_CONTAINER} mkdir -p ${APP_DIR}
-	docker cp Makefile ${PLDOTNET_CONTAINER}:${APP_DIR}/Makefile
-	docker cp tests ${PLDOTNET_CONTAINER}:${APP_DIR}/tests
-	docker cp src ${PLDOTNET_CONTAINER}:${APP_DIR}/src
-	docker cp dotnet_src ${PLDOTNET_CONTAINER}:${APP_DIR}/dotnet_src
-	docker cp pldotnet--0.9.sql ${PLDOTNET_CONTAINER}:${APP_DIR}
 	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make test-local
+
+.PHONY: test-docker-sql
+test-docker-sql:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} ./tests/npgsql/run_tests.sh

@@ -661,3 +661,4 @@ $RECYCLE.BIN/
 
 .vscode
 .env
+tests/npgsql/sql

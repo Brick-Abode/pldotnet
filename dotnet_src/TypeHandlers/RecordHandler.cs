@@ -120,7 +120,7 @@ namespace PlDotNET.Handler
             }
 
             OID oid = (OID)NpgsqlHelper.FindOid(dbt);
-            IntPtr datum = DatumConversion.OutputNullableValue(oid, obj);
+            IntPtr datum = DatumConversion.Instance.OutputNullableValue(oid, obj);
 
             return (datum, oid);
         }
@@ -149,7 +149,7 @@ namespace PlDotNET.Handler
 
             for (int i = 0; i < len; i++)
             {
-                objects[i] = nullmap[i] != 0 ? null! : DatumConversion.InputValue(datums[i], oids[i], true);
+                objects[i] = nullmap[i] != 0 ? null! : DatumConversion.Instance.InputValue(datums[i], oids[i], true);
             }
 
             return objects;
@@ -188,7 +188,7 @@ namespace PlDotNET.Handler
                 }
 
                 // We use the null-forgiving operator because `null` is correct here.
-                objects[i] = is_null ? null! : DatumConversion.InputValue(datum, oid, true);
+                objects[i] = is_null ? null! : DatumConversion.Instance.InputValue(datum, oid, true);
             }
 
             return objects;
