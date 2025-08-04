@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <RuleSet Name="StyleCop.Analyzers rules with default action" Description="StyleCop.Analyzers with default action. Rules with IsEnabledByDefault = false are disabled." ToolsVersion="14.0">
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.SpecialRules">
-        <Rule Id="SA0001"  Action="None" />          <!-- XML comment analysis disabled -->
+        <Rule Id="SA0001"  Action="None" />             <!-- XML comment analysis disabled -->
         <Rule Id="SA0002"  Action="Warning" />          <!-- Invalid settings file -->
     </Rules>
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.SpacingRules">
@@ -15,8 +15,8 @@
         <Rule Id="SA1007"  Action="Warning" />          <!-- Operator keyword should be followed by space -->
         <Rule Id="SA1008"  Action="Warning" />          <!-- Opening parenthesis should be spaced correctly -->
         <Rule Id="SA1009"  Action="Warning" />          <!-- Closing parenthesis should be spaced correctly -->
-        <Rule Id="SA1010"  Action="Warning" />          <!-- Opening square brackets should be spaced correctly -->
-        <Rule Id="SA1011"  Action="None" />          <!-- Closing square brackets should be spaced correctly -->
+        <Rule Id="SA1010"  Action="None" />             <!-- Opening square brackets should be spaced correctly -->
+        <Rule Id="SA1011"  Action="None" />             <!-- Closing square brackets should be spaced correctly -->
         <Rule Id="SA1012"  Action="Warning" />          <!-- Opening braces should be spaced correctly -->
         <Rule Id="SA1013"  Action="Warning" />          <!-- Closing braces should be spaced correctly -->
         <Rule Id="SA1014"  Action="Warning" />          <!-- Opening generic brackets should be spaced correctly -->
@@ -38,7 +38,7 @@
 
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.ReadabilityRules">
         <Rule Id="SA1100"  Action="Warning" />          <!-- Do not prefix calls with base unless local implementation exists -->
-        <Rule Id="SA1101"  Action="None" />          <!-- Prefix local calls with this -->
+        <Rule Id="SA1101"  Action="None" />             <!-- Prefix local calls with this -->
         <Rule Id="SA1102"  Action="Warning" />          <!-- Query clause should follow previous clause -->
         <Rule Id="SA1103"  Action="Warning" />          <!-- Query clauses should be on separate lines or all on one line -->
         <Rule Id="SA1104"  Action="Warning" />          <!-- Query clause should begin on new line when previous clause spans multiple lines -->
@@ -79,7 +79,7 @@
     </Rules>
 
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.OrderingRules">
-        <Rule Id="SA1200"  Action="None" />          <!-- Using directives should be placed correctly -->
+        <Rule Id="SA1200"  Action="None" />             <!-- Using directives should be placed correctly -->
         <Rule Id="SA1201"  Action="Warning" />          <!-- Elements should appear in the correct order -->
         <Rule Id="SA1202"  Action="Warning" />          <!-- Elements should be ordered by access -->
         <Rule Id="SA1203"  Action="Warning" />          <!-- Constants should appear before fields -->
@@ -99,7 +99,7 @@
     </Rules>
 
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.NamingRules">
-        <Rule Id="SA1300"  Action="None" />          <!-- Element should begin with upper-case letter -->
+        <Rule Id="SA1300"  Action="None" />             <!-- Element should begin with upper-case letter -->
         <Rule Id="SA1301"  Action="None" />             <!-- Element should begin with lower-case letter -->
         <Rule Id="SA1302"  Action="Warning" />          <!-- Interface names should begin with I -->
         <Rule Id="SA1303"  Action="Warning" />          <!-- Const field names should begin with upper-case letter -->
@@ -121,11 +121,11 @@
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.MaintainabilityRules">
         <Rule Id="SA1119"  Action="Warning" />          <!-- Statement should not use unnecessary parenthesis -->
         <Rule Id="SA1400"  Action="Warning" />          <!-- Access modifier should be declared -->
-        <Rule Id="SA1401"  Action="None" />          <!-- Fields should be private -->
-        <Rule Id="SA1402"  Action="None" />          <!-- File may only contain a single type -->
+        <Rule Id="SA1401"  Action="None" />             <!-- Fields should be private -->
+        <Rule Id="SA1402"  Action="None" />             <!-- File may only contain a single type -->
         <Rule Id="SA1403"  Action="Warning" />          <!-- File may only contain a single namespace -->
         <Rule Id="SA1404"  Action="Warning" />          <!-- Code analysis suppression should have justification -->
-        <Rule Id="SA1405"  Action="None" />          <!-- Debug.Assert should provide message text -->
+        <Rule Id="SA1405"  Action="None" />             <!-- Debug.Assert should provide message text -->
         <Rule Id="SA1406"  Action="Warning" />          <!-- Debug.Fail should provide message text -->
         <Rule Id="SA1407"  Action="Warning" />          <!-- Arithmetic expressions should declare precedence -->
         <Rule Id="SA1408"  Action="Warning" />          <!-- Conditional expressions should declare precedence -->
@@ -163,7 +163,7 @@
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers.DocumentationRules">
         <Rule Id="SA1600"  Action="Warning" />          <!-- Elements should be documented -->
         <Rule Id="SA1601"  Action="Warning" />          <!-- Partial elements should be documented -->
-        <Rule Id="SA1602"  Action="Warning" />          <!-- Enumeration items should be documented -->
+        <Rule Id="SA1602"  Action="None" />             <!-- Enumeration items should be documented -->
         <Rule Id="SA1603"  Action="None" />             <!-- Documentation should contain valid XML -->
         <Rule Id="SA1604"  Action="Warning" />          <!-- Element documentation should have summary -->
         <Rule Id="SA1605"  Action="Warning" />          <!-- Partial element documentation should have summary -->
@@ -176,7 +176,7 @@
         <Rule Id="SA1612"  Action="Warning" />          <!-- Element parameter documentation should match element parameters -->
         <Rule Id="SA1613"  Action="Warning" />          <!-- Element parameter documentation should declare parameter name -->
         <Rule Id="SA1614"  Action="Warning" />          <!-- Element parameter documentation should have text -->
-        <Rule Id="SA1615"  Action="None" />          <!-- Element return value should be documented -->
+        <Rule Id="SA1615"  Action="None" />             <!-- Element return value should be documented -->
         <Rule Id="SA1616"  Action="Warning" />          <!-- Element return value documentation should have text -->
         <Rule Id="SA1617"  Action="Warning" />          <!-- Void return value should not be documented -->
         <Rule Id="SA1618"  Action="Warning" />          <!-- Generic type parameters should be documented -->
@@ -194,15 +194,15 @@
         <Rule Id="SA1630"  Action="None" />             <!-- Documentation text should contain whitespace -->
         <Rule Id="SA1631"  Action="None" />             <!-- Documentation should meet character percentage -->
         <Rule Id="SA1632"  Action="None" />             <!-- Documentation text should meet minimum character length -->
-        <Rule Id="SA1633"  Action="None" />          <!-- File should have header -->
-        <Rule Id="SA1634"  Action="None" />          <!-- File header should show copyright -->
-        <Rule Id="SA1635"  Action="None" />          <!-- File header should have copyright text -->
-        <Rule Id="SA1636"  Action="None" />          <!-- File header copyright text should match -->
-        <Rule Id="SA1637"  Action="None" />          <!-- File header should contain file name -->
-        <Rule Id="SA1638"  Action="None" />          <!-- File header file name documentation should match file name -->
-        <Rule Id="SA1639"  Action="None" />          <!-- File header should have summary -->
-        <Rule Id="SA1640"  Action="None" />          <!-- File header should have valid company text -->
-        <Rule Id="SA1641"  Action="None" />          <!-- File header company name text should match -->
+        <Rule Id="SA1633"  Action="None" />             <!-- File should have header -->
+        <Rule Id="SA1634"  Action="None" />             <!-- File header should show copyright -->
+        <Rule Id="SA1635"  Action="None" />             <!-- File header should have copyright text -->
+        <Rule Id="SA1636"  Action="None" />             <!-- File header copyright text should match -->
+        <Rule Id="SA1637"  Action="None" />             <!-- File header should contain file name -->
+        <Rule Id="SA1638"  Action="None" />             <!-- File header file name documentation should match file name -->
+        <Rule Id="SA1639"  Action="None" />             <!-- File header should have summary -->
+        <Rule Id="SA1640"  Action="None" />             <!-- File header should have valid company text -->
+        <Rule Id="SA1641"  Action="None" />             <!-- File header company name text should match -->
         <Rule Id="SA1642"  Action="Warning" />          <!-- Constructor summary documentation should begin with standard text -->
         <Rule Id="SA1643"  Action="Warning" />          <!-- Destructor summary documentation should begin with standard text -->
         <Rule Id="SA1644"  Action="None" />             <!-- Documentation headers should not contain blank lines -->
@@ -210,7 +210,7 @@
         <Rule Id="SA1646"  Action="None" />             <!-- Included documentation XPath does not exist -->
         <Rule Id="SA1647"  Action="None" />             <!-- Include node does not contain valid file and path -->
         <Rule Id="SA1648"  Action="Warning" />          <!-- Inheritdoc should be used with inheriting class -->
-        <Rule Id="SA1649"  Action="None" />          <!-- File name should match first type name -->
+        <Rule Id="SA1649"  Action="None" />             <!-- File name should match first type name -->
         <Rule Id="SA1650"  Action="None" />             <!-- Element documentation should be spelled correctly -->
         <Rule Id="SA1651"  Action="Warning" />          <!-- Do not use placeholder elements -->
     </Rules>

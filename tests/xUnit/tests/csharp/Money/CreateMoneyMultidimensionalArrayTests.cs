@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Money")]
-public class CreateMoneyMultidimensionalArrayTests : PlDotNetTest
+public abstract class BaseCreateMoneyMultidimensionalArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-decimal objects_value = 3720368547758.08M;
-decimal?[, ,] three_dimensional_array = new decimal?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
-return three_dimensional_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateMoneyMultidimensionalArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateMoneyMultidimensionalArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateMoneyMultidimensionalArray",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "MONEY[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateMoneyMultidimensionalArray", Arguments = new List<FunctionArgument> { }, ReturnType = "MONEY[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-money-null-3array-arraynull", "CreateMoneyMultidimensionalArray1", "", "= ARRAY[[[3720368547758.08::MONEY, 3720368547758.08::MONEY], [null::MONEY, null::MONEY]], [[3720368547758.08::MONEY, null::MONEY], [3720368547758.08::MONEY, 3720368547758.08::MONEY]]]" },
-        };
+        return new object[][] { new object[] { "c#-money-null-3array-arraynull", "CreateMoneyMultidimensionalArray1", "", "= ARRAY[[[3720368547758.08::MONEY, 3720368547758.08::MONEY], [null::MONEY, null::MONEY]], [[3720368547758.08::MONEY, null::MONEY], [3720368547758.08::MONEY, 3720368547758.08::MONEY]]]" }, };
     }
 
     [Theory]
@@ -42,4 +26,16 @@ return three_dimensional_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Money")]
+public class CreateMoneyMultidimensionalArrayTestsCSharp : BaseCreateMoneyMultidimensionalArrayTests
+{
+    protected override string FunctionBody => @"
+decimal objects_value = 3720368547758.08M;
+decimal?[, ,] three_dimensional_array = new decimal?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
+return three_dimensional_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

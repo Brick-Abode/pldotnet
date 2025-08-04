@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "DateTime")]
-public class CreateIntervalMultidimensionalArrayFsharpTests : PlDotNetTest
+public abstract class BaseCreateIntervalMultidimensionalArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let objects_value = NpgsqlInterval(10, 33, 900000000)
-let arr = Array.CreateInstance(typeof<NpgsqlInterval>, 1, 1, 1)
-arr.SetValue(objects_value, 0, 0, 0)
-arr
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateIntervalMultidimensionalArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateIntervalMultidimensionalArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateIntervalMultidimensionalArrayFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "INTERVAL[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateIntervalMultidimensionalArrayFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "INTERVAL[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-interval-3array", "CreateIntervalMultidimensionalArrayFSharp", "", "= ARRAY[[[INTERVAL '10 months 33 days 15 minutes']]]" },
-        };
+        return new object[][] { new object[] { "f#-interval-3array", "CreateIntervalMultidimensionalArrayFSharp", "", "= ARRAY[[[INTERVAL '10 months 33 days 15 minutes']]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,17 @@ arr
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "DateTime")]
+public class CreateIntervalMultidimensionalArrayFsharpTestsFSharp : BaseCreateIntervalMultidimensionalArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+let objects_value = NpgsqlInterval(10, 33, 900000000)
+let arr = Array.CreateInstance(typeof<NpgsqlInterval>, 1, 1, 1)
+arr.SetValue(objects_value, 0, 0, 0)
+arr
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseBoxSTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseBoxSTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseBoxS", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "BOX[]") }, ReturnType = "BOX[]", Body = FunctionBody, Language = Language, IsStrict = true, CastFunctionAs = "TEXT", };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-box-null-1array", "IncreaseBoxs1", "ARRAY[BOX(POINT(0.0,1.0),POINT(5.0,3.0)), BOX(POINT(-5.0,4.5),POINT(6.7,12.3)), null::BOX, BOX(POINT(0.0,1.0),POINT(4.7,9.2))]", "= CAST(ARRAY[BOX(POINT(1.0,2.0),POINT(6.0,4.0)), BOX(POINT(-4.0,5.5),POINT(7.7,13.3)), null::BOX, BOX(POINT(1.0,2.0),POINT(5.7,10.2))] AS TEXT)" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseBoxS(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Geometric")]
-public class IncreaseBoxSTests : PlDotNetTest
+public class IncreaseBoxSTestsCSharp : BaseIncreaseBoxSTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,38 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseBoxSTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseBoxS",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "BOX[]") },
-            ReturnType = "BOX[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-            CastFunctionAs = "TEXT",
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] {
-                "c#-box-null-1array",
-                "IncreaseBoxs1",
-                "ARRAY[BOX(POINT(0.0,1.0),POINT(5.0,3.0)), BOX(POINT(-5.0,4.5),POINT(6.7,12.3)), null::BOX, BOX(POINT(0.0,1.0),POINT(4.7,9.2))]",
-                "= CAST(ARRAY[BOX(POINT(1.0,2.0),POINT(6.0,4.0)), BOX(POINT(-4.0,5.5),POINT(7.7,13.3)), null::BOX, BOX(POINT(1.0,2.0),POINT(5.7,10.2))] AS TEXT)"
-            },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseBoxS(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

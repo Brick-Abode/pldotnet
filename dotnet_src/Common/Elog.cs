@@ -7,11 +7,12 @@ namespace PlDotNET.Common
     /// <summary>
     /// A simple class used to report messages in PostgreSQL.
     /// </summary>
-    public class Elog
+    public static partial class Elog
     {
         /// <summary>
         /// Reports a log message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Debug(string message)
         {
             pldotnet_Elog(14, ConvertUTF16ToUTF8(message));
@@ -20,6 +21,7 @@ namespace PlDotNET.Common
         /// <summary>
         /// Reports a log message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Log(string message)
         {
             pldotnet_Elog(15, ConvertUTF16ToUTF8(message));
@@ -28,6 +30,7 @@ namespace PlDotNET.Common
         /// <summary>
         /// Reports an information message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Info(string message)
         {
             pldotnet_Elog(17, ConvertUTF16ToUTF8(message));
@@ -36,6 +39,7 @@ namespace PlDotNET.Common
         /// <summary>
         /// Reports a notice message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Notice(string message)
         {
             pldotnet_Elog(18, ConvertUTF16ToUTF8(message));
@@ -44,6 +48,7 @@ namespace PlDotNET.Common
         /// <summary>
         /// Reports a warning message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Warning(string message)
         {
             pldotnet_Elog(19, ConvertUTF16ToUTF8(message));
@@ -52,6 +57,7 @@ namespace PlDotNET.Common
         /// <summary>
         /// Reports an error message in PostgreSQL.
         /// </summary>
+        /// <param name="message">The message to log.</param>
         public static void Error(string message)
         {
             throw new Exception(message);
@@ -78,7 +84,9 @@ namespace PlDotNET.Common
         /// C function declared in pldotnet_main.h.
         /// See ::pldotnet_Elog().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        private static extern void pldotnet_Elog(int level, string nessage);
+        /// <param name="level">The log level (e.g., DEBUG, LOG, INFO, NOTICE, WARNING).</param>
+        /// <param name="nessage">The message to log, in UTF-8 format.
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so", StringMarshalling = StringMarshalling.Utf8)]
+        private static partial void pldotnet_Elog(int level, string nessage);
     }
 }

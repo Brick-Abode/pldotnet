@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "InOut")]
-public class InOutBasic1Tests : PlDotNetTest
+public abstract class BaseInOutBasic1Tests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-argument_0 = 1;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public InOutBasic1Tests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseInOutBasic1Tests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "InOutBasic1",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("OUT argument_0", "INT") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "InOutBasic1", Arguments = new List<FunctionArgument> { new FunctionArgument("OUT argument_0", "INT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-inout-basic-1", "inout_basic_1", "", "= 1" },
-        };
+        return new object[][] { new object[] { "c#-inout-basic-1", "inout_basic_1", "", "= 1" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ argument_0 = 1;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "InOut")]
+public class InOutBasic1TestsCSharp : BaseInOutBasic1Tests
+{
+    protected override string FunctionBody => @"
+argument_0 = 1;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

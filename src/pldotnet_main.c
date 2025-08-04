@@ -14,6 +14,9 @@
  */
 
 #include "pldotnet_main.h"
+#include <stdio.h>
+#include "postgres.h"
+#include "utils/guc.h"
 
 #define ASSERT(x)                                                        \
     if (!(x)) {                                                          \
@@ -363,6 +366,14 @@ void pldotnet_FreeResult(struct pldotnet_Result *r);
  * START: implementing functions
  */
 
+const char* pldotnet_GetPostgresSetting(const char *settingName) {
+    const char *setting_name;
+
+    setting_name = GetConfigOption(settingName, true, false);
+
+    return setting_name;
+}
+
 int pldotnet_GetResultLength(pldotnet_Result *output) { return output->length; }
 
 int pldotnet_GetResult(pldotnet_Result *output, int offset, Datum *value,
@@ -470,10 +481,16 @@ Datum plfsharp_validator(PG_FUNCTION_ARGS) {
 }
 
 bool pldotnet_BuildPaths(void) {
-    const char json_path_suffix[] =
-        "/bin/Release/net6.0/PlDotNET."
-        "runtimeconfig.json";
-    const char dll_path_suffix[] = "/bin/Release/net6.0/PlDotNET.dll";
+    char json_path_suffix[256];
+    char dll_path_suffix[256];
+
+    snprintf(json_path_suffix, sizeof(json_path_suffix),
+        "/bin/Release/net%s/PlDotNET.runtimeconfig.json",
+        DOTNET_VERSION);
+
+    snprintf(dll_path_suffix, sizeof(dll_path_suffix),
+        "/bin/Release/net%s/PlDotNET.dll",
+        DOTNET_VERSION);
 
     SNPRINTF(path_config.prefix, MAXPGPATH, "%s", root_path);
     SNPRINTF(path_config.config_path, MAXPGPATH, "%s%s", root_path,
@@ -634,11 +651,10 @@ static Datum result_to_record(TupleDesc desc, pldotnet_Result *result,
     tuple = heap_form_tuple(desc, result->values, result->nulls);
     if (do_copy) {
         output_datum = heap_copy_tuple_as_datum(tuple, desc);
-    } else {
-        output_datum = PointerGetDatum(tuple);
+        heap_freetuple(tuple);
+        return output_datum;
     }
-    heap_freetuple(tuple);
-    return output_datum;
+    return PointerGetDatum(tuple);
 }
 
 static void result_FromTuple(pldotnet_Result *result, HeapTuple tuple,
@@ -655,8 +671,13 @@ static void result_FromTuple(pldotnet_Result *result, HeapTuple tuple,
         attr = TupleDescAttr(desc, i);
 
         if (attr->attisdropped) continue;
-        if (attr->attgenerated && (!include_generated))
-            continue; /* don't include unless requested */
+
+        // In PG version < 12, there is no attgenerated field
+        // In PG version >= 12, attgenerated is true for generated columns
+        #if PG_VERSION_NUM >= 120000
+            if (attr->attgenerated && (!include_generated))
+                continue; /* don't include unless requested */
+        #endif
 
         datum = heap_getattr(tuple, i + 1, desc, &is_null);
 
@@ -938,8 +959,14 @@ static Datum pldotnet_CompileAndRunUserFunction(const FunctionCallInfo fcinfo,
                                           // find the enumerator in the cache
 
             // create and register the callback for garbage collection
-            cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
-                funcctx->multi_call_memory_ctx, sizeof(cb_data));
+            // For versions >= 17, the function call receives 3 arguments
+            #if PG_VERSION_NUM >= 170000
+                cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
+                    funcctx->multi_call_memory_ctx, sizeof(cb_data), false);
+            #else
+                cbd = (cb_data *)funcctx->multi_call_memory_ctx->methods->alloc(
+                    funcctx->multi_call_memory_ctx, sizeof(cb_data));
+            #endif
 
             cbd->cb_record.arg = cbd;
             cbd->cb_record.func = srf_MemoryContextCallback;

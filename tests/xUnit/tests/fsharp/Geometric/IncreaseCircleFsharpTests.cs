@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Geometric")]
-public class IncreaseCircleFsharpTests : PlDotNetTest
+public abstract class BaseIncreaseCircleFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let orig_value = if orig_value.HasValue then orig_value.Value else NpgsqlCircle(NpgsqlPoint(0, 0), 3)
-NpgsqlCircle(orig_value.Center, (orig_value.Radius + 1.0))
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public IncreaseCircleFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseCircleFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseCircleFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("orig_value", "CIRCLE") },
-            ReturnType = "CIRCLE",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseCircleFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("orig_value", "CIRCLE") }, ReturnType = "CIRCLE", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-circle-null", "increaseCircleFSharp1", "NULL::CIRCLE", "= CIRCLE '<(0, 0), 4>'" },
-        };
+        return new object[][] { new object[] { "f#-circle-null", "increaseCircleFSharp1", "NULL::CIRCLE", "= CIRCLE '<(0, 0), 4>'" }, };
     }
 
     [Theory]
@@ -41,4 +26,15 @@ NpgsqlCircle(orig_value.Center, (orig_value.Radius + 1.0))
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Geometric")]
+public class IncreaseCircleFsharpTestsFSharp : BaseIncreaseCircleFsharpTests
+{
+    protected override string FunctionBody => @"
+let orig_value = if orig_value.HasValue then orig_value.Value else NpgsqlCircle(NpgsqlPoint(0, 0), 3)
+NpgsqlCircle(orig_value.Center, (orig_value.Radius + 1.0))
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -14,14 +14,14 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
     /// <summary>
     /// A generic class for all type handlers which handle PostreSQL arrays.
     /// </summary>
-    public static class ArrayHandler
+    public static partial class ArrayHandler
     {
         public static int Maxdim = get_Maxdim();
 
@@ -29,28 +29,28 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::get_Maxdim().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern int get_Maxdim();
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial int get_Maxdim();
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetArrayAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern unsafe void pldotnet_GetArrayAttributes(IntPtr datum, ref int typeId, ref int nDims, int[] dims, ref byte* nullmap);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial void pldotnet_GetArrayAttributes(IntPtr datum, ref int typeId, ref int nDims, int[] dims, ref byte* nullmap);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetArrayDatum().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern unsafe int pldotnet_GetArrayDatum(IntPtr arrayDatum, IntPtr[] results, int nElems, int typeId);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial int pldotnet_GetArrayDatum(IntPtr arrayDatum, IntPtr[] results, int nElems, int typeId);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumArray().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumArray(int elementId, int dimNumber, int[] dimLengths, IntPtr[] datums, byte[] nullmap = null);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumArray(int elementId, int dimNumber, int[] dimLengths, IntPtr[] datums, byte[] nullmap = null);
     }
 }

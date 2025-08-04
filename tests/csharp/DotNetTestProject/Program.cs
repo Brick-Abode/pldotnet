@@ -103,7 +103,7 @@ namespace TestDLLFunctions
 
         public static byte[]? byteaconversions(byte[]? a, byte[]? b)
         {
-            UTF8Encoding utf8_e = new ();
+            UTF8Encoding utf8_e = new();
             if (a == null && b == null)
             {
                 return null;
@@ -140,7 +140,7 @@ namespace TestDLLFunctions
             int new_day = ((DateOnly)new_date).Day;
             int new_month = ((DateOnly)new_date).Month;
             int new_year = ((DateOnly)new_date).Year;
-            DateTime new_timestamp = new (new_year, new_month, new_day, ((DateTime)orig_timestamp).Hour, ((DateTime)orig_timestamp).Minute, ((DateTime)orig_timestamp).Second);
+            DateTime new_timestamp = new(new_year, new_month, new_day, ((DateTime)orig_timestamp).Hour, ((DateTime)orig_timestamp).Minute, ((DateTime)orig_timestamp).Second);
             return new_timestamp;
         }
 
@@ -237,7 +237,7 @@ namespace TestDLLFunctions
                 PhysicalAddress orig_value = (PhysicalAddress)flatten_values.GetValue(i);
                 byte[] bytes = orig_value.GetAddressBytes();
                 bytes[0] += 1;
-                PhysicalAddress new_value = new (bytes);
+                PhysicalAddress new_value = new(bytes);
                 flatten_values.SetValue((PhysicalAddress)new_value, i);
             }
 
@@ -277,7 +277,7 @@ namespace TestDLLFunctions
                 }
 
                 NpgsqlRange<long> orig_value = (NpgsqlRange<long>)flatten_values.GetValue(i);
-                NpgsqlRange<long> new_value = new (orig_value.LowerBound + 1, orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound + 1, orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
+                NpgsqlRange<long> new_value = new(orig_value.LowerBound + 1, orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound + 1, orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
                 flatten_values.SetValue((NpgsqlRange<long>)new_value, i);
             }
 
@@ -297,7 +297,7 @@ namespace TestDLLFunctions
 
                 NpgsqlRange<DateOnly> orig_value = (NpgsqlRange<DateOnly>)flatten_values.GetValue(i);
 
-                NpgsqlRange<DateOnly> new_value = new (orig_value.LowerBound.AddDays(1), orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound.AddDays(1), orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
+                NpgsqlRange<DateOnly> new_value = new(orig_value.LowerBound.AddDays(1), orig_value.LowerBoundIsInclusive, orig_value.LowerBoundInfinite, orig_value.UpperBound.AddDays(1), orig_value.UpperBoundIsInclusive, orig_value.UpperBoundInfinite);
                 flatten_values.SetValue((NpgsqlRange<DateOnly>)new_value, i);
             }
 
@@ -612,7 +612,7 @@ namespace TestDLLFunctions.OtherTests
                 PhysicalAddress orig_value = (PhysicalAddress)flatten_values.GetValue(i);
                 byte[] bytes = orig_value.GetAddressBytes();
                 bytes[0] += 1;
-                PhysicalAddress new_value = new (bytes);
+                PhysicalAddress new_value = new(bytes);
                 flatten_values.SetValue((PhysicalAddress)new_value, i);
             }
 

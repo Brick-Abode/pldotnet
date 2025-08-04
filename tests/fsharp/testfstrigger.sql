@@ -27,74 +27,57 @@ CREATE TABLE trigger_test_table (
 -- Function creation
 
 CREATE OR REPLACE FUNCTION trigger_test_function_modify_fsharp() RETURNS TRIGGER AS $$
-    // SPEC: Modify text where id == 2
-    // This lets us confirm that MODIFY works
+        if tg.Arguments.[1] <> "1" then
+            raise (SystemException($"Assertion failed: wrong trigger argument, '{tg.Arguments.[1]}' != '1'"))
+        if (unbox<int> tg.NewRow.[0]) <> 2 then
+            raise (SystemException($"Assertion failed: wrong row value, {tg.NewRow.[1]} != 2"))
 
-    // We check the argument just to make sure the right argument is being called in the right place,
-    // but also to make sure that argument passing works.
-    if tg.Arguments.[1] <> "1" then 
-        raise (SystemException($"Assertion failed: wrong trigger argument, '{tg.Arguments.[1]}' != '1'"))
-
-    // This assertion ensures that the correct WHEN clause is on the trigger
-    if (unbox<int> tg.NewRow.[0]) <> 2 then 
-        raise (SystemException($"Assertion failed: wrong row value, {tg.NewRow.[1]} != 2"))
-
-    tg.NewRow.[1] <- "MODIFIED Text with F#!!!"
-    ReturnMode.TriggerModify
+        tg.NewRow.[1] <- "MODIFIED Text with F#!!!"
+        ReturnMode.TriggerModify
 $$ LANGUAGE plfsharp;
 
 CREATE OR REPLACE FUNCTION trigger_test_skip_fsharp() RETURNS TRIGGER AS $$
-    // SPEC: Skip insert where id == 5
-    // This lets us confirm that SKIP works
+        if tg.Arguments.[1] <> "2" then
+            raise (SystemException($"Assertion failed: wrong trigger argument, '{tg.Arguments.[1]}' != '2'"))
 
-    // We check the argument just to make sure the right argument is being called in the right place,
-    // and also to make sure that argument passing works.
-    if tg.Arguments.[1] <> "2" then
-        raise (SystemException($"Assertion failed: wrong trigger argument, '{tg.Arguments.[1]}' != '2'"))
-    
-    if (unbox<int> tg.NewRow.[0]) = 5 then 
-        ReturnMode.TriggerSkip
-    else
-        ReturnMode.Normal;
-    
+        if (unbox<int> tg.NewRow.[0]) = 5 then
+            ReturnMode.TriggerSkip
+        else
+            ReturnMode.Normal;
 $$ LANGUAGE plfsharp;
 
 CREATE OR REPLACE FUNCTION trigger_test_tg_vals_fsharp() RETURNS TRIGGER AS $$
-    // SPEC: Check tg values where id == 6; MODIFY if valid
-    // This lets us confirm that tg values are correct by checking
-    // the text value.
-    if unbox<int> tg.NewRow.[0] = 6 then
-        if tg.TriggerName = "test_trigger_bir_3" &&
-        tg.TriggerWhen = "BEFORE" &&
-        tg.TriggerLevel = "ROW" &&
-        tg.TriggerEvent = "INSERT" &&
-        tg.RelationId > 0 &&
-        tg.TableName = "trigger_test_table" &&
-        tg.TableSchema = "public" &&
-        tg.NewRow.Length = 2 &&
-        unbox<int> tg.NewRow.[0] = 6 &&
-        tg.Arguments.[0] = "BEFORE/INSERT/ROW" &&
-        tg.Arguments.[1] = "3" then
-            tg.NewRow.[1] <- "TG value assertions passed"
-            ReturnMode.TriggerModify
+        if unbox<int> tg.NewRow.[0] = 6 then
+            if tg.TriggerName = "test_trigger_bir_3" &&
+                tg.TriggerWhen = "BEFORE" &&
+                tg.TriggerLevel = "ROW" &&
+                tg.TriggerEvent = "INSERT" &&
+                tg.RelationId > 0 &&
+                tg.TableName = "trigger_test_table" &&
+                tg.TableSchema = "public" &&
+                tg.NewRow.Length = 2 &&
+                unbox<int> tg.NewRow.[0] = 6 &&
+                tg.Arguments.[0] = "BEFORE/INSERT/ROW" &&
+                tg.Arguments.[1] = "3" then
+                    tg.NewRow.[1] <- "TG value assertions passed"
+                    ReturnMode.TriggerModify
+            else
+                Elog.Error($"failed test, tg values didn't check out: {tg}")
+                ReturnMode.Normal
         else
             Elog.Error($"failed test, tg values didn't check out: {tg}")
-            ReturnMode.Normal
-    else
-        Elog.Error($"failed test, tg values didn't check out: {tg}")
-        ReturnMode.Normal
-
+            ReturnMode.Normal;
 $$ LANGUAGE plfsharp;
 
 -- This test isn't automatically effective, but it can be manually checked.
 CREATE OR REPLACE FUNCTION trigger_test_exception_fsharp() RETURNS TRIGGER AS $$
-    raise (SystemException(("This is a test of exception handling")))
-    ReturnMode.Normal; // unreached
+        raise (SystemException(("This is a test of exception handling")))
+        ReturnMode.Normal; // unreached
 $$ LANGUAGE plfsharp;
 
 CREATE OR REPLACE FUNCTION trigger_test_update_type_fsharp() RETURNS TRIGGER AS $$
-    tg.NewRow.[1] = 1; // this is an error; the correct type is string, not int
-    ReturnMode.TriggerModify;
+        tg.NewRow.[1] = 1;
+        ReturnMode.TriggerModify;
 $$ LANGUAGE plfsharp;
 
 

@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class UpdateArrayTextIndexFsharpTests : PlDotNetTest
+public abstract class BaseUpdateArrayTextIndexFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let arrayInteger: int[] = index.Cast<int>().ToArray()
-texts.SetValue(desired, arrayInteger)
-texts
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateArrayTextIndexFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateArrayTextIndexFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "UpdateArrayTextIndexFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("texts", "text[]"), new FunctionArgument("desired", "text"), new FunctionArgument("index", "integer[]") },
-            ReturnType = "text[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "UpdateArrayTextIndexFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("texts", "text[]"), new FunctionArgument("desired", "text"), new FunctionArgument("index", "integer[]") }, ReturnType = "text[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-text-null-1array", "updateArrayTextIndexFSharp1", "ARRAY['test1'::text, null::text, ' test string 2'::text, null::text], 'test updated', ARRAY[1]", "= ARRAY['test1'::text, 'test updated'::text, ' test string 2'::text, null::text]" },
-        new object[] { "f#-text-null-3array", "updateArrayTextIndexFSharp2", "ARRAY[[['test1'::text, null::text, ' appended'::text], [' to'::text, ' another'::text, ' text:'::text]], [[' test string 2,'::text, null::text, ' is'::text], [' this'::text, ' text'::text, ' good?'::text]]], 'test updated', ARRAY[1, 0, 2]", "= ARRAY[[['test1'::text, null::text, ' appended'::text], [' to'::text, ' another'::text, ' text:'::text]], [[' test string 2,'::text, null::text, 'test updated'::text], [' this'::text, ' text'::text, ' good?'::text]]]" },
-        };
+        return new object[][] { new object[] { "f#-text-null-1array", "updateArrayTextIndexFSharp1", "ARRAY['test1'::text, null::text, ' test string 2'::text, null::text], 'test updated', ARRAY[1]", "= ARRAY['test1'::text, 'test updated'::text, ' test string 2'::text, null::text]" }, new object[] { "f#-text-null-3array", "updateArrayTextIndexFSharp2", "ARRAY[[['test1'::text, null::text, ' appended'::text], [' to'::text, ' another'::text, ' text:'::text]], [[' test string 2,'::text, null::text, ' is'::text], [' this'::text, ' text'::text, ' good?'::text]]], 'test updated', ARRAY[1, 0, 2]", "= ARRAY[[['test1'::text, null::text, ' appended'::text], [' to'::text, ' another'::text, ' text:'::text]], [[' test string 2,'::text, null::text, 'test updated'::text], [' this'::text, ' text'::text, ' good?'::text]]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,16 @@ texts
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class UpdateArrayTextIndexFsharpTestsFSharp : BaseUpdateArrayTextIndexFsharpTests
+{
+    protected override string FunctionBody => @"
+let arrayInteger: int[] = index.Cast<int>().ToArray()
+texts.SetValue(desired, arrayInteger)
+texts
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

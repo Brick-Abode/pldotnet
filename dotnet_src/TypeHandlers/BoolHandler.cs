@@ -14,7 +14,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -25,8 +25,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-boolean.html.
     /// </remarks>
     [OIDHandler(OID.BOOLOID, OID.BOOLARRAYOID)]
-    public class BoolHandler : StructTypeHandler<bool>
+    public partial class BoolHandler : StructTypeHandler<bool>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoolHandler"/> class.
+        /// </summary>
         public BoolHandler()
         {
             this.ElementOID = OID.BOOLOID;
@@ -37,16 +40,16 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetBoolean().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
         [return: MarshalAs(UnmanagedType.I1)]
-        public static extern bool pldotnet_GetBoolean(IntPtr datum);
+        public static partial bool pldotnet_GetBoolean(IntPtr datum);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumBoolean().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumBoolean(bool value);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumBoolean([MarshalAs(UnmanagedType.Bool)] bool value);
 
         /// <inheritdoc />
         public override bool InputValue(IntPtr datum)

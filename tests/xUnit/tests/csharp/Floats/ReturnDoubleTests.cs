@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Floats")]
-public class ReturnDoubleTests : PlDotNetTest
+public abstract class BaseReturnDoubleTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return 11.0050000000005;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnDoubleTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnDoubleTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnDouble",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "double precision",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnDouble", Arguments = new List<FunctionArgument> { }, ReturnType = "double precision", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-float8", "returnDouble", "", "= double precision '11.0050000000005'" },
-        };
+        return new object[][] { new object[] { "c#-float8", "returnDouble", "", "= double precision '11.0050000000005'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return 11.0050000000005;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Floats")]
+public class ReturnDoubleTestsCSharp : BaseReturnDoubleTests
+{
+    protected override string FunctionBody => @"
+return 11.0050000000005;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

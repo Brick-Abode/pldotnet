@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Range")]
-public class CreateInT4RangeArrayTests : PlDotNetTest
+public abstract class BaseCreateInT4RangeArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-NpgsqlRange<int> objects_value = new NpgsqlRange<int>(64, true, false, 89, false, false);
-NpgsqlRange<int>?[, ,] three_dimensional_array = new NpgsqlRange<int>?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
-return three_dimensional_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateInT4RangeArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateInT4RangeArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateInT4RangeArray",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "INT4RANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateInT4RangeArray", Arguments = new List<FunctionArgument> { }, ReturnType = "INT4RANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-int4range-null-3array-arraynull", "CreateInt4RangeArray1", "", "= ARRAY[[['[64,89)'::INT4RANGE,'[64,89)'::INT4RANGE], [null::INT4RANGE, null::INT4RANGE]], [['[64,89)'::INT4RANGE, null::INT4RANGE], ['[64,89)'::INT4RANGE, '[64,89)'::INT4RANGE]]]" },
-        };
+        return new object[][] { new object[] { "c#-int4range-null-3array-arraynull", "CreateInt4RangeArray1", "", "= ARRAY[[['[64,89)'::INT4RANGE,'[64,89)'::INT4RANGE], [null::INT4RANGE, null::INT4RANGE]], [['[64,89)'::INT4RANGE, null::INT4RANGE], ['[64,89)'::INT4RANGE, '[64,89)'::INT4RANGE]]]" }, };
     }
 
     [Theory]
@@ -42,4 +26,16 @@ return three_dimensional_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Range")]
+public class CreateInT4RangeArrayTestsCSharp : BaseCreateInT4RangeArrayTests
+{
+    protected override string FunctionBody => @"
+NpgsqlRange<int> objects_value = new NpgsqlRange<int>(64, true, false, 89, false, false);
+NpgsqlRange<int>?[, ,] three_dimensional_array = new NpgsqlRange<int>?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
+return three_dimensional_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

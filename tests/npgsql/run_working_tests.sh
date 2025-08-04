@@ -4,13 +4,13 @@ rm -rf tests/npgsql/sql/
 mkdir tests/npgsql/sql/
 chmod 0777 tests/npgsql/sql/
 
-files=(npgsql/test/Npgsql.Tests/*.cs)
-files+=(npgsql/test/Npgsql.Tests/Types/*.cs)
+files=(dotnet_src/npgsql/test/Npgsql.Tests/*.cs)
+files+=(dotnet_src/npgsql/test/Npgsql.Tests/Types/*.cs)
 
 if [ ${#files[@]} -gt 0 ]; then
   dotnet run --project tests/npgsql/ "${files[@]}"
 else
-  echo "No .cs files found in the directories npgsql/test/Npgsql.Tests/ and npgsql/test/Npgsql.Tests/Types/"
+  echo "No .cs files found in the directories dotnet_src/npgsql/test/Npgsql.Tests/ and dotnet_src/npgsql/test/Npgsql.Tests/Types/"
 fi
 
 rm -rf tests/npgsql/bin tests/npgsql/obj

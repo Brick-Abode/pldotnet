@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "DateTime")]
-public class CreateTimestampTzMultidimensionalArrayFsharpTests : PlDotNetTest
+public abstract class BaseCreateTimestampTzMultidimensionalArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let objects_value = DateTime(2022, 11, 15, 13, 23, 45, DateTimeKind.Utc);
-let arr = Array.CreateInstance(typeof<DateTime>, 1, 1, 1)
-arr.SetValue(objects_value, 0, 0, 0)
-arr
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateTimestampTzMultidimensionalArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateTimestampTzMultidimensionalArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateTimestampTzMultidimensionalArrayFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "TIMESTAMP WITH TIME ZONE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateTimestampTzMultidimensionalArrayFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "TIMESTAMP WITH TIME ZONE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-timestamptz-3array", "CreateTimestamptzMultidimensionalArrayFSharp", "", "= ARRAY[[[TIMESTAMP WITH TIME ZONE '2022-11-15 13:23:45 +00']]]" },
-        };
+        return new object[][] { new object[] { "f#-timestamptz-3array", "CreateTimestamptzMultidimensionalArrayFSharp", "", "= ARRAY[[[TIMESTAMP WITH TIME ZONE '2022-11-15 13:23:45 +00']]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,17 @@ arr
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "DateTime")]
+public class CreateTimestampTzMultidimensionalArrayFsharpTestsFSharp : BaseCreateTimestampTzMultidimensionalArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+let objects_value = DateTime(2022, 11, 15, 13, 23, 45, DateTimeKind.Utc);
+let arr = Array.CreateInstance(typeof<DateTime>, 1, 1, 1)
+arr.SetValue(objects_value, 0, 0, 0)
+arr
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

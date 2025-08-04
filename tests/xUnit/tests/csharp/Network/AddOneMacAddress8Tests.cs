@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Network")]
-public class AddOneMacAddress8Tests : PlDotNetTest
+public abstract class BaseAddOneMacAddress8Tests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-byte[] bytes = my_address.GetAddressBytes();
-bytes[7] += 1;
-return new PhysicalAddress(bytes);
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public AddOneMacAddress8Tests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseAddOneMacAddress8Tests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "AddOneMacAddress8",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("my_address", "MACADDR8") },
-            ReturnType = "MACADDR8",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "AddOneMacAddress8", Arguments = new List<FunctionArgument> { new FunctionArgument("my_address", "MACADDR8") }, ReturnType = "MACADDR8", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-macaddr8", "addOneMacAddress8", "MACADDR8 '08:00:2b:01:02:03:04:05'", "= MACADDR8 '08:00:2b:01:02:03:04:06'" },
-        };
+        return new object[][] { new object[] { "c#-macaddr8", "addOneMacAddress8", "MACADDR8 '08:00:2b:01:02:03:04:05'", "= MACADDR8 '08:00:2b:01:02:03:04:06'" }, };
     }
 
     [Theory]
@@ -42,4 +26,16 @@ return new PhysicalAddress(bytes);
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Network")]
+public class AddOneMacAddress8TestsCSharp : BaseAddOneMacAddress8Tests
+{
+    protected override string FunctionBody => @"
+byte[] bytes = my_address.GetAddressBytes();
+bytes[7] += 1;
+return new PhysicalAddress(bytes);
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

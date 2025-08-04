@@ -15,7 +15,7 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -26,8 +26,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-bit.html.
     /// </remarks>
     [OIDHandler(OID.VARBITOID, OID.VARBITARRAYOID)]
-    public class VarBitStringHandler : ObjectTypeHandler<BitArray>
+    public partial class VarBitStringHandler : ObjectTypeHandler<BitArray>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VarBitStringHandler"/> class.
+        /// </summary>
         public VarBitStringHandler()
         {
             this.ElementOID = OID.VARBITOID;
@@ -38,15 +41,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumVarBitAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern unsafe void pldotnet_GetDatumVarBitAttributes(IntPtr datum, ref int len, ref byte* dat);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial void pldotnet_GetDatumVarBitAttributes(IntPtr datum, ref int len, ref byte* dat);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumVarBit().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumVarBit(int len, byte[] dat);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumVarBit(int len, byte[] dat);
 
         /// <summary>
         /// Creates a BitArray object from a PostgreSQL bit string data type.
@@ -65,9 +68,9 @@ namespace PlDotNET.Handler
             }
 
             // the reverse BitArray constructed from byte[]
-            BitArray auxiliar = new (bytes);
+            BitArray auxiliar = new(bytes);
 
-            BitArray result = new (bitLen);
+            BitArray result = new(bitLen);
             for (int i = 0, cont = 0; i < byteLen; i++)
             {
                 for (int j = 7; j >= 0; j--)
@@ -93,7 +96,7 @@ namespace PlDotNET.Handler
             int byteLen = (bitLen / 8) + ((bitLen % 8) > 0 ? 1 : 0);
 
             // the reverse BitArray; it will be used to call "CopyTo"
-            BitArray auxiliar = new (byteLen * 8);
+            BitArray auxiliar = new(byteLen * 8);
             for (int i = 0, cont = 0; i < byteLen; i++)
             {
                 for (int j = 7; j >= 0; j--)
@@ -135,6 +138,9 @@ namespace PlDotNET.Handler
     [OIDHandler(OID.BITOID, OID.BITARRAYOID)]
     public class BitStringHandler : ObjectTypeHandler<BitArray>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BitStringHandler"/> class.
+        /// </summary>
         public BitStringHandler()
         {
             this.ElementOID = OID.BITOID;

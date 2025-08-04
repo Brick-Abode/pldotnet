@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Geometric")]
-public class IncreaseCircleTests : PlDotNetTest
+public abstract class BaseIncreaseCircleTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if (orig_value == null)
-    orig_value = new NpgsqlCircle(new NpgsqlPoint(0, 0), 3);
+    protected abstract string FunctionBody { get; }
 
-NpgsqlCircle new_value = new NpgsqlCircle(((NpgsqlCircle)orig_value).Center, ((NpgsqlCircle)orig_value).Radius + 1);
+    protected abstract LanguageType Language { get; }
 
-return new_value;
-    ";
-
-    public IncreaseCircleTests()
+    public BaseIncreaseCircleTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseCircle",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("orig_value", "CIRCLE") },
-            ReturnType = "CIRCLE",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseCircle", Arguments = new List<FunctionArgument> { new FunctionArgument("orig_value", "CIRCLE") }, ReturnType = "CIRCLE", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-circle-null", "increaseCircle1", "NULL::CIRCLE", "= CIRCLE '<(0, 0), 4>'" },
-        };
+        return new object[][] { new object[] { "c#-circle-null", "increaseCircle1", "NULL::CIRCLE", "= CIRCLE '<(0, 0), 4>'" }, };
     }
 
     [Theory]
@@ -45,4 +26,19 @@ return new_value;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Geometric")]
+public class IncreaseCircleTestsCSharp : BaseIncreaseCircleTests
+{
+    protected override string FunctionBody => @"
+if (orig_value == null)
+    orig_value = new NpgsqlCircle(new NpgsqlPoint(0, 0), 3);
+
+NpgsqlCircle new_value = new NpgsqlCircle(((NpgsqlCircle)orig_value).Center, ((NpgsqlCircle)orig_value).Radius + 1);
+
+return new_value;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

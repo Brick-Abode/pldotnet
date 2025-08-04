@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Network")]
-public class ModifyNetMaskTests : PlDotNetTest
+public abstract class BaseModifyNetMaskTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return (my_inet.Address, my_inet.Netmask + n);
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ModifyNetMaskTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseModifyNetMaskTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ModifyNetMask",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("my_inet", "INET"), new FunctionArgument("n", "INT") },
-            ReturnType = "INET",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ModifyNetMask", Arguments = new List<FunctionArgument> { new FunctionArgument("my_inet", "INET"), new FunctionArgument("n", "INT") }, ReturnType = "INET", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-inet", "modifyNetMask", "INET '192.168.0.1/24', 6", "= INET '192.168.0.1/30'" },
-        };
+        return new object[][] { new object[] { "c#-inet", "modifyNetMask", "INET '192.168.0.1/24', 6", "= INET '192.168.0.1/30'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return (my_inet.Address, my_inet.Netmask + n);
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Network")]
+public class ModifyNetMaskTestsCSharp : BaseModifyNetMaskTests
+{
+    protected override string FunctionBody => @"
+return (my_inet.Address, my_inet.Netmask + n);
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

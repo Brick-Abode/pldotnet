@@ -1,44 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Integers")]
-public class Sum2SmallInTFsharpTests : PlDotNetTest
+public abstract class BaseSum2SmallInTFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-match (a.HasValue, b.HasValue) with
-| (false, false) -> System.Nullable(int16 0)
-| (true, false) -> Nullable(a.Value)
-| (false, true) -> Nullable(b.Value)
-| (true, true) -> Nullable (a.Value+b.Value)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public Sum2SmallInTFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseSum2SmallInTFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "Sum2SmallInTFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "int2"), new FunctionArgument("b", "int2") },
-            ReturnType = "int2",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "Sum2SmallInTFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "int2"), new FunctionArgument("b", "int2") }, ReturnType = "int2", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-int2", "sum2SmallIntFSharp1", "CAST(32760 AS int2), CAST(7 AS int2)", "= SMALLINT '32767'" },
-        new object[] { "f#-int2-null", "sum2SmallIntFSharp2", "NULL::int2, CAST(7 AS int2)", "= SMALLINT '7'" },
-        new object[] { "f#-int2-null", "sum2SmallIntFSharp3", "CAST(32760 AS int2), NULL::int2", "= SMALLINT '32760'" },
-        new object[] { "f#-int2-null", "sum2SmallIntFSharp4", "NULL::int2, NULL::int2", "= SMALLINT '0'" },
-        };
+        return new object[][] { new object[] { "f#-int2", "sum2SmallIntFSharp1", "CAST(32760 AS int2), CAST(7 AS int2)", "= SMALLINT '32767'" }, new object[] { "f#-int2-null", "sum2SmallIntFSharp2", "NULL::int2, CAST(7 AS int2)", "= SMALLINT '7'" }, new object[] { "f#-int2-null", "sum2SmallIntFSharp3", "CAST(32760 AS int2), NULL::int2", "= SMALLINT '32760'" }, new object[] { "f#-int2-null", "sum2SmallIntFSharp4", "NULL::int2, NULL::int2", "= SMALLINT '0'" }, };
     }
 
     [Theory]
@@ -47,4 +26,18 @@ match (a.HasValue, b.HasValue) with
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Integers")]
+public class Sum2SmallInTFsharpTestsFSharp : BaseSum2SmallInTFsharpTests
+{
+    protected override string FunctionBody => @"
+match (a.HasValue, b.HasValue) with
+| (false, false) -> System.Nullable(int16 0)
+| (true, false) -> Nullable(a.Value)
+| (false, true) -> Nullable(b.Value)
+| (true, true) -> Nullable (a.Value+b.Value)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class AddGoodbyeFsharpTests : PlDotNetTest
+public abstract class BaseAddGoodbyeFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-a + "" Goodbye ^.^""
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public AddGoodbyeFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseAddGoodbyeFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "AddGoodbyeFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BPCHAR") },
-            ReturnType = "BPCHAR",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "AddGoodbyeFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BPCHAR") }, ReturnType = "BPCHAR", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-bpchar", "testingBpCharFSharp", "'HELLO!'", "= 'HELLO! Goodbye ^.^'::BPCHAR" },
-        };
+        return new object[][] { new object[] { "f#-bpchar", "testingBpCharFSharp", "'HELLO!'", "= 'HELLO! Goodbye ^.^'::BPCHAR" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ a + "" Goodbye ^.^""
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class AddGoodbyeFsharpTestsFSharp : BaseAddGoodbyeFsharpTests
+{
+    protected override string FunctionBody => @"
+a + "" Goodbye ^.^""
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

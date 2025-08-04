@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "InOut")]
-public class FsInOutAllThreeTests : PlDotNetTest
+public abstract class BaseFsInOutAllThreeTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if a.HasValue && b.HasValue then
-        Nullable(a.Value + 1), Nullable(a.Value + b.Value)
-    else
-        Nullable(), Nullable()
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public FsInOutAllThreeTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseFsInOutAllThreeTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "FsInOutAllThree",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "INT"), new FunctionArgument("INOUT b", "INT"), new FunctionArgument("OUT c", "INT") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "FsInOutAllThree", Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "INT"), new FunctionArgument("INOUT b", "INT"), new FunctionArgument("OUT c", "INT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-inout-allthree-1", "fs_inout_allthree", "11, 8", "= ROW(12,19)" },
-        new object[] { "f#-inout-allthree-2", "fs_inout_allthree", "NULL::int, 8", "= ROW(NULL::int, NULL::int)" },
-        new object[] { "f#-inout-allthree-3", "fs_inout_allthree", "8, NULL::int", "= ROW(NULL::int, NULL::int)" },
-        };
+        return new object[][] { new object[] { "f#-inout-allthree-1", "fs_inout_allthree", "11, 8", "= ROW(12,19)" }, new object[] { "f#-inout-allthree-2", "fs_inout_allthree", "NULL::int, 8", "= ROW(NULL::int, NULL::int)" }, new object[] { "f#-inout-allthree-3", "fs_inout_allthree", "8, NULL::int", "= ROW(NULL::int, NULL::int)" }, };
     }
 
     [Theory]
@@ -45,4 +26,17 @@ if a.HasValue && b.HasValue then
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "InOut")]
+public class FsInOutAllThreeTestsFSharp : BaseFsInOutAllThreeTests
+{
+    protected override string FunctionBody => @"
+if a.HasValue && b.HasValue then
+        Nullable(a.Value + 1), Nullable(a.Value + b.Value)
+    else
+        Nullable(), Nullable()
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

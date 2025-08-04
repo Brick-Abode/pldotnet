@@ -3,30 +3,27 @@ using System.Collections.Generic;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseDoSum2FsharpTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseDoSum2FsharpTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { TestType = SqlTestType.DoBlock, };
+    }
+}
+
 [Trait("Language", "FSharp")]
 [Trait("Category", "Do")]
-public class DoSum2FsharpTests : PlDotNetTest
+public class DoSum2FsharpTestsFSharp : BaseDoSum2FsharpTests
 {
-    private static readonly string DoBody = @"
+    protected override string FunctionBody => @"
 do $$
     let c = 1450 + 275;
     Elog.Info(""c = "" + c.ToString());
 $$ language plfsharp;
     ";
-
-	public DoSum2FsharpTests()
-	{
-		FunctionInfo = new SqlFunctionInfo
-		{
-			TestType = SqlTestType.DoBlock,
-		};
-	}
-
-    [Fact]
-    public void TestDoSum2Fsharp()
-    {
-        bool doExecutedSuccessfully = ExecuteSql(DoBody);
-        Assert.True(doExecutedSuccessfully);
-    }
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }
-

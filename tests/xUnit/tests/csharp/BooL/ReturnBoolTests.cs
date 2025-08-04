@@ -1,39 +1,24 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "BooL")]
-public class ReturnBoolTests : PlDotNetTest
+public abstract class BaseReturnBoolTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return false;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnBoolTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnBoolTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnBool",
-            Arguments = new List<FunctionArgument> { },
-            ReturnType = "boolean",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnBool", Arguments = new List<FunctionArgument> { }, ReturnType = "boolean", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-bool", "returnBool", "", " is false" },
-        };
+        return new object[][] { new object[] { "c#-bool", "returnBool", "", " is false" }, };
     }
-
 
     [Theory]
     [MemberData(nameof(TestCases))]
@@ -41,4 +26,14 @@ return false;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "BooL")]
+public class ReturnBoolTestsCSharp : BaseReturnBoolTests
+{
+    protected override string FunctionBody => @"
+return false;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

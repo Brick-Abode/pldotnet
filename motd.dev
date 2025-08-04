@@ -1,0 +1,2 @@
+- To run the tests, you can use from within the container:
+    `cd /app/pldotnet && make test-local`

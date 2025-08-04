@@ -16,6 +16,8 @@
 #ifndef PLDOTNET_MAIN_H_
 #define PLDOTNET_MAIN_H_
 
+#include <stddef.h>
+#include <stdio.h>
 #include <postgres.h>
 #include <access/htup_details.h>
 #include <catalog/pg_proc.h>
@@ -142,6 +144,13 @@ extern PGDLLEXPORT int pldotnet_SetResult(pldotnet_Result *output, int offset,
 extern PGDLLEXPORT int pldotnet_GetResult(pldotnet_Result *output, int offset,
                                           Datum *value, bool *is_null,
                                           Oid *oid);
+
+/**
+ * @brief Get a PostgreSQL setting value.
+ * @param settingName The setting name.
+ * @return The value for the given setting name.
+ */
+extern PGDLLEXPORT const char* pldotnet_GetPostgresSetting(const char *settingName);
 
 /**
  * @brief The call_handler will be called to execute the procedural

@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseInOutMultiArg2Tests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseInOutMultiArg2Tests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "InOutMultiArg2", Arguments = new List<FunctionArgument> { new FunctionArgument("INOUT argument_0", "INT"), new FunctionArgument("OUT argument_1", "INT"), new FunctionArgument("INOUT argument_2", "INT"), new FunctionArgument("INOUT argument_3", "INT"), new FunctionArgument("IN argument_4", "INT"), new FunctionArgument("OUT argument_5", "INT"), new FunctionArgument("IN argument_6", "INT"), new FunctionArgument("OUT argument_7", "INT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-inout-multiarg-2", "inout_multiarg_2", "NULL, 2, 3, 4, 6", "= ROW(1, 2, 3, NULL::INT, 6, 8)" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestInOutMultiArg2(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "InOut")]
-public class InOutMultiArg2Tests : PlDotNetTest
+public class InOutMultiArg2TestsCSharp : BaseInOutMultiArg2Tests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 if(argument_0 != null){ throw new SystemException($""Failed assertion: argument_0 = {argument_0}"");}
     argument_0 = 1;
     argument_1 = 2;
@@ -22,32 +45,5 @@ if(argument_0 != null){ throw new SystemException($""Failed assertion: argument_
     if(argument_6 != 6){ throw new SystemException($""Failed assertion: argument_6 = {argument_6}"");}
     argument_7 = 8;
     ";
-
-    public InOutMultiArg2Tests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "InOutMultiArg2",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("INOUT argument_0", "INT"), new FunctionArgument("OUT argument_1", "INT"), new FunctionArgument("INOUT argument_2", "INT"), new FunctionArgument("INOUT argument_3", "INT"), new FunctionArgument("IN argument_4", "INT"), new FunctionArgument("OUT argument_5", "INT"), new FunctionArgument("IN argument_6", "INT"), new FunctionArgument("OUT argument_7", "INT") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-inout-multiarg-2", "inout_multiarg_2", "NULL, 2, 3, 4, 6", "= ROW(1, 2, 3, NULL::INT, 6, 8)" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestInOutMultiArg2(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

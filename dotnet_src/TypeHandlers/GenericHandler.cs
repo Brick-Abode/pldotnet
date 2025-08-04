@@ -18,6 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.FSharp.Core;
+using NpgsqlTypes;
 using PlDotNET.Common;
 
 namespace PlDotNET.Handler
@@ -49,10 +50,7 @@ namespace PlDotNET.Handler
             }
 
             int bitLen = byteLen * 8;
-            if (offset > bitLen)
-            {
-                throw new ArgumentOutOfRangeException("Illegal offset");
-            }
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, bitLen);
 
             int byteOffset = offset / 8;
             int bitOffset = offset % 8;
@@ -339,7 +337,7 @@ namespace PlDotNET.Handler
             if (nullmap != null)
             {
                 int nullmapLen = (nelems / 8) + 1;
-                ReadOnlySpan<byte> nativeSpan = new (nullmap, nullmapLen);
+                ReadOnlySpan<byte> nativeSpan = new(nullmap, nullmapLen);
                 byte[] nullmapArray = nativeSpan.ToArray();
                 return this.InputArrayWithNull(datums, dims, nullmapArray);
             }
@@ -808,29 +806,23 @@ namespace PlDotNET.Handler
     /// <summary>
     ///
     /// </summary>
-    public class OIDHandler : System.Attribute
+    public class OIDHandler(OID baseType, OID arrayType) : System.Attribute
     {
-        public OID BaseType;
-        public OID ArrayType;
-
-        public OIDHandler(OID baseType, OID arrayType)
-        {
-            this.BaseType = baseType;
-            this.ArrayType = arrayType;
-        }
+        public OID BaseType = baseType;
+        public OID ArrayType = arrayType;
     }
 
     /// <summary>
     /// Provides a set of methods for setting the result datum of a user function to an output object.
     /// </summary>
-    public class OutputResult
+    public partial class OutputResult
     {
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_SetResult().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern unsafe int pldotnet_SetResult(IntPtr output, int offset, IntPtr value, bool isnull, uint oid);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial int pldotnet_SetResult(IntPtr output, int offset, IntPtr value, [MarshalAs(UnmanagedType.Bool)] bool isnull, uint oid);
 
         /// <summary>
         /// Sets the result datum of a user function to an output object.

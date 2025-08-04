@@ -14,13 +14,13 @@ do $$
 $$ language plcsharp;
     ";
 
-	public DoSum1Tests()
-	{
-		FunctionInfo = new SqlFunctionInfo
-		{
-			TestType = SqlTestType.DoBlock,
-		};
-	}
+    public DoSum1Tests()
+    {
+        FunctionInfo = new SqlFunctionInfo
+        {
+            TestType = SqlTestType.DoBlock,
+        };
+    }
 
     [Fact]
     public void TestDoSum1()

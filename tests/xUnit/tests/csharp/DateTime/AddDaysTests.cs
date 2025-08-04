@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "DateTime")]
-public class AddDaysTests : PlDotNetTest
+public abstract class BaseAddDaysTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if (my_timestamp == null) {
-    my_timestamp = new DateTime(2022, 1, 1, 8, 30, 20, DateTimeKind.Utc);
-}
+    protected abstract string FunctionBody { get; }
 
-return ((DateTime)my_timestamp).AddDays((double)days_to_add);
-    ";
+    protected abstract LanguageType Language { get; }
 
-    public AddDaysTests()
+    public BaseAddDaysTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "AddDays",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("my_timestamp TIMESTAMP WITH TIME", "ZONE"), new FunctionArgument("days_to_add", "INT") },
-            ReturnType = "TIMESTAMP WITH TIME ZONE",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "AddDays", Arguments = new List<FunctionArgument> { new FunctionArgument("my_timestamp TIMESTAMP WITH TIME", "ZONE"), new FunctionArgument("days_to_add", "INT") }, ReturnType = "TIMESTAMP WITH TIME ZONE", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-timestamptz", "addDays1", "TIMESTAMP WITH TIME ZONE '2004-10-19 10:23:54 PM +02', 2", "= TIMESTAMP WITH TIME ZONE '2004-10-21 22:23:54 +02'" },
-        new object[] { "c#-timestamptz-null", "addDays2", "NULL::TIMESTAMP WITH TIME ZONE, 2", "= TIMESTAMP WITH TIME ZONE '2022-01-03 08:30:20 +00'" },
-        };
+        return new object[][] { new object[] { "c#-timestamptz", "addDays1", "TIMESTAMP WITH TIME ZONE '2004-10-19 10:23:54 PM +02', 2", "= TIMESTAMP WITH TIME ZONE '2004-10-21 22:23:54 +02'" }, new object[] { "c#-timestamptz-null", "addDays2", "NULL::TIMESTAMP WITH TIME ZONE, 2", "= TIMESTAMP WITH TIME ZONE '2022-01-03 08:30:20 +00'" }, };
     }
 
     [Theory]
@@ -45,4 +26,18 @@ return ((DateTime)my_timestamp).AddDays((double)days_to_add);
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "DateTime")]
+public class AddDaysTestsCSharp : BaseAddDaysTests
+{
+    protected override string FunctionBody => @"
+if (my_timestamp == null) {
+    my_timestamp = new DateTime(2022, 1, 1, 8, 30, 20, DateTimeKind.Utc);
+}
+
+return ((DateTime)my_timestamp).AddDays((double)days_to_add);
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

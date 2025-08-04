@@ -17,7 +17,7 @@ fi
 
 rm -rf tests/npgsql/bin tests/npgsql/obj
 
-echo 'DROP TABLE IF EXISTS NPGSQL_TESTS;CREATE TABLE NPGSQL_TESTS(FEATURE TEXT, TEST_NAME TEXT, RESULT TEXT, RESULT_BOOL BOOLEAN);' | (sudo -u postgres  psql)
+echo 'DROP TABLE IF EXISTS NPGSQL_TESTS;CREATE TABLE NPGSQL_TESTS(FEATURE TEXT, TEST_NAME TEXT, RESULT TEXT, RESULT_BOOL BOOLEAN);' | (runuser -u postgres -- psql)
 
 could_not_compile="Here are the compilation results"
 add_in_the_table="INSERT 0 1"
@@ -25,7 +25,7 @@ for file in tests/npgsql/sql/*.sql
 do
     echo $file
     output_file="${file//.sql/.out}"
-    cat $file | (sudo -u postgres psql 2>&1 || /etc/init.d/postgresql restart) | tee $output_file
+    cat $file | (runuser -u postgres -- psql 2>&1 || /etc/init.d/postgresql restart) | tee $output_file
     # if ! grep -q "$could_not_compile" $output_file && ! grep -q "$add_in_the_table" $output_file; then
     #     content=$(cat $output_file)
     #     all_line=$(cat $file | grep "SELECT '")

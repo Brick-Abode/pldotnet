@@ -1386,7 +1386,7 @@ AS $$
         reader.GetFieldValue<NpgsqlInterval>(reader.GetOrdinal("INTERVALCOL")),
         reader.GetFieldValue<PhysicalAddress>(reader.GetOrdinal("MACCOL")),
         new NpgsqlParameter("MAC8COL", NpgsqlDbType.MacAddr8) { Value = reader.GetFieldValue<PhysicalAddress>(reader.GetOrdinal("MAC8COL")) },
-        reader.GetFieldValue<(IPAddress Address, int Netmask)>(reader.GetOrdinal("INETCOL")),
+        new NpgsqlParameter("INETCOL", NpgsqlDbType.Inet) { Value = reader.GetFieldValue<(IPAddress Address, int Netmask)>(reader.GetOrdinal("INETCOL")) },
         new NpgsqlParameter("CIDRCOL", NpgsqlDbType.Cidr) { Value = reader.GetFieldValue<(IPAddress Address, int Netmask)>(reader.GetOrdinal("CIDRCOL")) },
         new NpgsqlParameter("MONEYCOL", NpgsqlDbType.Money) { Value = reader.GetFieldValue<decimal>(reader.GetOrdinal("MONEYCOL")) },
         reader.GetFieldValue<BitArray>(reader.GetOrdinal("VARBITCOL")),

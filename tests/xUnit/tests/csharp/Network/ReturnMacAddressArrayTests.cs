@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Network")]
-public class ReturnMacAddressArrayTests : PlDotNetTest
+public abstract class BaseReturnMacAddressArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return addresses;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnMacAddressArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnMacAddressArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnMacAddressArray",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("addresses", "MACADDR[]") },
-            ReturnType = "MACADDR[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnMacAddressArray", Arguments = new List<FunctionArgument> { new FunctionArgument("addresses", "MACADDR[]") }, ReturnType = "MACADDR[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-macaddr-null-2array-arraynull", "returnMacAddressArray1", "ARRAY[[null::macaddr, null::macaddr], [null::macaddr, MACADDR 'a8-00-2b-01-02-03']]", "= ARRAY[[null::macaddr, null::macaddr], [null::macaddr, MACADDR 'a8-00-2b-01-02-03']]" },
-        };
+        return new object[][] { new object[] { "c#-macaddr-null-2array-arraynull", "returnMacAddressArray1", "ARRAY[[null::macaddr, null::macaddr], [null::macaddr, MACADDR 'a8-00-2b-01-02-03']]", "= ARRAY[[null::macaddr, null::macaddr], [null::macaddr, MACADDR 'a8-00-2b-01-02-03']]" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return addresses;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Network")]
+public class ReturnMacAddressArrayTestsCSharp : BaseReturnMacAddressArrayTests
+{
+    protected override string FunctionBody => @"
+return addresses;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

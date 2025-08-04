@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class ConcatenateTextFsharpTests : PlDotNetTest
+public abstract class BaseConcatenateTextFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-a + "" "" + b
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ConcatenateTextFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseConcatenateTextFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ConcatenateTextFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "text"), new FunctionArgument("b", "text") },
-            ReturnType = "text",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ConcatenateTextFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "text"), new FunctionArgument("b", "text") }, ReturnType = "text", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-text", "concatenateTextFSharp1", "'red', 'blue'", "= 'red blue'" },
-        new object[] { "f#-text-null", "concatenateTextFSharp2", "NULL::TEXT, 'blue'", "= ' blue'" },
-        new object[] { "f#-text-null", "concatenateTextFSharp3", "NULL::TEXT, NULL::TEXT", "= ' '" },
-        };
+        return new object[][] { new object[] { "f#-text", "concatenateTextFSharp1", "'red', 'blue'", "= 'red blue'" }, new object[] { "f#-text-null", "concatenateTextFSharp2", "NULL::TEXT, 'blue'", "= ' blue'" }, new object[] { "f#-text-null", "concatenateTextFSharp3", "NULL::TEXT, NULL::TEXT", "= ' '" }, };
     }
 
     [Theory]
@@ -42,4 +26,14 @@ a + "" "" + b
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class ConcatenateTextFsharpTestsFSharp : BaseConcatenateTextFsharpTests
+{
+    protected override string FunctionBody => @"
+a + "" "" + b
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

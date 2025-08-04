@@ -1,19 +1,16 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Dll")]
-public class Mult2InTFsharpDllTests : PlDotNetTest
+public abstract class BaseMult2InTFsharpDllTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net6.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!mult2IntFSharp'
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public Mult2InTFsharpDllTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMult2InTFsharpDllTests()
     {
         FunctionInfo = new SqlFunctionInfo
         {
@@ -21,20 +18,14 @@ public class Mult2InTFsharpDllTests : PlDotNetTest
             Arguments = new List<FunctionArgument> { new FunctionArgument("a", "INT4"), new FunctionArgument("b", "INT4") },
             ReturnType = "INT4",
             Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
+            Language = LanguageType.PlfSharp,
             IsStrict = false,
         };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-int4-dll", "mult2IntFSharpDLL1", "'25'::INT2, '30'::INT2", "= '750'::INT4" },
-        new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL2", "'25'::INT2, NULL::INT2", "= '25'::INT4" },
-        new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL3", "NULL::INT2, '30'::INT2", "= '30'::INT4" },
-        new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL4", "NULL::INT2, NULL::INT2", "IS NULL" },
-        };
+        return new object[][] { new object[] { "f#-int4-dll", "mult2IntFSharpDLL1", "'25'::INT2, '30'::INT2", "= '750'::INT4" }, new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL2", "'25'::INT2, NULL::INT2", "= '25'::INT4" }, new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL3", "NULL::INT2, '30'::INT2", "= '30'::INT4" }, new object[] { "f#-int4-null-dll", "mult2IntFSharpDLL4", "NULL::INT2, NULL::INT2", "IS NULL" }, };
     }
 
     [Theory]
@@ -43,17 +34,22 @@ public class Mult2InTFsharpDllTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
 
+[Trait("Language", "FSharp")]
+[Trait("Category", "Dll")]
+public class Mult2InTFsharpDllTestsFSharp : BaseMult2InTFsharpDllTests
+{
+    protected override string FunctionBody => @"
+'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!mult2IntFSharp'
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
     public override string GetFunctionDefinition(SqlFunctionInfo functionInfo)
     {
         var arguments = string.Join(", ", functionInfo.Arguments.Select(arg => $"{arg.Name} {arg.Type}"));
         string strictKeyword = functionInfo.IsStrict ? "STRICT" : "";
-
         // Conditionally build the returnTypeString
-        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType)
-                                    ? string.Empty
-                                    : $"RETURNS {functionInfo.ReturnType}";
-
+        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType) ? string.Empty : $"RETURNS {functionInfo.ReturnType}";
         return $@"CREATE OR REPLACE FUNCTION {functionInfo.Name}({arguments})
 {returnTypeString} AS {functionInfo.Body} LANGUAGE {functionInfo.LanguageString} {strictKeyword};";
     }

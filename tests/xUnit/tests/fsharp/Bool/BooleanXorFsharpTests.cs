@@ -1,51 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Bool")]
-public class BooleanXorFsharpTests : PlDotNetTest
+public abstract class BaseBooleanXorFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let a = if a.HasValue then a else false
-let b = if b.HasValue then b else false
-(a.Value && not b.Value) || (not a.Value && b.Value)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public BooleanXorFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseBooleanXorFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "BooleanXorFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "boolean"), new FunctionArgument("b", "boolean") },
-            ReturnType = "boolean",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "BooleanXorFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "boolean"), new FunctionArgument("b", "boolean") }, ReturnType = "boolean", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-        new object[] 
-        { 
-            "f#-bool", 
-            "BooleanXorFSharp1", 
-            "false, false", 
-            "is false" 
-        },
-        new object[] 
-        { 
-            "f#-bool-null", 
-            "BooleanXorFSharp2", 
-            "NULL::BOOLEAN, NULL::BOOLEAN", 
-            "is false" 
-        }        };
+        return new object[][] { new object[] { "f#-bool", "BooleanXorFSharp1", "false, false", "is false" }, new object[] { "f#-bool-null", "BooleanXorFSharp2", "NULL::BOOLEAN, NULL::BOOLEAN", "is false" } };
     }
 
     [Theory]
@@ -54,4 +26,16 @@ let b = if b.HasValue then b else false
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Bool")]
+public class BooleanXorFsharpTestsFSharp : BaseBooleanXorFsharpTests
+{
+    protected override string FunctionBody => @"
+let a = if a.HasValue then a else false
+let b = if b.HasValue then b else false
+(a.Value && not b.Value) || (not a.Value && b.Value)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

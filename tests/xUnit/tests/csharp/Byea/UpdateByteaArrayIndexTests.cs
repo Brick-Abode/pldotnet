@@ -1,60 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Byea")]
-public class UpdateByTeaArrayIndexTests : PlDotNetTest
+public abstract class BaseUpdateByTeaArrayIndexTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int[] arrayInteger = index.Cast<int>().ToArray();
-values_array.SetValue(desired, arrayInteger);
-return values_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateByTeaArrayIndexTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateByTeaArrayIndexTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "UpdateByTeaArrayIndex",
-            Arguments = new List<FunctionArgument> {
-                new FunctionArgument("values_array", "BYTEA[]"),
-                new FunctionArgument("desired", "BYTEA"),
-                new FunctionArgument("index", "integer[]")
-            },
-            ReturnType = "BYTEA[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "UpdateByTeaArrayIndex", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "BYTEA[]"), new FunctionArgument("desired", "BYTEA"), new FunctionArgument("index", "integer[]") }, ReturnType = "BYTEA[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {
-                "c#-bytea-null-1array",
-                "updateByteaArrayIndex1",
-                "ARRAY['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA, null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA], 'Inserted BYTEA'::BYTEA, ARRAY[2]",
-                "= ARRAY['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA, 'Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]"
-            },
-            new object[] {
-                "c#-bytea-null-2array",
-                "updateByteaArrayIndex2",
-                "ARRAY[['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA], [null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]], 'Inserted BYTEA'::BYTEA, ARRAY[1,0]",
-                "= ARRAY[['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA], ['Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]]"
-            },
-            new object[] {
-                "c#-bytea-null-2array-arraynull",
-                "updateByteaArrayIndex3",
-                "ARRAY[[null::BYTEA, null::BYTEA], [null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]], 'Inserted BYTEA'::BYTEA, ARRAY[1,0]",
-                "= ARRAY[[null::BYTEA, null::BYTEA], ['Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]]"
-            },
-        };
+        return new object[][] { new object[] { "c#-bytea-null-1array", "updateByteaArrayIndex1", "ARRAY['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA, null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA], 'Inserted BYTEA'::BYTEA, ARRAY[2]", "= ARRAY['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA, 'Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]" }, new object[] { "c#-bytea-null-2array", "updateByteaArrayIndex2", "ARRAY[['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA], [null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]], 'Inserted BYTEA'::BYTEA, ARRAY[1,0]", "= ARRAY[['Brick Abode is nice!'::BYTEA, 'Test 1!'::BYTEA], ['Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]]" }, new object[] { "c#-bytea-null-2array-arraynull", "updateByteaArrayIndex3", "ARRAY[[null::BYTEA, null::BYTEA], [null::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]], 'Inserted BYTEA'::BYTEA, ARRAY[1,0]", "= ARRAY[[null::BYTEA, null::BYTEA], ['Inserted BYTEA'::BYTEA, '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA]]" }, };
     }
 
     [Theory]
@@ -63,4 +26,16 @@ return values_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Byea")]
+public class UpdateByTeaArrayIndexTestsCSharp : BaseUpdateByTeaArrayIndexTests
+{
+    protected override string FunctionBody => @"
+int[] arrayInteger = index.Cast<int>().ToArray();
+values_array.SetValue(desired, arrayInteger);
+return values_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

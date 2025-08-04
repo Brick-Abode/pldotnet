@@ -68,7 +68,7 @@ const char *pldotnet_ErrorSeverity(int elevel) {
     return prefix;
 }
 
-SPITupleTable *pldotnet_SPIExecute(char *cmd, bool read_only, long limit,
+SPITupleTable *pldotnet_SPIExecute(char *cmd, bool read_only, int64_t limit,
                                    ErrorData **errorData) {
     MemoryContextWrapper memory_context;
     int rv = 0;
@@ -98,7 +98,7 @@ SPITupleTable *pldotnet_SPIExecute(char *cmd, bool read_only, long limit,
 
 SPITupleTable *pldotnet_SPIExecutePlan(SPIPlanPtr plan, Datum *paramValues,
                                        const char *nullmap, bool read_only,
-                                       long limit, ErrorData **errorData) {
+                                       int64_t limit, ErrorData **errorData) {
     MemoryContextWrapper memory_context;
     int rv = 0;
 

@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Byea")]
-public class CreateByTeaMultidimensionalArrayTests : PlDotNetTest
+public abstract class BaseCreateByTeaMultidimensionalArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-byte[] objects_value = new byte[] { 0x92, 0x83, 0x74, 0x65, 0x56, 0x47, 0x38 };
-byte[]?[, ,] three_dimensional_array = new byte[]?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
-return three_dimensional_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateByTeaMultidimensionalArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateByTeaMultidimensionalArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateByTeaMultidimensionalArray",
-            Arguments = new List<FunctionArgument> { },
-            ReturnType = "BYTEA[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateByTeaMultidimensionalArray", Arguments = new List<FunctionArgument> { }, ReturnType = "BYTEA[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-bytea-null-3array-arraynull", "CreateByteaMultidimensionalArray1", "", "= ARRAY[[['\\x92837465564738'::BYTEA, '\\x92837465564738'::BYTEA], [null::BYTEA, null::BYTEA]], [['\\x92837465564738'::BYTEA, null::BYTEA], ['\\x92837465564738'::BYTEA, '\\x92837465564738'::BYTEA]]]" },
-        };
+        return new object[][] { new object[] { "c#-bytea-null-3array-arraynull", "CreateByteaMultidimensionalArray1", "", "= ARRAY[[['\\x92837465564738'::BYTEA, '\\x92837465564738'::BYTEA], [null::BYTEA, null::BYTEA]], [['\\x92837465564738'::BYTEA, null::BYTEA], ['\\x92837465564738'::BYTEA, '\\x92837465564738'::BYTEA]]]" }, };
     }
 
     [Theory]
@@ -42,4 +26,16 @@ return three_dimensional_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Byea")]
+public class CreateByTeaMultidimensionalArrayTestsCSharp : BaseCreateByTeaMultidimensionalArrayTests
+{
+    protected override string FunctionBody => @"
+byte[] objects_value = new byte[] { 0x92, 0x83, 0x74, 0x65, 0x56, 0x47, 0x38 };
+byte[]?[, ,] three_dimensional_array = new byte[]?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
+return three_dimensional_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

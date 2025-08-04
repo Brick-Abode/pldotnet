@@ -1,43 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Bit")]
-public class ModifyVarBitTests : PlDotNetTest
+public abstract class BaseModifyVarBitTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if (a == null)
-        return null;
+    protected abstract string FunctionBody { get; }
 
-    a[0] = a[0] ? false : true;
-    a[a.Length-1] = a[a.Length-1] ? false : true;
-    return a;
-    ";
+    protected abstract LanguageType Language { get; }
 
-    public ModifyVarBitTests()
+    public BaseModifyVarBitTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ModifyVarBit",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a BIT", "VARYING") },
-            ReturnType = "BIT VARYING",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ModifyVarBit", Arguments = new List<FunctionArgument> { new FunctionArgument("a BIT", "VARYING") }, ReturnType = "BIT VARYING", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-varbit", "modifyvarbit1", "'1001110001000'::BIT VARYING", "= '0001110001001'::BIT VARYING" },
-        new object[] { "c#-varbit-null", "modifyvarbit2", "NULL::BIT VARYING", "IS NULL" },
-        };
+        return new object[][] { new object[] { "c#-varbit", "modifyvarbit1", "'1001110001000'::BIT VARYING", "= '0001110001001'::BIT VARYING" }, new object[] { "c#-varbit-null", "modifyvarbit2", "NULL::BIT VARYING", "IS NULL" }, };
     }
 
     [Theory]
@@ -46,4 +26,19 @@ if (a == null)
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Bit")]
+public class ModifyVarBitTestsCSharp : BaseModifyVarBitTests
+{
+    protected override string FunctionBody => @"
+if (a == null)
+        return null;
+
+    a[0] = a[0] ? false : true;
+    a[a.Length-1] = a[a.Length-1] ? false : true;
+    return a;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseMonthDateArrayTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseMonthDateArrayTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseMonthDateArray", Arguments = new List<FunctionArgument> { new FunctionArgument("dates", "DATE[]") }, ReturnType = "DATE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-date-1array", "IncreaseMonthDateArray1", "ARRAY[DATE 'Oct-14-2022', DATE 'Oct-15-2022', null::date, DATE 'Oct-16-2022']", "= ARRAY[DATE 'Nov-14-2022', DATE 'Nov-15-2022', null::date, DATE 'Nov-16-2022']" }, new object[] { "c#-date-2array", "IncreaseMonthDateArray2", "ARRAY[[DATE 'Oct-14-2022', DATE 'Jan-15-2022'], [DATE 'Nov-18-2022', null::date]]", "= ARRAY[DATE 'Nov-14-2022', DATE 'Feb-15-2022', DATE 'Dec-18-2022', null::date]" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseMonthDateArray(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "DateTime")]
-public class IncreaseMonthDateArrayTests : PlDotNetTest
+public class IncreaseMonthDateArrayTestsCSharp : BaseIncreaseMonthDateArrayTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_dates = Array.CreateInstance(typeof(object), dates.Length);
 ArrayManipulation.FlatArray(dates, ref flatten_dates);
 for(int i = 0; i < flatten_dates.Length; i++)
@@ -27,33 +50,5 @@ for(int i = 0; i < flatten_dates.Length; i++)
 }
 return flatten_dates;
     ";
-
-    public IncreaseMonthDateArrayTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseMonthDateArray",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("dates", "DATE[]") },
-            ReturnType = "DATE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-date-1array", "IncreaseMonthDateArray1", "ARRAY[DATE 'Oct-14-2022', DATE 'Oct-15-2022', null::date, DATE 'Oct-16-2022']", "= ARRAY[DATE 'Nov-14-2022', DATE 'Nov-15-2022', null::date, DATE 'Nov-16-2022']" },
-        new object[] { "c#-date-2array", "IncreaseMonthDateArray2", "ARRAY[[DATE 'Oct-14-2022', DATE 'Jan-15-2022'], [DATE 'Nov-18-2022', null::date]]", "= ARRAY[DATE 'Nov-14-2022', DATE 'Feb-15-2022', DATE 'Dec-18-2022', null::date]" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseMonthDateArray(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

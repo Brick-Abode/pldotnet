@@ -74,15 +74,20 @@ static void *pldotnet_dlsym(void *handle, const char *symbol) {
 
 // Returns 0 on success, (other) on error
 static int pldotnet_GetHostFxrPath(char_t *buffer, size_t bufferSize) {
-    FILE *out = popen(
-        "dpkg -L dotnet-hostfxr-6.0 | grep libhostfxr.so | head -1 | xargs "
-        "dirname",
-        "r");
+    FILE *out;
+    char cmd[256];
     const char *aux = "/libhostfxr.so";
     size_t currentLength;
     int written;
 
-    if (NULL == out) { return -11; }
+    snprintf(cmd, sizeof(cmd),
+        "dpkg -L dotnet-hostfxr-%s | grep libhostfxr.so | head -1 | xargs dirname",
+        DOTNET_VERSION);
+
+    out = popen(cmd, "r");
+    if (NULL == out) {
+        return -11;
+    }
 
     while (fgets(buffer, bufferSize, out) != NULL) puts(buffer);
     buffer[strlen(buffer) - 1] = '\0';  // Removing the newline character

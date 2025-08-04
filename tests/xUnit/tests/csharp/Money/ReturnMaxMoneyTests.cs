@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Money")]
-public class ReturnMaxMoneyTests : PlDotNetTest
+public abstract class BaseReturnMaxMoneyTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-decimal value = 92233720368547758.07M;
-    return value;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnMaxMoneyTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnMaxMoneyTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnMaxMoney",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "MONEY",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnMaxMoney", Arguments = new List<FunctionArgument> { }, ReturnType = "MONEY", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-money", "returnMaxMoney", "", "= '92233720368547758.07'::MONEY" },
-        };
+        return new object[][] { new object[] { "c#-money", "returnMaxMoney", "", "= '92233720368547758.07'::MONEY" }, };
     }
 
     [Theory]
@@ -41,4 +26,15 @@ decimal value = 92233720368547758.07M;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Money")]
+public class ReturnMaxMoneyTestsCSharp : BaseReturnMaxMoneyTests
+{
+    protected override string FunctionBody => @"
+decimal value = 92233720368547758.07M;
+    return value;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

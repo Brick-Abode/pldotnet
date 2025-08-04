@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class IdentityStrFsharpTests : PlDotNetTest
+public abstract class BaseIdentityStrFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-a
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public IdentityStrFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseIdentityStrFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IdentityStrFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "text") },
-            ReturnType = "text",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "IdentityStrFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "text") }, ReturnType = "text", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-text", "identityStrFSharp", "'dog'", "= 'dog'" },
-        };
+        return new object[][] { new object[] { "f#-text", "identityStrFSharp", "'dog'", "= 'dog'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ a
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class IdentityStrFsharpTestsFSharp : BaseIdentityStrFsharpTests
+{
+    protected override string FunctionBody => @"
+a
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

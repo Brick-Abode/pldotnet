@@ -21,9 +21,12 @@
  *
  */
 
+#ifndef PLDOTNET_SPI_H_
+#define PLDOTNET_SPI_H_
+
+#include <stddef.h>
 #include <postgres.h>
 #include <executor/spi.h>
-
 #include "pldotnet_main.h"
 
 #define nullptr ((void *)0)
@@ -47,7 +50,7 @@ extern bool is_spi_open;
  */
 extern PGDLLEXPORT SPITupleTable *pldotnet_SPIExecute(char *cmd,
                                    bool read_only,
-                                   long limit,
+                                   int64_t limit,
                                    ErrorData **errorData);
 
 /**
@@ -72,7 +75,7 @@ extern PGDLLEXPORT SPITupleTable *pldotnet_SPIExecutePlan(SPIPlanPtr plan,
                                        Datum *paramValues,
                                        const char *nullmap,
                                        bool read_only,
-                                       long limit,
+                                       int64_t limit,
                                        ErrorData **errorData);
 
 /**
@@ -189,3 +192,5 @@ extern PGDLLEXPORT void pldotnet_FreeErrorData(ErrorData *errorData);
  * @return the number of processed rows at the last query executed.
  */
 extern PGDLLEXPORT uint64 pldotnet_GetProcessedRowsNumber(void);
+
+#endif  // PLDOTNET_SPI_H_

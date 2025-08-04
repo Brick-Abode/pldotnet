@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseModifyCoefficientsTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseModifyCoefficientsTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "ModifyCoefficients", Arguments = new List<FunctionArgument> { new FunctionArgument("original_line", "LINE") }, ReturnType = "LINE", Body = FunctionBody, Language = Language, IsStrict = false, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-line", "modifyCoefficients1", "LINE '{-1.5,2.75,-3.25}'", "= LINE '{1.50,-2.75,3.25}'" }, new object[] { "c#-line-null", "modifyCoefficients2", "NULL::LINE", "= LINE '{2.4, 8.2, -32.43}'" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestModifyCoefficients(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Geometric")]
-public class ModifyCoefficientsTests : PlDotNetTest
+public class ModifyCoefficientsTestsCSharp : BaseModifyCoefficientsTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 if (original_line == null)
     original_line = new NpgsqlLine(2.4, 8.2, -32.43);
 
@@ -19,33 +42,5 @@ double c = ((NpgsqlLine)original_line).C * -1.0;
 NpgsqlLine my_line = new NpgsqlLine(a,b,c);
 return my_line;
     ";
-
-    public ModifyCoefficientsTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ModifyCoefficients",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("original_line", "LINE") },
-            ReturnType = "LINE",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-line", "modifyCoefficients1", "LINE '{-1.5,2.75,-3.25}'", "= LINE '{1.50,-2.75,3.25}'" },
-            new object[] { "c#-line-null", "modifyCoefficients2", "NULL::LINE", "= LINE '{2.4, 8.2, -32.43}'" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestModifyCoefficients(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

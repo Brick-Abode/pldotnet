@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "BooL")]
-public class CreateBooleanMultidimensionalArrayTests : PlDotNetTest
+public abstract class BaseCreateBooleanMultidimensionalArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-bool?[, ,] boolean_three_dimensional = new bool?[2, 2, 2] {{{true, false}, {null, null}}, {{false, false}, {true, null}}};
-return boolean_three_dimensional;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateBooleanMultidimensionalArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateBooleanMultidimensionalArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateBooleanMultidimensionalArray",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "boolean[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateBooleanMultidimensionalArray", Arguments = new List<FunctionArgument> { }, ReturnType = "boolean[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-bool-null-3array-arraynull", "CreateBooleanMultidimensionalArray", "", "= ARRAY[[[true, false], [null::boolean, null::boolean]], [[false, false], [true, null::boolean]]]" },
-        };
+        return new object[][] { new object[] { "c#-bool-null-3array-arraynull", "CreateBooleanMultidimensionalArray", "", "= ARRAY[[[true, false], [null::boolean, null::boolean]], [[false, false], [true, null::boolean]]]" }, };
     }
 
     [Theory]
@@ -41,4 +26,15 @@ return boolean_three_dimensional;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "BooL")]
+public class CreateBooleanMultidimensionalArrayTestsCSharp : BaseCreateBooleanMultidimensionalArrayTests
+{
+    protected override string FunctionBody => @"
+bool?[, ,] boolean_three_dimensional = new bool?[2, 2, 2] {{{true, false}, {null, null}}, {{false, false}, {true, null}}};
+return boolean_three_dimensional;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

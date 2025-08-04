@@ -20,13 +20,13 @@ do $$
 $$ language plcsharp;
     ";
 
-	public DoMinDouble2Tests()
-	{
-		FunctionInfo = new SqlFunctionInfo
-		{
-			TestType = SqlTestType.DoBlock,
-		};
-	}
+    public DoMinDouble2Tests()
+    {
+        FunctionInfo = new SqlFunctionInfo
+        {
+            TestType = SqlTestType.DoBlock,
+        };
+    }
 
     [Fact]
     public void TestDoMinDouble2()

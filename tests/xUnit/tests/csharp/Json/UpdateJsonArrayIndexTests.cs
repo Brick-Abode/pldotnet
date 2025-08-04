@@ -1,52 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Json")]
-public class UpdateJsonArrayIndexTests : PlDotNetTest
+public abstract class BaseUpdateJsonArrayIndexTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int[] arrayInteger = index.Cast<int>().ToArray();
-values_array.SetValue(desired, arrayInteger);
-return values_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateJsonArrayIndexTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateJsonArrayIndexTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "UpdateJsonArrayIndex",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "JSON[]"), new FunctionArgument("desired", "JSON"), new FunctionArgument("index", "integer[]") },
-            ReturnType = "JSON[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "UpdateJsonArrayIndex", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "JSON[]"), new FunctionArgument("desired", "JSON"), new FunctionArgument("index", "integer[]") }, ReturnType = "JSON[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-new object[]
-{
-    "c#-json-null-1array",
-    "updateJsonArrayIndex1",
-    "ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[2]",
-    "= ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]::TEXT"
-},
-        new object[]
-        {
-            "c#-json-null-2array-arraynull",
-            "updateJsonArrayIndex2",
-            "ARRAY[[null::JSON, null::JSON], [null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[1,0]",
-            "= ARRAY[[null::JSON, null::JSON], ['{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]]::TEXT"
-        },
-        };
+        return new object[][] { new object[] { "c#-json-null-1array", "updateJsonArrayIndex1", "ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[2]", "= ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]::TEXT" }, new object[] { "c#-json-null-2array-arraynull", "updateJsonArrayIndex2", "ARRAY[[null::JSON, null::JSON], [null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[1,0]", "= ARRAY[[null::JSON, null::JSON], ['{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]]::TEXT" }, };
     }
 
     [Theory]
@@ -55,4 +26,16 @@ new object[]
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Json")]
+public class UpdateJsonArrayIndexTestsCSharp : BaseUpdateJsonArrayIndexTests
+{
+    protected override string FunctionBody => @"
+int[] arrayInteger = index.Cast<int>().ToArray();
+values_array.SetValue(desired, arrayInteger);
+return values_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Range")]
-public class CreateTimestampTzRangeArrayFsharpTests : PlDotNetTest
+public abstract class BaseCreateTimestampTzRangeArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let arr = Array.CreateInstance(typeof<NpgsqlRange<DateTime>>, 1, 1, 1)
-let objects_value = NpgsqlRange<DateTime>(DateTime(2022, 4, 14, 12, 30, 25, DateTimeKind.Utc), true, false, DateTime(2022, 4, 15, 17, 30, 25, DateTimeKind.Utc), false, false)
-arr.SetValue(objects_value, 0, 0, 0)
-arr
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateTimestampTzRangeArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateTimestampTzRangeArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateTimestampTzRangeArrayFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "TSTZRANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateTimestampTzRangeArrayFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "TSTZRANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-tstzrange-null-3array-arraynull", "CreateTimestampTzRangeArrayFSharp1", "", "= ARRAY[[['[2022-04-14 12:30:25 +00, 2022-04-15 17:30:25 +00)'::TSTZRANGE]]]" },
-        };
+        return new object[][] { new object[] { "f#-tstzrange-null-3array-arraynull", "CreateTimestampTzRangeArrayFSharp1", "", "= ARRAY[[['[2022-04-14 12:30:25 +00, 2022-04-15 17:30:25 +00)'::TSTZRANGE]]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,17 @@ arr
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Range")]
+public class CreateTimestampTzRangeArrayFsharpTestsFSharp : BaseCreateTimestampTzRangeArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+let arr = Array.CreateInstance(typeof<NpgsqlRange<DateTime>>, 1, 1, 1)
+let objects_value = NpgsqlRange<DateTime>(DateTime(2022, 4, 14, 12, 30, 25, DateTimeKind.Utc), true, false, DateTime(2022, 4, 15, 17, 30, 25, DateTimeKind.Utc), false, false)
+arr.SetValue(objects_value, 0, 0, 0)
+arr
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

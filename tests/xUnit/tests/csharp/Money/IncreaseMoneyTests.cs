@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseMoneyTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseMoneyTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseMoney", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MONEY[]") }, ReturnType = "MONEY[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-money-null-1array", "IncreaseMoney1", "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY]", "= ARRAY['32501.0'::MONEY, '-499.4'::MONEY, null::MONEY, '900541.2'::MONEY]" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseMoney(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Money")]
-public class IncreaseMoneyTests : PlDotNetTest
+public class IncreaseMoneyTestsCSharp : BaseIncreaseMoneyTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,32 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseMoneyTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseMoney",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MONEY[]") },
-            ReturnType = "MONEY[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-money-null-1array", "IncreaseMoney1", "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY]", "= ARRAY['32501.0'::MONEY, '-499.4'::MONEY, null::MONEY, '900541.2'::MONEY]" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseMoney(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

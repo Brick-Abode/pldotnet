@@ -1,61 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Call")]
-public class UpdateMoneyFSharpTests : PlDotNetTest
+public abstract class BaseUpdateMoneyFSharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-    let flatten_floats = Array.CreateInstance(typeof<decimal>, values_array.Length)
-    ArrayManipulation.FlatArray(values_array, ref flatten_floats) |> ignore
-    flatten_floats.SetValue(desired, index)
-    flatten_floats
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateMoneyFSharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateMoneyFSharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "updateMoneyArrayFSharp",
-            Arguments = new List<FunctionArgument> {
-                new FunctionArgument("values_array", "MONEY[]"),
-                new FunctionArgument("desired", "MONEY"),
-                new FunctionArgument("index", "int"),
-            },
-            ReturnType = "MONEY[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "updateMoneyArrayFSharp", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MONEY[]"), new FunctionArgument("desired", "MONEY"), new FunctionArgument("index", "int"), }, ReturnType = "MONEY[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {
-                "f#-money-null-1array",
-                "updateMoneyArrayFSharp1",
-                "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY], '1390540.2'::MONEY, 2::int",
-                "= ARRAY['32500.0'::MONEY, '-500.4'::MONEY, '1390540.2'::MONEY, '900540.2'::MONEY]"
-            },
-            new object[] {
-                "f#-money-null-2array-arraynull",
-                "updateMoneyArrayFSharp2",
-                "ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, 1::int",
-                "= ARRAY['32500.0'::MONEY, '1390540.2'::MONEY, 0::MONEY, 0::MONEY]"
-            },
-            new object[] {
-                "f#-money-null-2array-arraynull",
-                "updateMoneyArrayFSharp3",
-                "ARRAY[[null::MONEY, null::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, 1::int",
-                "= ARRAY[0::MONEY, '1390540.2'::MONEY, 0::MONEY, 0::MONEY]"
-            },
-        };
+        return new object[][] { new object[] { "f#-money-null-1array", "updateMoneyArrayFSharp1", "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY], '1390540.2'::MONEY, 2::int", "= ARRAY['32500.0'::MONEY, '-500.4'::MONEY, '1390540.2'::MONEY, '900540.2'::MONEY]" }, new object[] { "f#-money-null-2array-arraynull", "updateMoneyArrayFSharp2", "ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, 1::int", "= ARRAY['32500.0'::MONEY, '1390540.2'::MONEY, 0::MONEY, 0::MONEY]" }, new object[] { "f#-money-null-2array-arraynull", "updateMoneyArrayFSharp3", "ARRAY[[null::MONEY, null::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, 1::int", "= ARRAY[0::MONEY, '1390540.2'::MONEY, 0::MONEY, 0::MONEY]" }, };
     }
 
     [Theory]
@@ -64,4 +26,17 @@ public class UpdateMoneyFSharpTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Call")]
+public class UpdateMoneyFSharpTestsFSharp : BaseUpdateMoneyFSharpTests
+{
+    protected override string FunctionBody => @"
+    let flatten_floats = Array.CreateInstance(typeof<decimal>, values_array.Length)
+    ArrayManipulation.FlatArray(values_array, ref flatten_floats) |> ignore
+    flatten_floats.SetValue(desired, index)
+    flatten_floats
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

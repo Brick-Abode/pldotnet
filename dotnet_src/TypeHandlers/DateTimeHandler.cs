@@ -16,7 +16,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using NpgsqlTypes;
-using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
@@ -40,7 +39,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.DATEOID, OID.DATEARRAYOID)]
-    public class DateHandler : StructTypeHandler<DateOnly>
+    public partial class DateHandler : StructTypeHandler<DateOnly>
     {
         public DateHandler()
         {
@@ -52,15 +51,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumDateAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumDateAttributes(IntPtr datum, ref int date);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumDateAttributes(IntPtr datum, ref int date);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumDate().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumDate(int date);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumDate(int date);
 
         /// <inheritdoc />
         public override DateOnly InputValue(IntPtr datum)
@@ -73,7 +72,7 @@ namespace PlDotNET.Handler
                     throw new InvalidCastException(ConfigDateTime.InfinityExceptionMessage) : DateOnly.MaxValue,
                 int.MinValue => ConfigDateTime.DisableDateTimeInfinityConversions ?
                     throw new InvalidCastException(ConfigDateTime.InfinityExceptionMessage) : DateOnly.MinValue,
-                var value => DateOnly.FromDayNumber(value + 730119)
+                var value => DateOnly.FromDayNumber(value + 730119),
             };
         }
 
@@ -91,7 +90,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.TIMEOID, OID.TIMEARRAYOID)]
-    public class TimeHandler : StructTypeHandler<TimeOnly>
+    public partial class TimeHandler : StructTypeHandler<TimeOnly>
     {
         public TimeHandler()
         {
@@ -103,15 +102,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumTimeAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumTimeAttributes(IntPtr datum, ref long time);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumTimeAttributes(IntPtr datum, ref long time);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumTime().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumTime(long time);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumTime(long time);
 
         /// <inheritdoc />
         public override TimeOnly InputValue(IntPtr datum)
@@ -135,7 +134,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.TIMETZOID, OID.TIMETZARRAYOID)]
-    public class TimeTzHandler : StructTypeHandler<DateTimeOffset>
+    public partial class TimeTzHandler : StructTypeHandler<DateTimeOffset>
     {
         public TimeTzHandler()
         {
@@ -147,15 +146,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumTimeTzAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumTimeTzAttributes(IntPtr datum, ref long time, ref int zone);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumTimeTzAttributes(IntPtr datum, ref long time, ref int zone);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumTimeTz().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumTimeTz(long time, int zone);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumTimeTz(long time, int zone);
 
         /// <inheritdoc />
         public override DateTimeOffset InputValue(IntPtr datum)
@@ -180,7 +179,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.TIMESTAMPOID, OID.TIMESTAMPARRAYOID)]
-    public class TimestampHandler : StructTypeHandler<DateTime>
+    public partial class TimestampHandler : StructTypeHandler<DateTime>
     {
         public TimestampHandler()
         {
@@ -192,15 +191,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumTimestampAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumTimestampAttributes(IntPtr datum, ref long timestamp);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumTimestampAttributes(IntPtr datum, ref long timestamp);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumTimestamp().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumTimestamp(long timestamp);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumTimestamp(long timestamp);
 
         /// <summary>
         /// Creates the DateTime object according to the provided parameters.
@@ -213,7 +212,7 @@ namespace PlDotNET.Handler
                 {
                     long.MaxValue => ConfigDateTime.DisableDateTimeInfinityConversions ? throw new InvalidCastException(ConfigDateTime.InfinityExceptionMessage) : DateTime.MaxValue,
                     long.MinValue => ConfigDateTime.DisableDateTimeInfinityConversions ? throw new InvalidCastException(ConfigDateTime.InfinityExceptionMessage) : DateTime.MinValue,
-                    var value => new DateTime((value * 10) + ConfigDateTime.PostgresTimestampOffsetTicks, kind)
+                    var value => new DateTime((value * 10) + ConfigDateTime.PostgresTimestampOffsetTicks, kind),
                 };
             }
             catch (ArgumentOutOfRangeException e)
@@ -257,7 +256,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.TIMESTAMPTZOID, OID.TIMESTAMPTZARRAYOID)]
-    public class TimestampTzHandler : StructTypeHandler<DateTime>
+    public partial class TimestampTzHandler : StructTypeHandler<DateTime>
     {
         public TimestampTzHandler()
         {
@@ -269,15 +268,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumTimestampTzAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumTimestampTzAttributes(IntPtr datum, ref long timestamp);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumTimestampTzAttributes(IntPtr datum, ref long timestamp);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumTimestampTz().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumTimestampTz(long timestamp);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumTimestampTz(long timestamp);
 
         /// <inheritdoc />
         public override DateTime InputValue(IntPtr datum)
@@ -336,7 +335,7 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-datetime.html.
     /// </remarks>
     [OIDHandler(OID.INTERVALOID, OID.INTERVALARRAYOID)]
-    public class IntervalHandler : StructTypeHandler<NpgsqlInterval>
+    public partial class IntervalHandler : StructTypeHandler<NpgsqlInterval>
     {
         public IntervalHandler()
         {
@@ -348,15 +347,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumIntervalAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumIntervalAttributes(IntPtr datum, ref long time, ref int day, ref int month);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumIntervalAttributes(IntPtr datum, ref long time, ref int day, ref int month);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumInterval().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumInterval(long time, int day, int month);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumInterval(long time, int day, int month);
 
         /// <inheritdoc />
         public override NpgsqlInterval InputValue(IntPtr datum)

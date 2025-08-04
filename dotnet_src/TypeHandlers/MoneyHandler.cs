@@ -14,7 +14,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -25,8 +25,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-money.html.
     /// </remarks>
     [OIDHandler(OID.MONEYOID, OID.MONEYARRAYOID)]
-    public class MoneyHandler : StructTypeHandler<decimal>
+    public partial class MoneyHandler : StructTypeHandler<decimal>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoneyHandler"/> class.
+        /// </summary>
         public MoneyHandler()
         {
             this.ElementOID = OID.MONEYOID;
@@ -37,15 +40,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumMoneyAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumMoneyAttributes(IntPtr datum, ref long value);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumMoneyAttributes(IntPtr datum, ref long value);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumMoney().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumMoney(long value);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumMoney(long value);
 
         /// <summary>
         /// Checks the limits of the decimal value before converting it into PostgreSQL money data type.
@@ -63,7 +66,7 @@ namespace PlDotNET.Handler
         {
             long value = 0;
             pldotnet_GetDatumMoneyAttributes(datum, ref value);
-            decimal datumValue = new (value);
+            decimal datumValue = new(value);
             return datumValue / 100.0M;
         }
 

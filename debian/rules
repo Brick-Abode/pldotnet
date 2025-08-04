@@ -22,6 +22,7 @@ override_dh_auto_install:
 
 override_dh_installdeb:
 	for VER in $(PG_VER); do \
+		set -e; \
 		PLDOTNET_PATH="debian/postgresql-$$VER-pldotnet/$(USR_LIBDIR)PlDotNET"; \
 		PKG_LIBDIR="/usr/lib/postgresql/$$VER/lib"; \
 		mkdir -p "debian/postgresql-$$VER-pldotnet/$(USR_LIBDIR)" ; \
@@ -33,12 +34,13 @@ override_dh_installdeb:
 		cp -R $(DOTNET_TESTS) "$$PLDOTNET_PATH/samples" ; \
 		rm "$$PLDOTNET_PATH/samples/fsharp/testfsdll.sql" ; \
 		rm "$$PLDOTNET_PATH/samples/csharp/testdll.sql" ; \
-		cp debian/preinst debian/postinst debian/prerm debian/postrm "debian/postgresql-$$VER-pldotnet/DEBIAN/" ; \
+		cp debian/postinst "debian/postgresql-$$VER-pldotnet/DEBIAN/" ; \
 		chmod 755 -R "debian/postgresql-$$VER-pldotnet/DEBIAN/" ; \
 	done
 
 override_dh_install-arch:
 	for VER in $(PG_VER); do \
+		set -e; \
 		mkdir -p "debian/postgresql-"$${VER}"-pldotnet/usr/share/doc/postgresql-"$${VER}"-pldotnet" ; \
 		[ -e docs/FAQ.md ] && cp docs/FAQ.md "debian/postgresql-"$${VER}"-pldotnet/usr/share/doc/postgresql-"$${VER}"-pldotnet" ; \
 		[ -e docs/*.pdf ] && cp docs/*.pdf "debian/postgresql-"$${VER}"-pldotnet/usr/share/doc/postgresql-"$${VER}"-pldotnet" ; \

@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "String")]
-public class UpdateVarCharArrayIndexTests : PlDotNetTest
+public abstract class BaseUpdateVarCharArrayIndexTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int[] arrayInteger = index.Cast<int>().ToArray();
-values_array.SetValue(desired, arrayInteger);
-return values_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateVarCharArrayIndexTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateVarCharArrayIndexTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "UpdateVarCharArrayIndex",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "VARCHAR[]"), new FunctionArgument("desired", "VARCHAR"), new FunctionArgument("index", "integer[]") },
-            ReturnType = "VARCHAR[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "UpdateVarCharArrayIndex", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "VARCHAR[]"), new FunctionArgument("desired", "VARCHAR"), new FunctionArgument("index", "integer[]") }, ReturnType = "VARCHAR[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-varchar-null-1array", "updateVarcharArrayIndex1", "ARRAY['hello'::VARCHAR, 'hi'::VARCHAR, null::VARCHAR, 'bye'::VARCHAR], 'goodbye'::VARCHAR, ARRAY[2]", "= ARRAY['hello'::VARCHAR, 'hi'::VARCHAR, 'goodbye'::VARCHAR, 'bye'::VARCHAR]" },
-        new object[] { "c#-varchar-null-2array-arraynull", "updateVarcharArrayIndex2", "ARRAY[[null::VARCHAR, null::VARCHAR], [null::VARCHAR, 'bye'::VARCHAR]], 'goodbye'::VARCHAR, ARRAY[1,0]", "= ARRAY[[null::VARCHAR, null::VARCHAR], ['goodbye'::VARCHAR, 'bye'::VARCHAR]]" },
-        };
+        return new object[][] { new object[] { "c#-varchar-null-1array", "updateVarcharArrayIndex1", "ARRAY['hello'::VARCHAR, 'hi'::VARCHAR, null::VARCHAR, 'bye'::VARCHAR], 'goodbye'::VARCHAR, ARRAY[2]", "= ARRAY['hello'::VARCHAR, 'hi'::VARCHAR, 'goodbye'::VARCHAR, 'bye'::VARCHAR]" }, new object[] { "c#-varchar-null-2array-arraynull", "updateVarcharArrayIndex2", "ARRAY[[null::VARCHAR, null::VARCHAR], [null::VARCHAR, 'bye'::VARCHAR]], 'goodbye'::VARCHAR, ARRAY[1,0]", "= ARRAY[[null::VARCHAR, null::VARCHAR], ['goodbye'::VARCHAR, 'bye'::VARCHAR]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,16 @@ return values_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "String")]
+public class UpdateVarCharArrayIndexTestsCSharp : BaseUpdateVarCharArrayIndexTests
+{
+    protected override string FunctionBody => @"
+int[] arrayInteger = index.Cast<int>().ToArray();
+values_array.SetValue(desired, arrayInteger);
+return values_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

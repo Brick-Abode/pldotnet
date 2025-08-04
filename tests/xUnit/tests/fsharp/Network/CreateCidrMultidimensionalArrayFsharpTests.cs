@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Network")]
-public class CreateCidrMultidimensionalArrayFsharpTests : PlDotNetTest
+public abstract class BaseCreateCidrMultidimensionalArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let objects_value = struct (IPAddress.Parse(""127.123.54.0""), 24)
-let arr = Array.CreateInstance(typeof<struct(IPAddress*int)>, 1, 1, 1)
-arr.SetValue(objects_value, 0, 0, 0)
-arr
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateCidrMultidimensionalArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateCidrMultidimensionalArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateCidrMultidimensionalArrayFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "CIDR[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateCidrMultidimensionalArrayFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "CIDR[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-cidr-3array", "CreateCIDRMultidimensionalArrayFSharp", "", "= ARRAY[[[CIDR '127.123.54.0/24']]]" },
-        };
+        return new object[][] { new object[] { "f#-cidr-3array", "CreateCIDRMultidimensionalArrayFSharp", "", "= ARRAY[[[CIDR '127.123.54.0/24']]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,17 @@ arr
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Network")]
+public class CreateCidrMultidimensionalArrayFsharpTestsFSharp : BaseCreateCidrMultidimensionalArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+let objects_value = struct (IPAddress.Parse(""127.123.54.0""), 24)
+let arr = Array.CreateInstance(typeof<struct(IPAddress*int)>, 1, 1, 1)
+arr.SetValue(objects_value, 0, 0, 0)
+arr
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

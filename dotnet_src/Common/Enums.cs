@@ -40,7 +40,7 @@ namespace PlDotNET.Common
     /// <summary>
     /// Defines the modes of function calls in the PlDotNET system.
     /// </summary>
-    public enum CallMode : int
+    public enum CallMode
     {
         /// <summary>
         /// Indicates a normal, non-set-returning function (SRF) call.
@@ -76,7 +76,7 @@ namespace PlDotNET.Common
     /// <summary>
     /// Defines the modes of return values from functions in the PlDotNET system.
     /// </summary>
-    public enum ReturnMode : int
+    public enum ReturnMode
     {
         /// <summary>
         /// Indicates that an error was encountered during the function execution.

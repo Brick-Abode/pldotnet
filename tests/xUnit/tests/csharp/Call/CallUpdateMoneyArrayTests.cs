@@ -1,59 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Call")]
-public class CallUpdateMoneyArrayTests : PlDotNetTest
+public abstract class BaseCallUpdateMoneyArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int[] arrayInteger = index.Cast<int>().ToArray();
-values_array.SetValue(desired, arrayInteger);
-return values_array;
-    ";
-    public CallUpdateMoneyArrayTests()
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseCallUpdateMoneyArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "updateMoneyArray",
-            Arguments = new List<FunctionArgument> {
-                new FunctionArgument("values_array","MONEY[]"),
-                new FunctionArgument("desired","MONEY"),
-                new FunctionArgument("index","integer[]"),
-            },
-            ReturnType = "MONEY[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "updateMoneyArray", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MONEY[]"), new FunctionArgument("desired", "MONEY"), new FunctionArgument("index", "integer[]"), }, ReturnType = "MONEY[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {
-                "c#-money-null-1array",
-                "updateMoneyArray1",
-                "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY], '1390540.2'::MONEY, ARRAY[2]",
-                "= ARRAY['32500.0'::MONEY, '-500.4'::MONEY, '1390540.2'::MONEY, '900540.2'::MONEY]"
-            },
-            new object[] {
-                "c#-money-null-2array-arraynull",
-                "updateMoneyArray2",
-                "ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, ARRAY[1,0]",
-                "= ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], ['1390540.2'::MONEY, null::MONEY]]"
-            },
-            new object[] {
-                "c#-money-null-2array-arraynull",
-                "updateMoneyArray3",
-                "ARRAY[[null::MONEY, null::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, ARRAY[1,0]",
-                "= ARRAY[[null::MONEY, null::MONEY], ['1390540.2'::MONEY, null::MONEY]]"
-            },
-        };
+        return new object[][] { new object[] { "c#-money-null-1array", "updateMoneyArray1", "ARRAY['32500.0'::MONEY, '-500.4'::MONEY, null::MONEY, '900540.2'::MONEY], '1390540.2'::MONEY, ARRAY[2]", "= ARRAY['32500.0'::MONEY, '-500.4'::MONEY, '1390540.2'::MONEY, '900540.2'::MONEY]" }, new object[] { "c#-money-null-2array-arraynull", "updateMoneyArray2", "ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, ARRAY[1,0]", "= ARRAY[['32500.0'::MONEY, '-500.4'::MONEY], ['1390540.2'::MONEY, null::MONEY]]" }, new object[] { "c#-money-null-2array-arraynull", "updateMoneyArray3", "ARRAY[[null::MONEY, null::MONEY], [null::MONEY, null::MONEY]], '1390540.2'::MONEY, ARRAY[1,0]", "= ARRAY[[null::MONEY, null::MONEY], ['1390540.2'::MONEY, null::MONEY]]" }, };
     }
 
     [Theory]
@@ -64,3 +28,14 @@ return values_array;
     }
 }
 
+[Trait("Language", "CSharp")]
+[Trait("Category", "Call")]
+public class CallUpdateMoneyArrayTestsCSharp : BaseCallUpdateMoneyArrayTests
+{
+    protected override string FunctionBody => @"
+int[] arrayInteger = index.Cast<int>().ToArray();
+values_array.SetValue(desired, arrayInteger);
+return values_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
+}

@@ -1,19 +1,16 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Dll")]
-public class UpdateJsonArrayIndexDllTests : PlDotNetTest
+public abstract class BaseUpdateJsonArrayIndexDllTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/net6.0/CSharpTest.dll:TestDLLFunctions.TestClass!updatejsonarrayindex'
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateJsonArrayIndexDllTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateJsonArrayIndexDllTests()
     {
         FunctionInfo = new SqlFunctionInfo
         {
@@ -21,7 +18,7 @@ public class UpdateJsonArrayIndexDllTests : PlDotNetTest
             Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "JSON[]"), new FunctionArgument("desired", "JSON"), new FunctionArgument("index", "integer[]") },
             ReturnType = "JSON[]",
             Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
+            Language = LanguageType.PlcSharp,
             IsStrict = false,
             CastFunctionAs = "TEXT",
         };
@@ -29,11 +26,7 @@ public class UpdateJsonArrayIndexDllTests : PlDotNetTest
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {"c#-json-null-1array-dll", "updateJsonArrayIndexDLL1", "ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[2]", "= ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]::TEXT"},
-            new object[] {"c#-json-null-2array-arraynull-dll", "updateJsonArrayIndexDLL2", "ARRAY[[null::JSON, null::JSON], [null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[1,0]", "= ARRAY[[null::JSON, null::JSON], ['{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]]::TEXT"},
-        };
+        return new object[][] { new object[] { "c#-json-null-1array-dll", "updateJsonArrayIndexDLL1", "ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[2]", "= ARRAY['{\"age\": 20, \"name\": \"Mikael\"}'::JSON, '{\"age\": 25, \"name\": \"Rosicley\"}'::JSON, '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]::TEXT" }, new object[] { "c#-json-null-2array-arraynull-dll", "updateJsonArrayIndexDLL2", "ARRAY[[null::JSON, null::JSON], [null::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]], '{\"age\": 40, \"name\": \"John Doe\"}'::JSON, ARRAY[1,0]", "= ARRAY[[null::JSON, null::JSON], ['{\"age\": 40, \"name\": \"John Doe\"}'::JSON, '{\"age\": 30, \"name\": \"Todd\"}'::JSON]]::TEXT" }, };
     }
 
     [Theory]
@@ -42,16 +35,22 @@ public class UpdateJsonArrayIndexDllTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Dll")]
+public class UpdateJsonArrayIndexDllTestsCSharp : BaseUpdateJsonArrayIndexDllTests
+{
+    protected override string FunctionBody => @"
+'/app/pldotnet/tests/csharp/DotNetTestProject/bin/Release/CSharpTest.dll:TestDLLFunctions.TestClass!updatejsonarrayindex'
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
     public override string GetFunctionDefinition(SqlFunctionInfo functionInfo)
     {
         var arguments = string.Join(", ", functionInfo.Arguments.Select(arg => $"{arg.Name} {arg.Type}"));
         string strictKeyword = functionInfo.IsStrict ? "STRICT" : "";
-
         // Conditionally build the returnTypeString
-        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType)
-                                    ? string.Empty
-                                    : $"RETURNS {functionInfo.ReturnType}";
-
+        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType) ? string.Empty : $"RETURNS {functionInfo.ReturnType}";
         return $@"CREATE OR REPLACE FUNCTION {functionInfo.Name}({arguments})
 {returnTypeString} AS {functionInfo.Body} LANGUAGE {functionInfo.LanguageString} {strictKeyword};";
     }
