@@ -4,10 +4,6 @@ UNAME = $(shell uname)
 SED ?= sed
 DBUSER ?= postgres
 
-# General
-# Get installed dotnet host host
-DOTNET_VER = $(shell dotnet --info | grep 'Host' -A 3 | $(SED) -n 's/Version: \(.*\)/\1/p' | xargs)
-
 CURRENT_DIR = $(shell pwd)
 
 pre-tests-script:

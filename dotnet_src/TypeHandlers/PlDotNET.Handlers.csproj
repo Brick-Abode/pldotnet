@@ -3,17 +3,27 @@
   <PropertyGroup>
     <Authors>Brick Abode</Authors>
     <Description>PlDotNET.Handlers includes classes and methods for converting between PostgreSQL data types and .NET types.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(TargetFramework)</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Stylecop.Analyzers" Version="1.1.118">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="All">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="FSharp.Core" Version="6.*" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <FSharpCoreVersion Condition="'$(TargetFramework)' == 'net6.0'">6.*</FSharpCoreVersion>
+    <FSharpCoreVersion Condition="'$(TargetFramework)' == 'net7.0'">7.*</FSharpCoreVersion>
+    <FSharpCoreVersion Condition="'$(TargetFramework)' == 'net8.0'">8.*</FSharpCoreVersion>
+    <FSharpCoreVersion Condition="'$(TargetFramework)' == 'net9.0'">9.*</FSharpCoreVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="$(FSharpCoreVersion)" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -21,7 +31,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\npgsql\src\Npgsql\NpgsqlTypes\NpgsqlTypes.csproj" />
+    <ProjectReference Include="..\npgsql\src\Npgsql\Npgsql.csproj" />
     <ProjectReference Include="..\Common\PlDotNET.Common.csproj" />
   </ItemGroup>
 

@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Bool")]
-public class ReturnBooleanArrayFsharpTests : PlDotNetTest
+public abstract class BaseReturnBooleanArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-booleans
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnBooleanArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnBooleanArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnBooleanArrayFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("booleans", "boolean[]") },
-            ReturnType = "boolean[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnBooleanArrayFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("booleans", "boolean[]") }, ReturnType = "boolean[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-bool-null-1array", "returnBooleanArrayFSharp1", "ARRAY[true, null::boolean, false, false]", "= ARRAY[true, null::boolean, false, false]" },
-        new object[] { "f#-bool-null-2array-arraynull", "returnBooleanArrayFSharp2", "ARRAY[[true, false], [null::boolean, null::boolean]]", "= ARRAY[[true, false], [null::boolean, null::boolean]]" },
-        new object[] { "f#-bool-null-3array-arraynull", "returnBooleanArrayFSharp3", "ARRAY[[[true, false], [null::boolean, null::boolean]], [[true, null::boolean], [true, null::boolean]]]", "= ARRAY[[[true, false], [null::boolean, null::boolean]], [[true, null::boolean], [true, null::boolean]]]" },
-        };
+        return new object[][] { new object[] { "f#-bool-null-1array", "returnBooleanArrayFSharp1", "ARRAY[true, null::boolean, false, false]", "= ARRAY[true, null::boolean, false, false]" }, new object[] { "f#-bool-null-2array-arraynull", "returnBooleanArrayFSharp2", "ARRAY[[true, false], [null::boolean, null::boolean]]", "= ARRAY[[true, false], [null::boolean, null::boolean]]" }, new object[] { "f#-bool-null-3array-arraynull", "returnBooleanArrayFSharp3", "ARRAY[[[true, false], [null::boolean, null::boolean]], [[true, null::boolean], [true, null::boolean]]]", "= ARRAY[[[true, false], [null::boolean, null::boolean]], [[true, null::boolean], [true, null::boolean]]]" }, };
     }
 
     [Theory]
@@ -42,4 +26,14 @@ booleans
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Bool")]
+public class ReturnBooleanArrayFsharpTestsFSharp : BaseReturnBooleanArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+booleans
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

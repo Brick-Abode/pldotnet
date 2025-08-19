@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "InOut")]
-public class FsInOutAllThreeSTests : PlDotNetTest
+public abstract class BaseFsInOutAllThreeSTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-Nullable(b+1), Nullable(a+b)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public FsInOutAllThreeSTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseFsInOutAllThreeSTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "FsInOutAllThreeS",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "INT"), new FunctionArgument("INOUT b", "INT"), new FunctionArgument("OUT c", "INT") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "FsInOutAllThreeS", Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "INT"), new FunctionArgument("INOUT b", "INT"), new FunctionArgument("OUT c", "INT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-inout-allthree-S", "fs_inout_allthreeS", "3, 8", "= ROW(9, 11)" },
-        };
+        return new object[][] { new object[] { "f#-inout-allthree-S", "fs_inout_allthreeS", "3, 8", "= ROW(9, 11)" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ Nullable(b+1), Nullable(a+b)
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "InOut")]
+public class FsInOutAllThreeSTestsFSharp : BaseFsInOutAllThreeSTests
+{
+    protected override string FunctionBody => @"
+Nullable(b+1), Nullable(a+b)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

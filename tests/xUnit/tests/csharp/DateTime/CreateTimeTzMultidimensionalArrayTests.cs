@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "DateTime")]
-public class CreateTimeTzMultidimensionalArrayTests : PlDotNetTest
+public abstract class BaseCreateTimeTzMultidimensionalArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int hour = 10;
-int minute = 33;
-int second = 55;
-DateTimeOffset objects_value = new DateTimeOffset(2022, 12, 25, hour, minute, second, new TimeSpan(2, 0, 0));
-DateTimeOffset?[, ,] three_dimensional_array = new DateTimeOffset?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
-return three_dimensional_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateTimeTzMultidimensionalArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateTimeTzMultidimensionalArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateTimeTzMultidimensionalArray",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "TIMETZ[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateTimeTzMultidimensionalArray", Arguments = new List<FunctionArgument> { }, ReturnType = "TIMETZ[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-timetz-3array", "CreateTimetzMultidimensionalArray", "", "= ARRAY[[[TIMETZ '10:33:55+02:00', TIMETZ '10:33:55+02:00'], [null::timetz, null::timetz]], [[TIMETZ '10:33:55+02:00', null::timetz], [TIMETZ '10:33:55+02:00', TIMETZ '10:33:55+02:00']]]" },
-        };
+        return new object[][] { new object[] { "c#-timetz-3array", "CreateTimetzMultidimensionalArray", "", "= ARRAY[[[TIMETZ '10:33:55+02:00', TIMETZ '10:33:55+02:00'], [null::timetz, null::timetz]], [[TIMETZ '10:33:55+02:00', null::timetz], [TIMETZ '10:33:55+02:00', TIMETZ '10:33:55+02:00']]]" }, };
     }
 
     [Theory]
@@ -45,4 +26,19 @@ return three_dimensional_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "DateTime")]
+public class CreateTimeTzMultidimensionalArrayTestsCSharp : BaseCreateTimeTzMultidimensionalArrayTests
+{
+    protected override string FunctionBody => @"
+int hour = 10;
+int minute = 33;
+int second = 55;
+DateTimeOffset objects_value = new DateTimeOffset(2022, 12, 25, hour, minute, second, new TimeSpan(2, 0, 0));
+DateTimeOffset?[, ,] three_dimensional_array = new DateTimeOffset?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
+return three_dimensional_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

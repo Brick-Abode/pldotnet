@@ -42,74 +42,158 @@ using PlDotNET.FSharp;
 
 namespace PlDotNET
 {
+    /// <summary>
+    /// This class contains the cached information for a user function.
+    /// </summary>
     public struct CachedFunction
     {
+        /// <summary>
+        /// The source code of the user handler.
+        /// </summary>
         public string UserHandlerSourceCode;
+
+        /// <summary>
+        /// The source code of the user function.
+        /// </summary>
         public string UserFunctionSourceCode;
+
+        /// <summary>
+        /// The name of the function.
+        /// </summary>
         public string FunctionName;
+
+        /// <summary>
+        /// Indicates whether the function supports null input.
+        /// </summary>
         public bool SupportNullInput;
+
+        /// <summary>
+        /// The user procedure delegate that will be called to execute the function.
+        /// </summary>
         public Func<List<IntPtr>, IntPtr, ulong, int, bool[], int> UserProcedure;
+
+        /// <summary>
+        /// The assembly load context for the user function.
+        /// </summary>
         public AssemblyLoadContext UserAssemblyLoadContext;
+
+        /// <summary>
+        /// The .NET language used for the function (C# or F#).
+        /// </summary>
         public DotNETLanguage Language;
     }
 
+    /// <summary>
+    /// This class contains the cached information for a user trigger.
+    /// </summary>
     public struct CachedTrigger
     {
+        /// <summary>
+        /// The source code of the user handler.
+        /// </summary>
         public string UserHandlerSourceCode;
+
+        /// <summary>
+        /// The source code of the user function.
+        /// </summary>
         public string UserFunctionSourceCode;
+
+        /// <summary>
+        /// The name of the function.
+        /// </summary>
         public string FunctionName;
+
+        /// <summary>
+        /// The user procedure delegate that will be called to execute the trigger.
+        /// </summary>
         public Func<IntPtr, IntPtr, string, string, string, string, int, string, string, string[], int> UserProcedure;
+
+        /// <summary>
+        /// The assembly load context for the user trigger.
+        /// </summary>
         public AssemblyLoadContext UserAssemblyLoadContext;
+
+        /// <summary>
+        /// The .NET language used for the trigger (C# or F#).
+        /// </summary>
         public DotNETLanguage Language;
     }
 
-    public static class Engine
+    /// <summary>
+    /// This class contains the main functionality of PL.NET, including compiling and running user functions and triggers.
+    /// It also manages the settings and cached information for compiled functions and triggers.
+    /// </summary>
+    public static partial class Engine
     {
-        public static bool AlwaysNullable = false;
-
-        public static bool PrintSourceCode = false;
-
-        public static bool SaveSourceCode = true;
-
-        public static bool CompileFSharpWithFCS = false;
-
-        public static int VerboseLevel = 0;
-
-        public static string PathToSaveSourceCode = "/tmp/PlDotNET/GeneratedCodes";
-
-        public static string PathToTemporaryFiles = "/tmp/PlDotNET/";
-
-        public static IDictionary<uint, CachedFunction> FuncBuiltCodeDict = new Dictionary<uint, CachedFunction>();
-        public static IDictionary<uint, CachedTrigger> TrigBuiltCodeDict = new Dictionary<uint, CachedTrigger>();
-
+        /// <summary>
+        /// A delegate that compiles the user function code using Roslyn.
+        /// </summary>
+        /// <param name="functionId">The ID of the function to compile.</param>
+        /// <param name="name">The name of the function.</param>
+        /// <param name="returnType">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
+        /// <param name="isTrigger">True if the function is a trigger; otherwise false.</param>
+        /// <param name="paramNames">A space-separated string of parameter names.</param>
+        /// <param name="paramTypes">An array of OIDs representing the parameter types.</param>
+        /// <param name="paramModes">An array of bytes representing the parameter modes.</param>
+        /// <param name="numOutputValues">The number of output values.</param>
+        /// <param name="body">The body of the function as a string.</param>
+        /// <param name="supportNullInput">True if the function supports null input; otherwise false.</param>
+        /// <param name="dotnetLanguage">The .NET language of the function (C# or F#).</param>
         public unsafe delegate int DelCompileUserFunction(
             uint functionId,
             IntPtr name,
             uint returnType,
             [MarshalAs(UnmanagedType.I1)] bool retset,
-            [MarshalAs(UnmanagedType.I1)] bool is_trigger,
+            [MarshalAs(UnmanagedType.I1)] bool isTrigger,
             IntPtr paramNames,
             uint* paramTypes,
             byte* paramModes,
-            int num_output_values,
+            int numOutputValues,
             IntPtr body,
             [MarshalAs(UnmanagedType.I1)] bool supportNullInput,
             IntPtr dotnetLanguage);
 
+        /// <summary>
+        /// A delegate that runs a user function compiled by Roslyn.
+        /// </summary>
+        /// <param name="functionId">The ID of the function to run.</param>
+        /// <param name="callId">The call ID for the function call.</param>
+        /// <param name="callMode">The call mode for the function call.</param>
+        /// <param name="arguments">A pointer to the arguments passed to the function.</param>
+        /// <param name="num_arguments">The number of arguments passed to the function.</param>
+        /// <param name="nullmap">A pointer to a byte array indicating which arguments are null.</param>
+        /// <param name="output">A pointer to the output where the function result will be stored.</param>
         public unsafe delegate int DelRunUserFunction(
             uint functionId,
-            ulong call_id,
-            int call_mode,
+            ulong callId,
+            int callMode,
             void* arguments,
             int num_arguments,
             byte* nullmap,
             IntPtr output);
 
-        public unsafe delegate int DelRunUserTFunction (
+        /// <summary>
+        /// A delegate that runs a user trigger function compiled by Roslyn.
+        /// </summary>
+        /// <param name="functionId">The ID of the trigger function to run.</param>
+        /// <param name="callMode">The call mode for the trigger function call.</param>
+        /// <param name="oldRowResult">A pointer to the old row result for the trigger.</param>
+        /// <param name="newRowResult">A pointer to the new row result for the trigger.</param>
+        /// <param name="triggerName">The name of the trigger.</param>
+        /// <param name="triggerWhen">The timing of the trigger (e.g., BEFORE, AFTER).</param>
+        /// <param name="triggerLevel">The level of the trigger (e.g., ROW, STATEMENT).</param>
+        /// <param name="triggerEvent">The event that fired the trigger (e.g., INSERT, UPDATE, DELETE).</param>
+        /// <param name="relationId">The OID of the relation (table) associated with the trigger.</param>
+        /// <param name="tableName">The name of the table associated with the trigger.</param>
+        /// <param name="tableSchema">The schema of the table associated with the trigger.</param>
+        /// <param name="arguments">A pointer to an array of arguments passed to the trigger.</param>
+        /// <param name="nargs">The number of arguments passed to the trigger.</param>
+        public unsafe delegate int DelRunUserTFunction(
             uint functionId,
-            int call_mode,
-            IntPtr old_row_result,
-            IntPtr new_row_result,
+            int callMode,
+            IntPtr oldRowResult,
+            IntPtr newRowResult,
             string triggerName,
             string triggerWhen,
             string triggerLevel,
@@ -120,17 +204,52 @@ namespace PlDotNET
             IntPtr arguments,
             int nargs);
 
+        /// <summary>
+        /// A delegate that frees a generic GC handle.
+        /// </summary>
+        /// <param name="p">The pointer to the GC handle to free.</param>
         public delegate void DelFreeGenericGCHandle(IntPtr p);
 
+        /// <summary>
+        /// A delegate that builds a list of Datum objects.
+        /// </summary>
         public delegate System.IntPtr DelBuildDatumList();
 
+        /// <summary>
+        /// A delegate that adds a Datum object to a list of Datum objects.
+        /// </summary>
+        /// <param name="list">The pointer to the list of Datum objects.</param>
+        /// <param name="datum">The pointer to the Datum object to add.</param>
         public delegate void DelAddDatumToList(System.IntPtr list, System.IntPtr datum);
 
+        /// <summary>
+        /// A delegate that unloads assemblies from the AssemblyLoadContext.
+        /// </summary>
+        /// <param name="functionId">The ID of the function whose assemblies should be unloaded.</param>
         public delegate void DelUnloadAssemblies(uint functionId);
+
+        /// <summary>
+        /// Gets or sets the PL.NET settings for the current session.
+        /// </summary>
+        public static PlDotNETSettings Settings { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the dictionary that contains compiled user-defined functions.
+        /// </summary>
+        public static Dictionary<uint, CachedFunction> FuncBuiltCodeDict { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the dictionary that contains compiled user-defined triggers.
+        /// </summary>
+        public static Dictionary<uint, CachedTrigger> TrigBuiltCodeDict { get; set; } = [];
 
         /// <summary>
         /// This function compiles the dynamic code using Roslyn.
         /// </summary>
+        /// <param name="sourceCode">The source code to compile.</param>
+        /// <param name="memStream">The memory stream to write the compiled assembly to.</param>
+        /// <param name="assemblyName">The name of the assembly to create.</param>
+        /// <param name="memStreamUserFunction">An optional memory stream containing the user function assembly.</param>
         /// <returns>
         /// Returns The response of the dynamic code compiled with Roslyn.
         /// </returns>
@@ -139,17 +258,20 @@ namespace PlDotNET
             SyntaxTree userTree = SyntaxFactory.ParseSyntaxTree(sourceCode);
 
             var trustedAssembliesPathsArray = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
-            List<string> trustedAssembliesPaths = new ();
-            trustedAssembliesPaths.AddRange(trustedAssembliesPathsArray);
-            trustedAssembliesPaths.Add(typeof(NpgsqlPoint).Assembly.Location);
-            trustedAssembliesPaths.Add(typeof(Elog).Assembly.Location);
-            trustedAssembliesPaths.Add(typeof(NullLoggerFactory).Assembly.Location);
-            trustedAssembliesPaths.Add(typeof(NpgsqlCommand).Assembly.Location);
-            trustedAssembliesPaths.Add(typeof(CommandTests).Assembly.Location);
+            List<string> trustedAssembliesPaths =
+            [
+                .. trustedAssembliesPathsArray,
+                typeof(NpgsqlPoint).Assembly.Location,
+                typeof(Elog).Assembly.Location,
+                typeof(NullLoggerFactory).Assembly.Location,
+                typeof(NpgsqlCommand).Assembly.Location,
+                typeof(CommandTests).Assembly.Location,
+                typeof(DatumConversion).Assembly.Location,
+            ];
 
-            #if ENABLE_FCS
+#if ENABLE_FCS
             trustedAssembliesPaths.Add(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location);
-            #endif
+#endif
 
             var neededAssemblies = new[]
             {
@@ -180,6 +302,7 @@ namespace PlDotNET
                 "Npgsql.Tests",
                 "NpgsqlTypes",
                 "PlDotNET.Common",
+                "PlDotNET.Handlers",
             };
 
             List<PortableExecutableReference> references = trustedAssembliesPaths
@@ -200,7 +323,7 @@ namespace PlDotNET
             CSharpCompilation compilation = CSharpCompilation.Create(
                 $"{assemblyName}.dll",
                 options: compilationOptions,
-                syntaxTrees: new[] { userTree },
+                syntaxTrees: [userTree],
                 references: references);
 
             Microsoft.CodeAnalysis.Emit.EmitResult compileResult = compilation.Emit(memStream);
@@ -231,6 +354,18 @@ namespace PlDotNET
         /// be called by the user function ID.
         /// This function returns 0 if all the codes were compiled correctly.
         /// </summary>
+        /// <param name="functionId">The ID of the function to compile.</param>
+        /// <param name="name">The name of the function.</param>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
+        /// <param name="isTrigger">True if the function is a trigger; otherwise false.</param>
+        /// <param name="paramNames">A space-separated string of parameter names.</param>
+        /// <param name="paramTypes">An array of OIDs representing the parameter types.</param>
+        /// <param name="paramModes">An array of bytes representing the parameter modes.</param>
+        /// <param name="numOutputValues">The number of output values.</param>
+        /// <param name="body">The body of the function as a string.</param>
+        /// <param name="supportNullInput">True if the function supports null input; otherwise false.</param>
+        /// <param name="language">The .NET language of the function (C# or F#).</param>
         /// <returns>
         /// Returns 0 when the process succeeded, otherwise returns 1.
         /// </returns>
@@ -239,22 +374,25 @@ namespace PlDotNET
                 IntPtr name,
                 uint returnTypeId,
                 [MarshalAs(UnmanagedType.I1)] bool retset,
-                [MarshalAs(UnmanagedType.I1)] bool is_trigger,
+                [MarshalAs(UnmanagedType.I1)] bool isTrigger,
                 IntPtr paramNames,
                 uint* paramTypes,
                 byte* paramModes,
-                int num_output_values,
+                int numOutputValues,
                 IntPtr body,
                 [MarshalAs(UnmanagedType.I1)] bool supportNullInput,
                 IntPtr language)
         {
+            // Get the PL.NET settings for the current session
+            Settings = new PlDotNETSettings();
+
             // User function Data
             string funcName = Marshal.PtrToStringAuto(name);
             string auxParameters = Marshal.PtrToStringAuto(paramNames);
-            string[] paramNameArray = auxParameters == null ? Array.Empty<string>() : auxParameters.Split(" ");
-            uint[] paramTypeArray = auxParameters == null ? Array.Empty<uint>() : new ReadOnlySpan<uint>(paramTypes, paramNameArray.Length).ToArray();
+            string[] paramNameArray = auxParameters == null ? [] : auxParameters.Split(" ");
+            uint[] paramTypeArray = auxParameters == null ? [] : new ReadOnlySpan<uint>(paramTypes, paramNameArray.Length).ToArray();
             string funcBody = Marshal.PtrToStringAuto(body);
-            byte[] paramModeArray = Array.Empty<byte>();
+            byte[] paramModeArray = [];
 
             paramModeArray = (paramModes != null) ? new ReadOnlySpan<byte>(paramModes, paramNameArray.Length).ToArray() : paramModeArray;
 
@@ -311,36 +449,36 @@ namespace PlDotNET
                                         funcName,
                                         returnTypeId,
                                         retset,
-                                        is_trigger,
+                                        isTrigger,
                                         paramNameArray,
                                         paramTypeArray,
                                         paramModeArray,
-                                        num_output_values,
+                                        numOutputValues,
                                         funcBody,
-                                        supportNullInput || Engine.AlwaysNullable);
+                                        supportNullInput || Settings.AlwaysNullable);
 
-                /// Create the F# UserFunction source code
+                // Create the F# UserFunction source code
                 userFunctionCode = fs_dcg.BuildUserFunctionSourceCode();
 
-                /// The path to the F# UserFunction assembly
+                // The path to the F# UserFunction assembly
                 string userFunctionDll = string.Empty;
 
-                /// Compile the F# UserFunction and assign the assembly path to the userFunctionDll variable
-                if (!CompileFSharpWithFCS)
+                // Compile the F# UserFunction and assign the assembly path to the userFunctionDll variable
+                if (!Settings.CompileFSharpWithFCS)
                 {
-                    DotNetProjectBuilder dfp = new (
-                                                    "@PLDOTNET_TEMPLATE_DIR/UserFunctionProject.tfsproj",
-                                                    Engine.PathToTemporaryFiles,
-                                                    $"FSharpUserFunctionTemplate_{functionId}",
-                                                    DotNETLanguage.FSharp);
+                    DotNetProjectBuilder dfp = new(
+                        "@PLDOTNET_TEMPLATE_DIR/UserFunctionProject.tfsproj",
+                        Settings.PathToTemporaryFiles,
+                        $"FSharpUserFunctionTemplate_{functionId}",
+                        DotNETLanguage.FSharp);
 
                     // TODO Set verbose depending on PL.NET logging config
-                    dfp.SetVerboseLevel(VerboseLevel);
+                    dfp.SetVerboseLevel(Settings.VerboseLevel);
                     userFunctionDll = dfp.BuildAndGenDLL(userFunctionCode);
                 }
                 else
                 {
-                    #if ENABLE_FCS
+#if ENABLE_FCS
                     List<string> extraAssemblies = new ()
                     {
                         typeof(NpgsqlPoint).Assembly.Location,
@@ -350,10 +488,10 @@ namespace PlDotNET
                         typeof(FSharpCompiler).Assembly.Location,
                         typeof(System.ComponentModel.Component).Assembly.Location,
                     };
-                    userFunctionDll = FSharpCompiler.CompileFSharpSourceCodeAsDLL(functionId, Engine.PathToTemporaryFiles, userFunctionCode, extraAssemblies.ToArray());
-                    #else
+                    userFunctionDll = FSharpCompiler.CompileFSharpSourceCodeAsDLL(functionId, Settings.PathToTemporaryFiles, userFunctionCode, extraAssemblies.ToArray());
+#else
                     throw new SystemException("FSharp Compiler Service is not enabled in this build");
-                    #endif
+#endif
                 }
 
                 if (userFunctionDll == string.Empty)
@@ -361,7 +499,7 @@ namespace PlDotNET
                     return 1;
                 }
 
-                /// Update function body and set the user assembly flag to true, so PL.NET will handle the F# function as a user assembly
+                // Update function body and set the user assembly flag to true, so PL.NET will handle the F# function as a user assembly
                 funcBody = $"{userFunctionDll}:PlDotNET.UserSpace.UserFunction!{funcName}";
                 useUserAssembly = true;
             }
@@ -373,14 +511,14 @@ namespace PlDotNET
                             funcName,
                             returnTypeId,
                             retset,
-                            is_trigger,
+                            isTrigger,
                             paramNameArray,
                             paramTypeArray,
                             paramModeArray,
-                            num_output_values,
+                            numOutputValues,
                             funcBody,
-                            supportNullInput || Engine.AlwaysNullable,
-                            CompileFSharpWithFCS, // Used to generate a UserHandler compatible with FCS DLL
+                            supportNullInput || Settings.AlwaysNullable,
+                            Settings.CompileFSharpWithFCS, // Used to generate a UserHandler compatible with FCS DLL
                             dotnetLanguage == DotNETLanguage.FSharp); // Used to perform changes in the UserHandler code for F# language
 
                 // Create the UserFunction source code if the user does not provide an assembly
@@ -437,7 +575,7 @@ namespace PlDotNET
             }
 
             // Load the assemblies into AssemblyLoadContext
-            AssemblyLoadContext userAlc = new ($"UserFunction_{functionId}", true);
+            AssemblyLoadContext userAlc = new($"UserFunction_{functionId}", true);
             _ = userAlc.LoadFromAssemblyPath(typeof(NpgsqlCommand).Assembly.Location); // Npgsql Assembly
             _ = userAlc.LoadFromAssemblyPath(typeof(NpgsqlPoint).Assembly.Location); // NpgsqlTypes Assembly
             _ = userAlc.LoadFromAssemblyPath(typeof(NullLoggerFactory).Assembly.Location); // Logging Abstractions Assembly
@@ -450,10 +588,10 @@ namespace PlDotNET
             _ = userAlc.LoadFromStream(new MemoryStream(memUserFunction.GetBuffer())); // UserFunction Assembly
             Assembly userHandlerAssembly = userAlc.LoadFromStream(new MemoryStream(memUserHandler.GetBuffer())); // UserHandler Assembly
 
-            if (is_trigger)
+            if (isTrigger)
             {
                 // Create the CachedTFunction to keep the function information
-                CachedTrigger newCachedTFunction = new ()
+                CachedTrigger newCachedTFunction = new()
                 {
                     UserFunctionSourceCode = userFunctionCode,
                     UserHandlerSourceCode = userHandlerCode,
@@ -469,7 +607,7 @@ namespace PlDotNET
             else
             {
                 // Create the CachedFunction to keep the function information
-                CachedFunction newCachedFunction = new ()
+                CachedFunction newCachedFunction = new()
                 {
                     UserFunctionSourceCode = userFunctionCode,
                     UserHandlerSourceCode = userHandlerCode,
@@ -493,12 +631,16 @@ namespace PlDotNET
         /// <summary>
         /// This function returns a MemoryStream object which contains the Assembly for the UserFunction code.
         /// </summary>
+        /// <param name="language">The .NET language used for the UserFunction (C# or F#).</param>
+        /// <param name="functionId">The ID of the function for which the UserFunction is being created.</param>
+        /// <param name="useUserAssembly">Indicates whether the user function is using a provided assembly.</param>
+        /// <param name="userFunctionCode">The source code of the UserFunction or the path to the user assembly.</param>
         /// <returns>
         /// Returns a memory stream object with the compiled UserFunction code.
         /// </returns>
         public static MemoryStream CreateMemoryStreamForUserFunctionCode(DotNETLanguage language, uint functionId, bool useUserAssembly, string userFunctionCode)
         {
-            MemoryStream memUserFunction = new ();
+            MemoryStream memUserFunction = new();
             if (!useUserAssembly)
             {
                 if (language == DotNETLanguage.CSharp)
@@ -525,13 +667,18 @@ namespace PlDotNET
         /// <summary>
         /// This function returns a MemoryStream object which contains the Assembly for the UserHandler code.
         /// </summary>
+        /// <param name="language">The .NET language used for the UserHandler (C# or F#).</param>
+        /// <param name="functionId">The ID of the function for which the UserHandler is being created.</param>
+        /// <param name="functionName">The name of the function for which the UserHandler is being created.</param>
+        /// <param name="userHandlerCode">The source code of the UserHandler.</param>
+        /// <param name="assemblyToInclude">An optional memory stream containing an assembly to include in the UserHandler.</param>
         /// <returns>
         /// Returns a memory stream object with the compiled UserHandler code.
         /// </returns>
         public static MemoryStream CreateMemoryStreamForUserHandlerCode(DotNETLanguage language, uint functionId, string functionName, string userHandlerCode, MemoryStream assemblyToInclude)
         {
-            MemoryStream memUserHandler = new ();
-            #if ENABLE_FCS
+            MemoryStream memUserHandler = new();
+#if ENABLE_FCS
             if (language == DotNETLanguage.FSharp)
             {
                 List<string> extraAssemblies = new ()
@@ -543,14 +690,14 @@ namespace PlDotNET
                     typeof(FSharpCompiler).Assembly.Location,
                     typeof(System.ComponentModel.Component).Assembly.Location,
                 };
-                return FSharpCompiler.CompileFSharpSourceCode(functionId, Engine.PathToTemporaryFiles, userHandlerCode, extraAssemblies.ToArray());
+                return FSharpCompiler.CompileFSharpSourceCode(functionId, Settings.PathToTemporaryFiles, userHandlerCode, extraAssemblies.ToArray());
             }
-            #else
+#else
             if (language == DotNETLanguage.FSharp)
             {
                 throw new SystemException("FSharp Compiler Service is not enabled in this build");
             }
-            #endif
+#endif
 
             var compileResultUserHandler = Engine.CompileSourceCode(userHandlerCode, memUserHandler, $"UserHandler_{functionId}", assemblyToInclude);
 
@@ -567,6 +714,7 @@ namespace PlDotNET
         /// It creates the Delegate function for the CallUserFunction function,
         /// which was compiled by Roslyn.
         /// </summary>
+        /// <param name="compiledAssembly">The assembly that contains the compiled user handler code.</param>
         /// <returns>
         /// Returns the Function object of the delegated CallUserFunction or Null for a failed proccess.
         /// </returns>
@@ -590,6 +738,7 @@ namespace PlDotNET
         /// It creates the Delegate function for the CallUserTrigger function,
         /// which was compiled by Roslyn.
         /// </summary>
+        /// <param name="compiledAssembly">The assembly that contains the compiled user handler code.</param>
         /// <returns>
         /// Returns the Function object of the delegated CallUserTrigger or null for a failed proccess.
         /// </returns>
@@ -619,11 +768,31 @@ namespace PlDotNET
             return del;
         }
 
+        /// <summary>
+        /// This function is called from C code and tries to run the user trigger function
+        /// compiled by Roslyn. It retrieves the cached trigger function from the
+        /// TrigBuiltCodeDict dictionary using the function ID. If the trigger function is found,
+        /// it calls the UserProcedure delegate with the provided parameters.
+        /// If the trigger function is not found, it logs a warning and returns an error code.
+        /// </summary>
+        /// <param name="functionId">The ID of the trigger function to run.</param>
+        /// <param name="callMode">The call mode for the trigger function call.</param>
+        /// <param name="oldRowResult">A pointer to the old row result for the trigger.</param>
+        /// <param name="newRowResult">A pointer to the new row result for the trigger.</param>
+        /// <param name="triggerName">The name of the trigger.</param>
+        /// <param name="triggerWhen">The timing of the trigger (e.g., BEFORE, AFTER).</param>
+        /// <param name="triggerLevel">The level of the trigger (e.g., ROW, STATEMENT).</param>
+        /// <param name="triggerEvent">The event that fired the trigger (e.g., INSERT, UPDATE, DELETE).</param>
+        /// <param name="relationId">The OID of the relation (table) associated with the trigger.</param>
+        /// <param name="tableName">The name of the table associated with the trigger.</param>
+        /// <param name="tableSchema">The schema of the table associated with the trigger.</param>
+        /// <param name="arguments">A pointer to an array of arguments passed to the trigger.</param>
+        /// <param name="nargs">The number of arguments passed to the trigger.</param>
         public static unsafe int RunUserTFunction(
             uint functionId,
-            int call_mode,
-            IntPtr old_row_result,
-            IntPtr new_row_result,
+            int callMode,
+            IntPtr oldRowResult,
+            IntPtr newRowResult,
             string triggerName,
             string triggerWhen,
             string triggerLevel,
@@ -646,7 +815,7 @@ namespace PlDotNET
 
                 // for (int i = 0; i < nargs; i++)
                 // {
-                    // argumentArray[i] = Marshal.PtrToStringAnsi(arguments[i]);
+                // argumentArray[i] = Marshal.PtrToStringAnsi(arguments[i]);
                 // }
                 char** args = (char**)arguments.ToPointer();
                 if (args == null)
@@ -662,8 +831,8 @@ namespace PlDotNET
 
                 // Create TriggerData object using the provided parameters
                 var retval = cachedT.UserProcedure(
-                        old_row_result,
-                        new_row_result,
+                        oldRowResult,
+                        newRowResult,
                         triggerName,
                         triggerWhen,
                         triggerLevel,
@@ -688,22 +857,32 @@ namespace PlDotNET
         /// found, an error message is reported. Otherwise, it calls the
         /// function compiled by Roslyn.
         /// </summary>
+        /// <param name="functionId">The ID of the function to run.</param>
+        /// <param name="callId">The call ID for the function call.</param>
+        /// <param name="callMode">The call mode for the function call.</param>
+        /// <param name="arguments">A pointer to the arguments passed to the function.</param>
+        /// <param name="num_arguments">The number of arguments passed to the function.</param>
+        /// <param name="nullmap">A pointer to a byte array indicating which arguments are null.</param>
+        /// <param name="output">A pointer to the output where the function result will be stored.</param>
         /// <returns>
-        /// Returns ReturnMode
+        /// Returns ReturnMode.
         /// </returns>
-        public static unsafe int RunUserFunction(uint functionId, ulong call_id, int call_mode, void* arguments, int num_arguments, byte* nullmap, IntPtr output)
+        public static unsafe int RunUserFunction(uint functionId, ulong callId, int callMode, void* arguments, int num_arguments, byte* nullmap, IntPtr output)
         {
+            // Get the PL.NET settings for the current session
+            Settings = new PlDotNETSettings();
+
             string argaddr = ((IntPtr)arguments).ToString("X");
 
             IntPtr[] argumentArray = new ReadOnlySpan<IntPtr>(arguments, num_arguments).ToArray();
-            List<IntPtr> argumentList = new (argumentArray);
+            List<IntPtr> argumentList = new(argumentArray);
 
             if (Engine.FuncBuiltCodeDict.TryGetValue(functionId, out CachedFunction cached))
             {
                 try
                 {
                     bool[] isnull = new bool[argumentList.Count];
-                    if (cached.SupportNullInput || Engine.AlwaysNullable)
+                    if (cached.SupportNullInput || Settings.AlwaysNullable)
                     {
                         for (int i = 0, nargs = isnull.Length; i < nargs; i++)
                         {
@@ -711,7 +890,7 @@ namespace PlDotNET
                         }
                     }
 
-                    var retval = cached.UserProcedure(argumentList, output, call_id, call_mode, isnull);
+                    var retval = cached.UserProcedure(argumentList, output, callId, callMode, isnull);
                     return retval;
                 }
                 catch (Exception e)
@@ -728,6 +907,7 @@ namespace PlDotNET
         /// <summary>
         /// Free memmory pointed by a IntPtr.
         /// </summary>
+        /// <param name="p">The IntPtr to free.</param>
         public static unsafe void FreeGenericGCHandle(IntPtr p)
         {
             GCHandle.FromIntPtr(p).Free();
@@ -750,6 +930,8 @@ namespace PlDotNET
         /// This functions is called from C and adds an IntPtr(Datum) to a list,
         /// of IntPtr. Pldotnet passes the final list to RunUserFunction.
         /// </summary>
+        /// <param name="list">The IntPtr to the list of IntPtr.</param>
+        /// <param name="datum">The IntPtr to the Datum to add to the list.</param>
         public static unsafe void AddDatumToList(System.IntPtr list, System.IntPtr datum)
         {
             GCHandle gchList = GCHandle.FromIntPtr(list);
@@ -760,27 +942,30 @@ namespace PlDotNET
         /// <summary>
         /// Unloads the assemblies of a specific function.
         /// </summary>
+        /// <param name="functionId">The ID of the function whose assemblies should be unloaded.</param>
         public static void UnloadAssemblies(uint functionId)
         {
-            if (!FuncBuiltCodeDict.ContainsKey(functionId))
+            if (!FuncBuiltCodeDict.TryGetValue(functionId, out CachedFunction value))
             {
                 Elog.Warning($"PL.NET could not find the generated function to unload its assemblies (ID: {functionId})");
                 return;
             }
 
-            FuncBuiltCodeDict[functionId].UserAssemblyLoadContext.Unload();
+            value.UserAssemblyLoadContext.Unload();
             FuncBuiltCodeDict.Remove(functionId);
         }
 
         /// <summary>
         /// Checks if PL.NET supports all the PostgreSQL types of the SQL user function.
         /// </summary>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="paramTypes">An array of OIDs representing the parameter types.</param>
         /// <returns>
         /// Returns true if all types are supported.
         /// </returns>
         public static bool CheckSupportedTypes(uint returnTypeId, uint[] paramTypes)
         {
-            List<string> unsupportedTypes = new ();
+            List<string> unsupportedTypes = [];
 
             if ((OID)returnTypeId == OID.TRIGGEROID)
             {
@@ -824,23 +1009,28 @@ namespace PlDotNET
         /// <summary>
         /// Checks if the user provides a valid Assembly.
         /// </summary>
+        /// <param name="code">The code to validate.</param>
         /// <returns>
         /// Returns true if the user provides a valid assembly, that is, 'UserAssembly.dll:UserNamespace.UserClass!FunctionName'.
         /// </returns>
         public static bool ValidateUserAssembly(string code)
         {
-            return Regex.IsMatch(code, @"^([-/.a-zA-Z0-9]+.dll):([a-zA-Z0-9.]+)!([a-zA-Z0-9]+)$");
+            return MyRegex().IsMatch(code);
         }
 
         /// <summary>
         /// Checks if the user provides a valid Assembly. If so, modify the arguments with the assembly path, namespace and class names, and the method name.
         /// </summary>
+        /// <param name="code">The code to validate.</param>
+        /// <param name="assemblyPath">The path to the assembly.</param>
+        /// <param name="namespaceAndClass">The namespace and class name.</param>
+        /// <param name="methodName">The method name.</param>
         /// <returns>
         /// Returns true if the user provides a valid assembly, that is, 'UserAssembly.dll:UserNamespace.UserClass!FunctionName'.
         /// </returns>
         public static bool GetInformationFromUserAssembly(string code, ref string assemblyPath, ref string namespaceAndClass, ref string methodName)
         {
-            Regex regex = new ("^([-/.a-zA-Z0-9]+.dll):([a-zA-Z0-9.]+)!([a-zA-Z0-9]+)$");
+            Regex regex = MyRegex1();
             if (!regex.IsMatch(code))
             {
                 return false;
@@ -861,32 +1051,32 @@ namespace PlDotNET
         public static void CheckDirectoriesAccess()
         {
             // Check the access of the directory to save the source codes.
-            if (Engine.SaveSourceCode)
+            if (Settings.SaveSourceCode)
             {
-                if (!Directory.Exists(Engine.PathToSaveSourceCode))
+                if (!Directory.Exists(Settings.PathToSaveSourceCode))
                 {
                     // Create the directory if it doesn't exist
-                    Directory.CreateDirectory(Engine.PathToSaveSourceCode);
+                    Directory.CreateDirectory(Settings.PathToSaveSourceCode);
                 }
 
-                if (!CheckDirectoryMode(Engine.PathToSaveSourceCode))
+                if (!CheckDirectoryMode(Settings.PathToSaveSourceCode))
                 {
                     // Throw an exception if the directory doesn't have the correct mode
-                    throw new SystemException($"Please specify a directory where the source codes can be saved and the directory must have a mode of 0700; current directory, '{Engine.PathToSaveSourceCode}', is no good.");
+                    throw new SystemException($"Please specify a directory where the source codes can be saved and the directory must have a mode of 0700; current directory, '{Settings.PathToSaveSourceCode}', is no good.");
                 }
             }
 
             // Check the access of the temporary files directory
-            if (!Directory.Exists(Engine.PathToTemporaryFiles))
+            if (!Directory.Exists(Settings.PathToTemporaryFiles))
             {
                 // Create the directory if it doesn't exist
-                Directory.CreateDirectory(Engine.PathToTemporaryFiles);
+                Directory.CreateDirectory(Settings.PathToTemporaryFiles);
             }
 
-            if (!CheckDirectoryMode(Engine.PathToTemporaryFiles))
+            if (!CheckDirectoryMode(Settings.PathToTemporaryFiles))
             {
                 // Throw an exception if the directory doesn't have the correct mode
-                throw new SystemException($"Please specify a directory where the temporary files can be saved and the directory must have a mode of 0700; current directory, '{Engine.PathToTemporaryFiles}', is no good.");
+                throw new SystemException($"Please specify a directory where the temporary files can be saved and the directory must have a mode of 0700; current directory, '{Settings.PathToTemporaryFiles}', is no good.");
             }
         }
 
@@ -901,7 +1091,7 @@ namespace PlDotNET
             string mode = string.Empty;
 
             // Execute the "stat" command to get information about the directory
-            Process p = new ();
+            Process p = new();
             p.StartInfo.FileName = "/usr/bin/stat";
             p.StartInfo.Arguments = path;
             p.StartInfo.UseShellExecute = false;
@@ -912,12 +1102,21 @@ namespace PlDotNET
             string output = p.StandardOutput.ReadToEnd();
 
             // Use a regular expression to parse the output and extract the mode
-            Match m = Regex.Match(output, @"Access:\s+\(([0-9]+)/");
-            mode = m.Success ? mode = m.Groups[1].Value : mode;
+            Match m = MyRegex2().Match(output);
+            mode = m.Success ? _ = m.Groups[1].Value : mode;
 
             // If Linux mode didn't work, then we do Mac mode
             return (mode == "0700") || output.Contains("drwx------");
         }
+
+        [GeneratedRegex(@"^([-/.a-zA-Z0-9]+.dll):([a-zA-Z0-9.]+)!([a-zA-Z0-9]+)$")]
+        private static partial Regex MyRegex();
+
+        [GeneratedRegex("^([-/.a-zA-Z0-9]+.dll):([a-zA-Z0-9.]+)!([a-zA-Z0-9]+)$")]
+        private static partial Regex MyRegex1();
+
+        [GeneratedRegex(@"Access:\s+\(([0-9]+)/")]
+        private static partial Regex MyRegex2();
     }
 
 #nullable enable

@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "InOut")]
-public class InOutBasic0Tests : PlDotNetTest
+public abstract class BaseInOutBasic0Tests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if(argument_0 != 0){ throw new SystemException($""Failed assertion: argument_0 = {argument_0}"");}
-    argument_0 = 1;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public InOutBasic0Tests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseInOutBasic0Tests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "InOutBasic0",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("INOUT argument_0", "INT") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "InOutBasic0", Arguments = new List<FunctionArgument> { new FunctionArgument("INOUT argument_0", "INT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-inout-basic-0", "inout_basic_0", "0", "= 1" },
-        };
+        return new object[][] { new object[] { "c#-inout-basic-0", "inout_basic_0", "0", "= 1" }, };
     }
 
     [Theory]
@@ -41,4 +26,15 @@ if(argument_0 != 0){ throw new SystemException($""Failed assertion: argument_0 =
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "InOut")]
+public class InOutBasic0TestsCSharp : BaseInOutBasic0Tests
+{
+    protected override string FunctionBody => @"
+if(argument_0 != 0){ throw new SystemException($""Failed assertion: argument_0 = {argument_0}"");}
+    argument_0 = 1;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

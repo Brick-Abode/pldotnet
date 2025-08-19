@@ -1,44 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Bit")]
-public class ModifyVarBitFsharpTests : PlDotNetTest
+public abstract class BaseModifyVarBitFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if System.Object.ReferenceEquals(a, null) then
-        null
-    else
-        let result = a
-        result.[0] <- if a.[0] = false then true else false
-        result.[a.Length - 1] <- if a.[a.Length - 1] = false then true else false
-        result
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ModifyVarBitFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseModifyVarBitFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ModifyVarBitFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a BIT", "VARYING") },
-            ReturnType = "BIT VARYING",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ModifyVarBitFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a BIT", "VARYING") }, ReturnType = "BIT VARYING", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-varbit", "modifyvarbitfsharp1", "'1001110001000'::BIT VARYING", "= '0001110001001'::BIT VARYING" },
-        new object[] { "f#-varbit-null", "modifyvarbitfsharp2", "NULL::BIT VARYING", "IS NULL" },
-        };
+        return new object[][] { new object[] { "f#-varbit", "modifyvarbitfsharp1", "'1001110001000'::BIT VARYING", "= '0001110001001'::BIT VARYING" }, new object[] { "f#-varbit-null", "modifyvarbitfsharp2", "NULL::BIT VARYING", "IS NULL" }, };
     }
 
     [Theory]
@@ -47,4 +26,20 @@ if System.Object.ReferenceEquals(a, null) then
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Bit")]
+public class ModifyVarBitFsharpTestsFSharp : BaseModifyVarBitFsharpTests
+{
+    protected override string FunctionBody => @"
+if System.Object.ReferenceEquals(a, null) then
+        null
+    else
+        let result = a
+        result.[0] <- if a.[0] = false then true else false
+        result.[a.Length - 1] <- if a.[a.Length - 1] = false then true else false
+        result
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseDateOnlyRangesTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseDateOnlyRangesTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseDateOnlyRanges", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "DATERANGE[]") }, ReturnType = "DATERANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-daterange-null-1array", "IncreaseDateonlyRanges1", "ARRAY['[2021-01-01, 2021-01-01)'::DATERANGE, '(, 2021-04-04)'::DATERANGE, null::DATERANGE, '[,)'::DATERANGE]", "= ARRAY['[2021-01-02, 2021-01-02)'::DATERANGE, '(, 2021-04-05)'::DATERANGE, null::DATERANGE, '[,)'::DATERANGE]" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseDateOnlyRanges(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Range")]
-public class IncreaseDateOnlyRangesTests : PlDotNetTest
+public class IncreaseDateOnlyRangesTestsCSharp : BaseIncreaseDateOnlyRangesTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,32 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseDateOnlyRangesTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseDateOnlyRanges",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "DATERANGE[]") },
-            ReturnType = "DATERANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-daterange-null-1array", "IncreaseDateonlyRanges1", "ARRAY['[2021-01-01, 2021-01-01)'::DATERANGE, '(, 2021-04-04)'::DATERANGE, null::DATERANGE, '[,)'::DATERANGE]", "= ARRAY['[2021-01-02, 2021-01-02)'::DATERANGE, '(, 2021-04-05)'::DATERANGE, null::DATERANGE, '[,)'::DATERANGE]" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseDateOnlyRanges(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

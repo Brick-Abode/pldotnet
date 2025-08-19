@@ -3,39 +3,20 @@ using System.Collections.Generic;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Procedure")]
-public class PrintSumProcedureFsharpTests : PlDotNetTest
+public abstract class BasePrintSumProcedureFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let c = a.Value + b.Value
-Elog.Info($""[F#] c = "" + c.ToString());
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public PrintSumProcedureFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BasePrintSumProcedureFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-			TestType = SqlTestType.Procedure,
-            Name = "printSumProcedureFSharp",
-            Arguments = new List<FunctionArgument> {
-            	new FunctionArgument("a", "integer"),
-            	new FunctionArgument("b", "integer")
-        	},
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp,
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { TestType = SqlTestType.Procedure, Name = "printSumProcedureFSharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "integer"), new FunctionArgument("b", "integer") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-sum", "printSumProcedureFSharp1", "10, 25", "" },
-            new object[] { "f#-sum", "printSumProcedureFSharp2", "1450, 275", "" },
-        };
+        return new object[][] { new object[] { "f#-sum", "printSumProcedureFSharp1", "10, 25", "" }, new object[] { "f#-sum", "printSumProcedureFSharp2", "1450, 275", "" }, };
     }
 
     [Theory]
@@ -44,4 +25,15 @@ Elog.Info($""[F#] c = "" + c.ToString());
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Procedure")]
+public class PrintSumProcedureFsharpTestsFSharp : BasePrintSumProcedureFsharpTests
+{
+    protected override string FunctionBody => @"
+let c = a.Value + b.Value
+Elog.Info($""[F#] c = "" + c.ToString());
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

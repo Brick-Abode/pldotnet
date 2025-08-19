@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseToggleFirstBitsTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseToggleFirstBitsTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "ToggleFirstBits", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "BIT(8)[]") }, ReturnType = "BIT(8)[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-bit-null-1array", "ToggleFirstBits1", "ARRAY['10101001'::BIT(8), '10101101'::BIT(8), null::BIT(8), '01101001'::BIT(8)]", "= ARRAY['00101001'::BIT(8), '00101101'::BIT(8), null::BIT(8), '11101001'::BIT(8)]" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestToggleFirstBits(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Bit")]
-public class ToggleFirstBitsTests : PlDotNetTest
+public class ToggleFirstBitsTestsCSharp : BaseToggleFirstBitsTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -25,32 +48,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public ToggleFirstBitsTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ToggleFirstBits",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "BIT(8)[]") },
-            ReturnType = "BIT(8)[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-bit-null-1array", "ToggleFirstBits1", "ARRAY['10101001'::BIT(8), '10101101'::BIT(8), null::BIT(8), '01101001'::BIT(8)]", "= ARRAY['00101001'::BIT(8), '00101101'::BIT(8), null::BIT(8), '11101001'::BIT(8)]" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestToggleFirstBits(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

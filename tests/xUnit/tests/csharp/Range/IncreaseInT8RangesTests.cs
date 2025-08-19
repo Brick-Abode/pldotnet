@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseInT8RangesTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseInT8RangesTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseInT8Ranges", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "INT8RANGE[]") }, ReturnType = "INT8RANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-int8range-null-1array", "IncreaseInt8Ranges1", "ARRAY['[2,6)'::INT8RANGE, '(,6)'::INT8RANGE, null::INT8RANGE, '[,)'::INT8RANGE]", "= ARRAY['[3,7)'::INT8RANGE, '(,7)'::INT8RANGE, null::INT8RANGE, '[,)'::INT8RANGE]" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseInT8Ranges(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Range")]
-public class IncreaseInT8RangesTests : PlDotNetTest
+public class IncreaseInT8RangesTestsCSharp : BaseIncreaseInT8RangesTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,32 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseInT8RangesTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseInT8Ranges",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "INT8RANGE[]") },
-            ReturnType = "INT8RANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-int8range-null-1array", "IncreaseInt8Ranges1", "ARRAY['[2,6)'::INT8RANGE, '(,6)'::INT8RANGE, null::INT8RANGE, '[,)'::INT8RANGE]", "= ARRAY['[3,7)'::INT8RANGE, '(,7)'::INT8RANGE, null::INT8RANGE, '[,)'::INT8RANGE]" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseInT8Ranges(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

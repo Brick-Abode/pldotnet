@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Brick Abode</Authors>
     <Description>PlDotNET.FSharp includes classes and methods for dynamically compiling F# code.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(TargetFramework)</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

@@ -3,39 +3,20 @@ using System.Collections.Generic;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Procedure")]
-public class SayHelloFsharpTests : PlDotNetTest
+public abstract class BaseSayHelloFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let message = ""Hello, "" + name + ""! Welcome to plfsharp.""
-Elog.Info(message)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public SayHelloFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseSayHelloFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-			TestType = SqlTestType.Procedure,
-            Name = "sayHelloFsharp",
-            Arguments = new List<FunctionArgument> {
-            	new FunctionArgument("name", "TEXT")
-        	},
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp,
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { TestType = SqlTestType.Procedure, Name = "sayHelloFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("name", "TEXT") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-sayHello", "sayHelloFsharp1", "'Mikael'::TEXT", "= Mikael" },
-            new object[] { "f#-sayHello", "sayHelloFsharp2", "'Rosicley'::TEXT", "= Rosicley" },
-            new object[] { "f#-sayHello", "sayHelloFsharp3", "'Todd'::TEXT", "= Todd" },
-        };
+        return new object[][] { new object[] { "f#-sayHello", "sayHelloFsharp1", "'Mikael'::TEXT", "= Mikael" }, new object[] { "f#-sayHello", "sayHelloFsharp2", "'Rosicley'::TEXT", "= Rosicley" }, new object[] { "f#-sayHello", "sayHelloFsharp3", "'Todd'::TEXT", "= Todd" }, };
     }
 
     [Theory]
@@ -44,4 +25,15 @@ Elog.Info(message)
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Procedure")]
+public class SayHelloFsharpTestsFSharp : BaseSayHelloFsharpTests
+{
+    protected override string FunctionBody => @"
+let message = ""Hello, "" + name + ""! Welcome to plfsharp.""
+Elog.Info(message)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

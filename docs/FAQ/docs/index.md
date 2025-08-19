@@ -1,24 +1,24 @@
-# pl/dotnet: Frequently Asked Questions
+# PL/.NET: Frequently Asked Questions
 
 [TOC]
 
 ## Introduction
 
-### What is pl/dotnet?
+### What is PL/.NET?
 
-The pl/dotnet project extends PostgreSQL to support functions, stored procedures and `DO` blocks for the dotnet platform, including both C# and F#.
+The PL/.NET project extends PostgreSQL to support functions, stored procedures and `DO` blocks for the dotnet platform, including both C# and F#.
 
-### Which version of pl/dotnet does this FAQ cover?
+### Which version of PL/.NET does this FAQ cover?
 
-This FAQ is for the version 0.99 beta release of pl/dotnet, released in March of 2024.
+This FAQ is for the version 0.99 beta release of PL/.NET, released in March of 2024.
 
 ### What languages are supported?
 
-pl/dotnet supports the creation of stored procedures, functions, triggers, and `DO` blocks in both C# and F#, which can be used inside of PostgreSQL as the `plcsharp` and `plfsharp` languages, respectively.
+PL/.NET supports the creation of stored procedures, functions, triggers, and `DO` blocks in both C# and F#, which can be used inside of PostgreSQL as the `plcsharp` and `plfsharp` languages, respectively.
 
 ### Can I see an example?
 
-Of course.  Here is a basic example:
+Of course. Here is a basic example:
 
 ```sql
 CREATE OR REPLACE FUNCTION IntegerTest(a INTEGER) RETURNS INTEGER AS $$
@@ -26,9 +26,9 @@ return a+1;
 $$ LANGUAGE plcsharp STRICT;
 ```
 
-### Who is responsible for pl/dotnet?
+### Who is responsible for PL/.NET?
 
-pl/dotnet was built by the fine people at Brick Abode. We love ASP.NET development and PostgreSQL, and we build pl/dotnet to be the stored procedure environment that we wanted to have for working on our clients' projects. Feel free to talk to us about your ASP.NET development needs. Find out more at [https://www.brickabode.com](https://www.brickabode.com).
+PL/.NET was built by the fine people at Brick Abode. We love ASP.NET development and PostgreSQL, and we build PL/.NET to be the stored procedure environment that we wanted to have for working on our clients' projects. Feel free to talk to us about your ASP.NET development needs. Find out more at [https://www.brickabode.com](https://www.brickabode.com).
 
 ### How can I ask questions or request features?
 
@@ -38,11 +38,11 @@ pl/dotnet was built by the fine people at Brick Abode. We love ASP.NET developme
 
 ## Project information
 
-### Where can I get the source code for pl/dotnet?
+### Where can I get the source code for PL/.NET?
 
-The official repository for pl/dotnet is [https://github.com/Brick-Abode/pldotnet/](https://github.com/Brick-Abode/pldotnet/).
+The official repository for PL/.NET is [https://github.com/Brick-Abode/pldotnet/](https://github.com/Brick-Abode/pldotnet/).
 
-### Where can I read the documentation for pl/dotnet?
+### Where can I read the documentation for PL/.NET?
 
 Our project wiki is at [https://github.com/Brick-Abode/pldotnet/wiki](https://github.com/Brick-Abode/pldotnet/wiki).
 
@@ -50,93 +50,93 @@ Our project wiki is at [https://github.com/Brick-Abode/pldotnet/wiki](https://gi
 
 Yes, you can find the [whitepaper on our wiki](https://github.com/Brick-Abode/pldotnet/wiki/pldotnet:-White-Paper).
 
-### Is pl/dotnet fast?
+### Is PL/.NET fast?
 
-In our benchmarks, pl/csharp is the fastest procedural language in PostgreSQL.  pl/fsharp is second-fastest, less than 1% slower than pl/csharp.
+In our benchmarks, pl/csharp is the fastest procedural language in PostgreSQL. pl/fsharp is second-fastest, less than 1% slower than pl/csharp.
 
 These benchmarks are somewhat arbitrary, merely having been designed for our own needs, but they were not cherry-picked or tuned; we built the tests first and only benchmarked them afterwards. We wish for the benchmarks to be fair and welcome submissions to improve them.
 
 More details of the benchmarks can be found in our [whitepaper](https://github.com/Brick-Abode/pldotnet/wiki/pldotnet:-White-Paper).
 
-### Does pl/dotnet support a lot of types?
+### Does PL/.NET support a lot of types?
 
 We were able to achieve native representation for 38 types, plus their arrays, the widest range of types of any external procedural language in PostgreSQL.
 
 Here is the complete list of type mappings:
 
-| PostgreSQL | pl/dotnet                                   |
-|------------|---------------------------------------------|
-| BIT        | `BitArray`                                  |
-| BOOL       | `bool`                                      |
-| BOX        | `NpgsqlBox`                                 |
-| BPCHAR     | `string`                                    |
-| BYTEA      | `byte[]`                                    |
-| CIDR       | `IPAddress Address, int Netmask`            |
-| CIRCLE     | `NpgsqlCircle`                              |
-| DATE       | `DateOnly`                                  |
-| FLOAT4     | `float`                                     |
-| FLOAT8     | `double`                                    |
-| INET       | `IPAddress Address, int Netmask`            |
-| INT2       | `short`                                     |
-| INT4       | `int`                                       |
-| INT8       | `long`                                      |
-| INTERVAL   | `NpgsqlInterval`                            |
-| JSON       | `string`                                    |
-| LINE       | `NpgsqlLine`                                |
-| LSEG       | `NpgsqlLSeg`                                |
-| MACADDR    | `PhysicalAddress`                           |
-| MACADDR8   | `PhysicalAddress`                           |
-| MONEY      | `decimal`                                   |
-| PATH       | `NpgsqlPath`                                |
-| POINT      | `NpgsqlPoint`                               |
-| POLYGON    | `NpgsqlPolygon`                             |
-| TEXT       | `string`                                    |
-| TIME       | `TimeOnly`                                  |
-| TIMESTAMP  | `DateTime`                                  |
-| TIMESTAMPTZ| `DateTime`                                  |
-| TIMETZ     | `DateTimeOffset`                            |
-| UUID       | `Guid`                                      |
-| VARBIT     | `BitArray`                                  |
-| VARCHAR    | `string`                                    |
-| XML        | `string`                                    |
-| DATERANGE  | `NpgsqlRange<DateOnly>`                     |
-| INT4RANGE  | `NpgsqlRange<int>`                          |
-| INT8RANGE  | `NpgsqlRange<long>`                         |
-| TSRANGE    | `NpgsqlRange<DateTime>`                     |
-| TSTZRANGE  | `NpgsqlRange<DateTime>`                     |
+| PostgreSQL  | PL/.NET                          |
+| ----------- | -------------------------------- |
+| BIT         | `BitArray`                       |
+| BOOL        | `bool`                           |
+| BOX         | `NpgsqlBox`                      |
+| BPCHAR      | `string`                         |
+| BYTEA       | `byte[]`                         |
+| CIDR        | `IPAddress Address, int Netmask` |
+| CIRCLE      | `NpgsqlCircle`                   |
+| DATE        | `DateOnly`                       |
+| FLOAT4      | `float`                          |
+| FLOAT8      | `double`                         |
+| INET        | `IPAddress Address, int Netmask` |
+| INT2        | `short`                          |
+| INT4        | `int`                            |
+| INT8        | `long`                           |
+| INTERVAL    | `NpgsqlInterval`                 |
+| JSON        | `string`                         |
+| LINE        | `NpgsqlLine`                     |
+| LSEG        | `NpgsqlLSeg`                     |
+| MACADDR     | `PhysicalAddress`                |
+| MACADDR8    | `PhysicalAddress`                |
+| MONEY       | `decimal`                        |
+| PATH        | `NpgsqlPath`                     |
+| POINT       | `NpgsqlPoint`                    |
+| POLYGON     | `NpgsqlPolygon`                  |
+| TEXT        | `string`                         |
+| TIME        | `TimeOnly`                       |
+| TIMESTAMP   | `DateTime`                       |
+| TIMESTAMPTZ | `DateTime`                       |
+| TIMETZ      | `DateTimeOffset`                 |
+| UUID        | `Guid`                           |
+| VARBIT      | `BitArray`                       |
+| VARCHAR     | `string`                         |
+| XML         | `string`                         |
+| DATERANGE   | `NpgsqlRange<DateOnly>`          |
+| INT4RANGE   | `NpgsqlRange<int>`               |
+| INT8RANGE   | `NpgsqlRange<long>`              |
+| TSRANGE     | `NpgsqlRange<DateTime>`          |
+| TSTZRANGE   | `NpgsqlRange<DateTime>`          |
 
-### How does pl/dotnet make use of Npgsql?
+### How does PL/.NET make use of Npgsql?
 
 Npgsql is an open source ADO.NET Data Provider for PostgreSQL. You can find out more at their website, [https://www.npgsql.org/](https://www.npgsql.org/).
 
-pl/dotnet embraced Npgsql as our PostgreSQL compatibility layer to provide maximum transparency and ease in migrating code between a database client and the database server.
+PL/.NET embraced Npgsql as our PostgreSQL compatibility layer to provide maximum transparency and ease in migrating code between a database client and the database server.
 
-pl/dotnet uses Npgsql to map PostgreSQL data types to .NET data types.  Our implementation of SPI (database access within the stored procedure) is also based on Npgsql.
+PL/.NET uses Npgsql to map PostgreSQL data types to .NET data types. Our implementation of SPI (database access within the stored procedure) is also based on Npgsql.
 
-pl/dotnet incorporates Npgsql with minor, low-level modifications.  We make use of Npgsql's own regression test suite and are working towards perfect compatibility with it.
+PL/.NET incorporates Npgsql with minor, low-level modifications. We make use of Npgsql's own regression test suite and are working towards perfect compatibility with it.
 
 We are very grateful to the authors of Npgsql, as their work forms an integral piece of our own project.
 
-### How compatible is my Npgsql client code with pl/dotnet?
+### How compatible is my Npgsql client code with PL/.NET?
 
 We are 100% compatible with all supported Npgsql types.
 
-Database access within stored procedures, via SPI, is fully Npgsql-compatible in how you call them.  There are some minor differences, such as raising different exceptions in certain error conditions.
+Database access within stored procedures, via SPI, is fully Npgsql-compatible in how you call them. There are some minor differences, such as raising different exceptions in certain error conditions.
 
 We still have some minor Npgsql features, like subtransactions, which have not been mapped yet; it is our intention to reach full support in time.
 
 ### How complete is your F# support compared to C#?
 
-Very complete.  We have complete unit testing for all supported features in both C# and F#.
+Very complete. We have complete unit testing for all supported features in both C# and F#.
 
-Thanks to the magic of .NET, everything that works in C# *should* work in F#, and in our experience it does.
+Thanks to the magic of .NET, everything that works in C# _should_ work in F#, and in our experience it does.
 
-### How good is the code quality is pl/dotnet?
+### How good is the code quality is PL/.NET?
 
 - We have complete unit testing in C# and F# for all features and supported data types, their arrays, and nulls for that type.
-- Cpplint is a static code checker for C and C++.  pl/dotnet is clean under its checks.
-- StyleCop is a static code analysis tool for C#.  pl/dotnet is clean under its checks.
-- SonarLint is a code quality and security static analysis tool with almost 5000 rules.  pl/dotnet is clean under its checks.
+- Cpplint is a static code checker for C and C++. PL/.NET is clean under its checks.
+- StyleCop is a static code analysis tool for C#. PL/.NET is clean under its checks.
+- SonarLint is a code quality and security static analysis tool with almost 5000 rules. PL/.NET is clean under its checks.
 
 ### Is the code well commented?
 
@@ -144,44 +144,46 @@ All C and C# code is commented using Doxygen, and we encourage you to consult th
 
 ### What versions of .NET are supported?
 
-We currently support .NET version 6 and hope to add support for other versions soon.
+We currently support .NET version 9 and hope to add support for newer versions as they are released.
 
 ### What versions of PostgreSQL are supported?
 
-We currently support PostgreSQL versions 10, 11, 12, 13, 14, and 15.
+We currently support PostgreSQL versions 11, 12, 13, 14, 15, 16, and 17.
 
-## Using pl/dotnet
+## Using PL/.NET
 
-### How do I install pl/dotnet?
+### How do I install PL/.NET?
 
-See our `INSTALL` file at the top level of our source code.
+See our `INSTALL.md` file at the top level of our source code.
 
 You also can download our debian packages or use our Docker image on Dockerhub.
 
-### How do I use pl/dotnet?
+### How do I use PL/.NET?
 
 After you install it, you can use the normal Postgresql `CREATE FUNCTION`, `CREATE PROCEDURE`, `CREATE TRIGGER`, or `DO` syntax. The language is `plcsharp` or `plfsharp` depending on your choice of C# or F#.
 
-### How do I see the C#/F# code generated by pl/dotnet?
+See our `INSTALL.md` file at the top level of our source code for examples.
 
-By default pl/dotnet saves the generated source code in `/tmp/PlDotNET/GeneratedCodes`.
+### How do I see the C#/F# code generated by PL/.NET?
 
-You can control this behavior by modifying pl/dotnet. You can set the `SaveSourceCode` variable in `dotnet_src/Engine.cs` and specify the location by updating the `PathToSaveSourceCode` variable in the same file. This path needs to have mode of `0700`. Alternatively, you can set the `PrintSourceCode` variable in `dotnet_src/Engine.cs` to `true` to print the generated code to the console.  Note that after making changes to the `dotnet_src/Engine.cs` file, you will need to rebuild and reinstall the package.
+By default PL/.NET saves the generated source code in `/tmp/PlDotNET/GeneratedCodes`.
+
+You can control this behavior by modifying PL/.NET. You can set the `pldotnet.save_source_code` variable in your `postgresql.conf` file and specify the location by updating the `pldotnet.path_to_save_source_code` variable in the same file. This path needs to have mode of `0700`. Alternatively, you can set the `pldotnet.print_source_code` variable to `true` to print the generated code to the console. Note that after making changes to `postgresql.conf` you will need to restart PostgreSQL.
 
 ## NULL and STRICT
 
 ### How are NULLs handled?
 
-Null is mapped to `null` in C# and F#.  By default, all types in pl/dotnet are nullable.  You will see that as `T?` in C# and `Nullable<T>` in F#.
+Null is mapped to `null` in C# and F#. By default, all types in PL/.NET are nullable. You will see that as `T?` in C# and `Nullable<T>` in F#.
 
 ### Why does the type mapping change depending on whether my function is `STRICT`?
 
-A normal PostgreSQL function can be passed NULL as an argument. In order to handle this, pl/dotnet maps such types to their optional C# or F# type. For example, a PostgreSQL `INT4` is mapped to a `int?` in C#; this allows NULL to be handled in the standard way in the user function.
+A normal PostgreSQL function can be passed NULL as an argument. In order to handle this, PL/.NET maps such types to their optional C# or F# type. For example, a PostgreSQL `INT4` is mapped to a `int?` in C#; this allows NULL to be handled in the standard way in the user function.
 
 Some developers find such handling tedious and do not wish to be passed NULL. Fortunately, PostgreSQL supports this; you can
 declare your function to be `STRICT` (or `RETURNS NULL ON NULL INPUT`, which is an alias for `STRICT`.)
 
-Functions declared in this way immediately return NULL if called with NULL input (without actually calling the function), so the user function will never see a NULL value. For this reason, the type mapping is changed; `INT4` arguments are now mapped to `int` instead of `int?` in C#, or `Nullable<int>` in F#,  saving the developer the trouble of handling null values.
+Functions declared in this way immediately return NULL if called with NULL input (without actually calling the function), so the user function will never see a NULL value. For this reason, the type mapping is changed; `INT4` arguments are now mapped to `int` instead of `int?` in C#, or `Nullable<int>` in F#, saving the developer the trouble of handling null values.
 
 We could have always mapped types to `T?`, but we chose to do it this way for a reason; if you have existing code which takes `T` instead of `T?` arguments, then this lets you map them cleanly and appropriately to SQL.
 
@@ -189,19 +191,19 @@ We could have always mapped types to `T?`, but we chose to do it this way for a 
 
 ### How are arrays handled?
 
-Because PostgreSQL does not enforce dimensioning on its arrays, NPGSQL uses [`Array`](https://learn.microsoft.com/en-us/dotnet/api/system.array?view=net-8.0), a very generic, boxed version of arrays in its API. You can read more about NPGSQL's handling [here](https://www.npgsql.org/efcore/mapping/array.html). As always, pl/dotnet supports the NPGSQL mapping.
+Because PostgreSQL does not enforce dimensioning on its arrays, NPGSQL uses [`Array`](https://learn.microsoft.com/en-us/dotnet/api/system.array?view=net-8.0), a very generic, boxed version of arrays in its API. You can read more about [NPGSQL's handling here](https://www.npgsql.org/efcore/mapping/array.html). As always, PL/.NET supports the NPGSQL mapping.
 
 ### What is the performance problem with arrays?
 
 Because arrays are boxed, and because you don't know the dimensionality of an array, they behave more like trees than arrays, and navigating them is tedious and slow.
 
-We are forced to do this, because of our Npgsql compatibility.  We have ideas for how this can be improved in future versions; they will be incompatible and will require developers to explicitly opt into them.  We have found some optimizations in our array handling in certain cases and hope to continue improving it.
+We are forced to do this, because of our Npgsql compatibility. We have ideas for how this can be improved in future versions; they will be incompatible and will require developers to explicitly opt into them. We have found some optimizations in our array handling in certain cases and hope to continue improving it.
 
 ## Procedures, Functions, and `DO` blocks
 
-### Does pl/dotnet support procedures?
+### Does PL/.NET support procedures?
 
-It does.  A reminder (from the PostgreSQL manual)[https://www.postgresql.org/docs/current/xproc.html] about the central elements of procedures:
+It does. A reminder [from the PostgreSQL manual](https://www.postgresql.org/docs/current/xproc.html) about the central elements of procedures:
 
 ```quote
 - Procedures do not return a function value; hence CREATE PROCEDURE lacks a RETURNS clause. However, procedures can instead return data to their callers via output parameters.
@@ -260,9 +262,9 @@ CALL
 
 The similar plfsharp procedure can be found in the `SPITestTruncateAndAlterFSharp` procedure in `tests/fsharp/testfsspi.sql`.
 
-### Does pl/dotnet support functions?
+### Does PL/.NET support functions?
 
-It does.  Functions in SQL are "pure" in the computational sense: they are expected to be transformations from inputs to outputs, with no externally-visible side effects.
+It does. Functions in SQL are "pure" in the computational sense: they are expected to be transformations from inputs to outputs, with no externally-visible side effects.
 
 Here is an example in plcsharp:
 
@@ -300,9 +302,9 @@ user=# select make_pi_n_fs(1000);
 (1 row)
 ```
 
-### Does pl/dotnet support `DO` blocks?
+### Does PL/.NET support `DO` blocks?
 
-It does.  `DO` blocks are treated as though it were the body of a function with no parameters, returning void.  They are parsed and executed a single time.
+It does. `DO` blocks are treated as though it were the body of a function with no parameters, returning void. They are parsed and executed a single time.
 
 Here are some examples:
 
@@ -338,11 +340,11 @@ INFO:  c = 1725
 DO
 ```
 
-## INOUT and OUT  parameters
+## INOUT and OUT parameters
 
-### Does pl/dotnet support INOUT or OUT parameters?
+### Does PL/.NET support INOUT or OUT parameters?
 
-Yes, pl/dotnet supports INOUT and OUT parameters for both plcsharp and plfsharp.
+Yes, PL/.NET supports INOUT and OUT parameters for both plcsharp and plfsharp.
 
 ### How does pl/csharp support INOUT and OUT parameters?
 
@@ -464,7 +466,7 @@ Yes, triggers are fully supported.
 Trigger functions are called with a `TriggerData` argument which has
 all of the normal PostgreSQL trigger data:
 
-```
+```csharp
     public class TriggerData
     {
         // Row-level information for operations
@@ -501,8 +503,8 @@ These fields have the standard PostgreSQL meaning:
 
 Triggers can return `ReturnMode.Normal`, `ReturnMode.TriggerSkip`,
 or `ReturnMode.TriggerModify` as appropriate, under the normal
-SQL/PostgreSQL trigger rules.  Look in `tests/csharp/testtrigger.sql`
-or `tests/fsharp/testfstrigger.sql`.  for sample usage, or look in
+SQL/PostgreSQL trigger rules. Look in `tests/csharp/testtrigger.sql`
+or `tests/fsharp/testfstrigger.sql`. for sample usage, or look in
 `TriggerData.cs` for the definition of `TriggerData`.
 
 ### Where can I learn more about trigger functions?
@@ -511,7 +513,7 @@ The PostgreSQL manual does not define
 trigger functions abstractly, so (the PL/pgSQL
 definition)[https://www.postgresql.org/docs/current/plpgsql-trigger.html]
 is a good reference, although basically all Procedural Languages in
-PostgreSQL do the same thing, including pl/dotnet.
+PostgreSQL do the same thing, including PL/.NET.
 
 ### Where can I find examples of trigger functions?
 
@@ -521,7 +523,7 @@ They are somewhat complicated, so we refer you to `tests/csharp/testtrigger.sql`
 
 ### Is SPI supported?
 
-Yes, pl/dotnet supports the Server Programming Interface (SPI) in both plcsharp and plfsharp, allowing execute SQL commands directly from C# and F# code.
+Yes, PL/.NET supports the Server Programming Interface (SPI) in both plcsharp and plfsharp, allowing execute SQL commands directly from C# and F# code.
 All SPI functionality is exported via the Npgsql-standard APIs.
 
 Sample code can be found in `tests/csharp/testspi.sql` and
@@ -531,8 +533,8 @@ Sample code can be found in `tests/csharp/testspi.sql` and
 
 Here are the DDL operations we have tested:
 
-| C#      | F#      | Operation            | Description                                            |
-| ------- | ------- | -------------------- | ------------------------------------------------------ |
+| C#  | F#  | Operation            | Description                                            |
+| --- | --- | -------------------- | ------------------------------------------------------ |
 | ✅  | ✅  | **Create Table**     | Create new tables in the database.                     |
 | ✅  | ✅  | **Alter Table**      | Modify the structure of existing tables.               |
 | ✅  | ✅  | **Drop Table**       | Remove tables from the database.                       |
@@ -615,8 +617,8 @@ INFO:  Returned value = 10
 
 Here are the DML operations we have tested:
 
-| C#      | F#      | Operation  | Description                      |
-| ------- | ------- | ---------- | -------------------------------- |
+| C#  | F#  | Operation  | Description                      |
+| --- | --- | ---------- | -------------------------------- |
 | ✅  | ✅  | **Select** | Retrieve data from the database. |
 | ✅  | ✅  | **Insert** | Add new rows to a table.         |
 | ✅  | ✅  | **Update** | Modify existing data in a table. |
@@ -626,8 +628,8 @@ Here are the DML operations we have tested:
 
 Here are the DML operations we have tested:
 
-| C#      | F#      | Operation             | Description                       |
-| ------- | ------- | --------------------- | --------------------------------- |
+| C#  | F#  | Operation             | Description                       |
+| --- | --- | --------------------- | --------------------------------- |
 | ✅  | ✅  | **Begin Transaction** | Start a new database transaction. |
 | ✅  | ✅  | **Commit**            | Commit the current transaction.   |
 | ✅  | ✅  | **Rollback**          | Rollback the current transaction. |
@@ -636,9 +638,9 @@ Here are the DML operations we have tested:
 
 ### Are set-returning functions (SRFs) supported?
 
-Set returning functions are supported in C# but not F#.  You can have a simple return type, a RECORD return type, or you can define a TABLE function.
+Set returning functions are supported in C# but not F#. You can have a simple return type, a RECORD return type, or you can define a TABLE function.
 
-Functions returning `SETOF RECORD` are unique in that the RECORDs are flexible; you can return different types in different circumstances.  SQL requires you to provide the expected types when you select it, and pl/dotnet checks to confirm that the types provided match the types expected.  In general, SRF-with-record is a bad idea, and table functions are the preferred way to return tabular data.
+Functions returning `SETOF RECORD` are unique in that the RECORDs are flexible; you can return different types in different circumstances. SQL requires you to provide the expected types when you select it, and PL/.NET checks to confirm that the types provided match the types expected. In general, SRF-with-record is a bad idea, and table functions are the preferred way to return tabular data.
 
 You cannot return `SETOF RECORD` using `INOUT` or `OUT` parameters.
 
@@ -753,7 +755,7 @@ Here is the generated code:
 
 ### Does pl/csharp support records?
 
-Yes, pl/csharp supports records.  Per the PostgreSQL convention,
+Yes, pl/csharp supports records. Per the PostgreSQL convention,
 you cannot accept them as inputs, but you can create them to outputs.
 They are mapped in dotnet to arrays of objects.
 
@@ -797,7 +799,7 @@ user=# SELECT * FROM dynamic_record_generator(3) AS (a float, b float, c bool);
 (1 row)
 ```
 
-You can even see how pl/dotnet will keep you safe from returning the wrong type:
+You can even see how PL/.NET will keep you safe from returning the wrong type:
 
 ```sql
 user=# SELECT * FROM dynamic_record_generator_srf(10) AS t(a int8, b varchar);
@@ -856,7 +858,7 @@ Here is the generated code:
 
 ### Does pl/fsharp support records?
 
-Yes, same as C#.  Here's an example:
+Yes, same as C#. Here's an example:
 
 ```sql
 user=# CREATE OR REPLACE FUNCTION dynamic_record_generator_fsharp(scenario INT4)
@@ -889,7 +891,7 @@ This is also a good example of how to control the type mapping, in this case dot
 
 ### Does pl/fsharp support sets of records?
 
-Yes, though again you should usually use a table function instead.  Here is an example:
+Yes, though again you should usually use a table function instead. Here is an example:
 
 ```sql
 tlewis=# CREATE OR REPLACE FUNCTION dynamic_record_generator_srf_fsharp(lim INT8)
@@ -937,11 +939,10 @@ Here is the generated code:
                 seq { for i in 0L .. lim.Value - 1L do yield [| box i; $"Number is {i}" |] }
 ```
 
-
 ### Can I control the mapping of types from dotnet to PostgreSQL?
 
-Some dotnet types can be mapped to multiple PostgreSQL types.  In a normal
-context, pl/dotnet knows the correct type mapping and will handle it for
+Some dotnet types can be mapped to multiple PostgreSQL types. In a normal
+context, PL/.NET knows the correct type mapping and will handle it for
 you, but in a Record context, you can control the type mapping by using a
 `NpgsqlParameter`.
 
@@ -980,7 +981,7 @@ Look in `tests/csharp/testrecord.sql` for similar plcsharp examples.
 
 ### Does pl/csharp support table functions?
 
-Yes.  Here is an example:
+Yes. Here is an example:
 
 ```sql
 user=# CREATE OR REPLACE FUNCTION table_array_test(lim int4)
@@ -1021,7 +1022,7 @@ Here is the generated code:
 
 ### Does pl/fsharp support table functions?
 
-Yes.  Here is an example:
+Yes. Here is an example:
 
 ```sql
 tlewis=# CREATE OR REPLACE FUNCTION table_array_test_fsharp(lim int4)
@@ -1075,7 +1076,7 @@ AS 'Test.dll:Namespace.Class!IntegerTest'
 LANGUAGE plcsharp STRICT;
 ```
 
-To use your assembly with pl/dotnet, place it in the `/var/lib/postgresql/data/` directory. Alternatively, you can specify the full path to the assembly in the `CREATE OR REPLACE FUNCTION` statement, as demonstrated in this example:
+To use your assembly with PL/.NET, place it in the `/var/lib/postgresql/data/` directory. Alternatively, you can specify the full path to the assembly in the `CREATE OR REPLACE FUNCTION` statement, as demonstrated in this example:
 
 ```sql
 CREATE OR REPLACE FUNCTION IntegerTest(a INTEGER) RETURNS INTEGER
@@ -1083,29 +1084,29 @@ AS '/path/to/Test.dll:Namespace.Class!IntegerTest'
 LANGUAGE plcsharp STRICT;
 ```
 
-### Can I use any C#/F# library in pl/dotnet?
+### Can I use any C#/F# library in PL/.NET?
 
-Users cannot currently load libraries into their pl/dotnet programs, but we hope to add this support soon. In the meantime, if you wish to use other libraries, you can create your own Assembly and load it as demonstrated in the question [Q: Can I load my code from a DLL?](#q-can-i-load-my-code-from-a-dll).
+Users cannot currently load libraries into their PL/.NET programs, but we hope to add this support soon. In the meantime, if you wish to use other libraries, you can create your own Assembly and load it as demonstrated in the question [Q: Can I load my code from a DLL?](#can-i-load-my-code-from-a-dll).
 
 ## Security
 
-### How safe is pl/dotnet?
+### How safe is PL/.NET?
 
-Currently, pl/dotnet outputs the source code for each function to `/tmp/PlDotNET/` for debugging.
+Currently, PL/.NET outputs the source code for each function to `/tmp/PlDotNET/` for debugging.
 
-Each function in pl/dotnet is placed in a separate [AssemblyLoadContext](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=net-8.0) in the .NET runtime (CLR).  This places significant barriers between sharing of data between functions.
+Each function in PL/.NET is placed in a separate [AssemblyLoadContext](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=net-8.0) in the .NET runtime (CLR). This places significant barriers between sharing of data between functions.
 
 .NET was not designed to provide perfect security guarantees for code running inside of it, nor were most of the other runtimes used in PostgreSQL procedural languages. We encourage stored procedure authors to be cautious of the security implications of running code in stored procedures.
 
-### How isolated are functions in pl/dotnet?
+### How isolated are functions in PL/.NET?
 
-Each function in pl/dotnet is placed in a separate AssemblyLoadContext in the .NET runtime (CLR).
+Each function in PL/.NET is placed in a separate AssemblyLoadContext in the .NET runtime (CLR).
 
 We hope in the future to allow different functions loaded from the same DLL to share the same AssemblyLoadContext.
 
 ## Coding guidelines
 
-### How do I write efficient and secure C# stored procedures in pl/dotnet?
+### How do I write efficient and secure C# stored procedures in PL/.NET?
 
 - Use parameterized queries: Use parameterized queries to prevent SQL injection attacks.
 - Use prepared statements: Use prepared statements to avoid parsing the same SQL statement multiple times.

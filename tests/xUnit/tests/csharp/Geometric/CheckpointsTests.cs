@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Geometric")]
-public class CheckpointsTests : PlDotNetTest
+public abstract class BaseCheckpointsTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if(pointa.X == pointb.X && pointa.Y == pointb.Y)
-{
-    return true;
-}
-return false;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CheckpointsTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCheckpointsTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "Checkpoints",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("pointa", "point"), new FunctionArgument("pointb", "point") },
-            ReturnType = "boolean",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "Checkpoints", Arguments = new List<FunctionArgument> { new FunctionArgument("pointa", "point"), new FunctionArgument("pointb", "point") }, ReturnType = "boolean", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-point", "checkPoints1", "POINT(2.555701574,8.7552345789),POINT(2.555701574,8.7552345789)", " is true" },
-            new object[] { "c#-point", "checkPoints2", "POINT(2.555701574,8.7552345789),POINT(2.555701574,8.7552345785)", "is false" },
-        };
+        return new object[][] { new object[] { "c#-point", "checkPoints1", "POINT(2.555701574,8.7552345789),POINT(2.555701574,8.7552345789)", " is true" }, new object[] { "c#-point", "checkPoints2", "POINT(2.555701574,8.7552345789),POINT(2.555701574,8.7552345785)", "is false" }, };
     }
 
     [Theory]
@@ -45,4 +26,18 @@ return false;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Geometric")]
+public class CheckpointsTestsCSharp : BaseCheckpointsTests
+{
+    protected override string FunctionBody => @"
+if(pointa.X == pointb.X && pointa.Y == pointb.Y)
+{
+    return true;
+}
+return false;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

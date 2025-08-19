@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Floats")]
-public class ReturnDoubleFsharpTests : PlDotNetTest
+public abstract class BaseReturnDoubleFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-11.0050000000005
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnDoubleFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnDoubleFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnDoubleFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "float8",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnDoubleFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "float8", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-float8", "returnDoubleFSharp", "", "= float8 '11.0050000000005'" },
-        };
+        return new object[][] { new object[] { "f#-float8", "returnDoubleFSharp", "", "= float8 '11.0050000000005'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ public class ReturnDoubleFsharpTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Floats")]
+public class ReturnDoubleFsharpTestsFSharp : BaseReturnDoubleFsharpTests
+{
+    protected override string FunctionBody => @"
+11.0050000000005
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

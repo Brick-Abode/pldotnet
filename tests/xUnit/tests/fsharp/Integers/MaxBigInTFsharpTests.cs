@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Integers")]
-public class MaxBigInTFsharpTests : PlDotNetTest
+public abstract class BaseMaxBigInTFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-Nullable 9223372036854775807L
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MaxBigInTFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMaxBigInTFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MaxBigInTFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "int8",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MaxBigInTFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "int8", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-int8", "maxBigIntFSharp", "", "= int8 '9223372036854775807'" },
-        };
+        return new object[][] { new object[] { "f#-int8", "maxBigIntFSharp", "", "= int8 '9223372036854775807'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ Nullable 9223372036854775807L
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Integers")]
+public class MaxBigInTFsharpTestsFSharp : BaseMaxBigInTFsharpTests
+{
+    protected override string FunctionBody => @"
+Nullable 9223372036854775807L
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

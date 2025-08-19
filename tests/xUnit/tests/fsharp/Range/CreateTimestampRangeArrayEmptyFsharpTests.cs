@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Range")]
-public class CreateTimestampRangeArrayEmptyFsharpTests : PlDotNetTest
+public abstract class BaseCreateTimestampRangeArrayEmptyFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-Array.CreateInstance(typeof<NpgsqlRange<DateTime>>, 1, 1, 1)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateTimestampRangeArrayEmptyFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateTimestampRangeArrayEmptyFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateTimestampRangeArrayEmptyFSharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "TSRANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-            CastFunctionAs = "TEXT",
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateTimestampRangeArrayEmptyFSharp", Arguments = new List<FunctionArgument> { }, ReturnType = "TSRANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, CastFunctionAs = "TEXT", };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-tsrange-null-3array-arraynull", "CreateTimestampRangeArrayEmptyFSharp1", "", "= '{{{empty}}}'" },
-        };
+        return new object[][] { new object[] { "f#-tsrange-null-3array-arraynull", "CreateTimestampRangeArrayEmptyFSharp1", "", "= '{{{empty}}}'" }, };
     }
 
     [Theory]
@@ -41,4 +26,14 @@ Array.CreateInstance(typeof<NpgsqlRange<DateTime>>, 1, 1, 1)
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Range")]
+public class CreateTimestampRangeArrayEmptyFsharpTestsFSharp : BaseCreateTimestampRangeArrayEmptyFsharpTests
+{
+    protected override string FunctionBody => @"
+Array.CreateInstance(typeof<NpgsqlRange<DateTime>>, 1, 1, 1)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

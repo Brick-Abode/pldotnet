@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseByTeaConversionsTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseByTeaConversionsTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "ByTeaConversions", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BYTEA"), new FunctionArgument("b", "BYTEA") }, ReturnType = "BYTEA", Body = FunctionBody, Language = Language, IsStrict = false, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-bytea", "byteaConversions1", "'Brick Abode is nice!'::BYTEA, 'Thank you very much...'::BYTEA", "= '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA" }, new object[] { "c#-bytea-null", "byteaConversions2", "NULL::BYTEA, 'Thank you very much...'::BYTEA", "= 'Thank you very much...'::BYTEA" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestByTeaConversions(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Byea")]
-public class ByTeaConversionsTests : PlDotNetTest
+public class ByTeaConversionsTestsCSharp : BaseByTeaConversionsTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 UTF8Encoding utf8_e = new UTF8Encoding();
     if (a == null && b == null)
         return null;
@@ -23,33 +46,5 @@ UTF8Encoding utf8_e = new UTF8Encoding();
     string result = s1 + "" "" + s2;
     return utf8_e.GetBytes(result);
     ";
-
-    public ByTeaConversionsTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ByTeaConversions",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BYTEA"), new FunctionArgument("b", "BYTEA") },
-            ReturnType = "BYTEA",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = false,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-bytea", "byteaConversions1", "'Brick Abode is nice!'::BYTEA, 'Thank you very much...'::BYTEA", "= '\\x427269636b2041626f6465206973206e69636521205468616e6b20796f752076657279206d7563682e2e2e'::BYTEA" },
-        new object[] { "c#-bytea-null", "byteaConversions2", "NULL::BYTEA, 'Thank you very much...'::BYTEA", "= 'Thank you very much...'::BYTEA" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestByTeaConversions(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

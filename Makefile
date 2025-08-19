@@ -1,5 +1,4 @@
 # Makefile for PL/.NET
-
 UNAME = $(shell uname)
 PYTHON ?= python3
 SED ?= sed
@@ -7,15 +6,16 @@ DBUSER ?= postgres
 
 # General
 # Get installed dotnet host host
-DOTNET_VER = $(shell dotnet --info | grep 'Host' -A 3 | $(SED) -n 's/Version: \(.*\)/\1/p' | xargs)
+DOTNET_VERSION ?= 9.0
+DOTNET_VERSION_FLAG = -DDOTNET_VERSION='"$(DOTNET_VERSION)"'
 
 PLDOTNET_ENGINE_DIR = -DPLDOTNET_ENGINE_DIR=$(PLDOTNET_ENGINE_ROOT)/PlDotNET
 PLDOTNET_TEMPLATE_DIR = $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Templates
 
 # Linux support
 ifeq ($(UNAME), Linux)
-	DOTNET_HOSTDIR ?= $(shell dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
-	DOTNET_LIBDIR  ?= $(shell dpkg -L dotnet-apphost-pack-6.0 | grep hostfxr.h | head -1 | xargs dirname)
+	DOTNET_HOSTDIR ?= $(shell dpkg -L dotnet-apphost-pack-$(DOTNET_VERSION) | grep hostfxr.h | head -1 | xargs dirname)
+	DOTNET_LIBDIR  ?= $(shell dpkg -L dotnet-apphost-pack-$(DOTNET_VERSION) | grep hostfxr.h | head -1 | xargs dirname)
 	DOTNET_HOSTLIB ?= -L$(DOTNET_LIBDIR) -lnethost -Wl,-rpath $(DOTNET_LIBDIR)
 	PLDOTNET_ENGINE_ROOT ?= /var/lib
 	PG_CONFIG = pg_config
@@ -54,13 +54,13 @@ DATA = pldotnet--0.9.sql
 OBJS = src/pldotnet_hostfxr.o src/pldotnet.o src/pldotnet_conversions.o src/pldotnet_main.o src/pldotnet_spi.o
 
 PG_CPPFLAGS = -I$(DOTNET_HOSTDIR) -I$(PG_INCDIR) $(GLIB_INC) \
-			  -Iinc -DLINUX $(DEFINE_DOTNET_BUILD) $(PLDOTNET_ENGINE_DIR) \
+			  -Iinc -DLINUX $(DEFINE_DOTNET_BUILD) $(PLDOTNET_ENGINE_DIR) $(DOTNET_VERSION_FLAG) \
 			  -DPKG_LIBDIR=$(PKG_LIBDIR)
 PGXS = $(shell $(PG_CONFIG) --pgxs)
 
 ifeq ($(UNAME), Darwin)
 	PG_CPPFLAGS = -isystem $(DOTNET_HOSTDIR) -isystem $(PG_INCDIR) $(GLIB_INC) \
-			  -Iinc -DLINUX $(DEFINE_DOTNET_BUILD) $(PLDOTNET_ENGINE_DIR) \
+			  -Iinc -DLINUX $(DEFINE_DOTNET_BUILD) $(PLDOTNET_ENGINE_DIR) $(DOTNET_VERSION_FLAG)\
 			  -DPKG_LIBDIR=$(PKG_LIBDIR)
 	PGXS = $(HOME)/postgresql-15/lib/pgxs/src/makefiles/pgxs.mk
 endif
@@ -76,156 +76,167 @@ ifeq ($(UNAME), Linux)
 	CP_CHOWN += && chown -R postgres $(PLDOTNET_ENGINE_ROOT)/PlDotNET
 endif
 
-pldotnet-install: pldotnet-uninstall install
-	$(CP_CHOWN)
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Common/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/TypeHandlers/*.cs
-	$(SED) -i 's/@PKG_LIBDIR/$(shell echo $(PKG_LIBDIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/npgsql/src/Npgsql/PlDotNET/*.cs
-	$(SED) -i 's/@PLDOTNET_TEMPLATE_DIR/$(shell echo $(PLDOTNET_TEMPLATE_DIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/CodeGenerator.cs
-	$(SED) -i 's/@PLDOTNET_TEMPLATE_DIR/$(shell echo $(PLDOTNET_TEMPLATE_DIR) | $(SED) 's/\//\\\//g')/' $(PLDOTNET_ENGINE_ROOT)/PlDotNET/Engine.cs
-	$(BUILD_PLDOTNET_PROJECT)
+SHELL := /bin/bash
 
-pldotnet-uninstall: uninstall
-	rm -rf $(PLDOTNET_ENGINE_ROOT)/PlDotNET
+#########
+# BUILD #
+#########
 
-pldotnet-build-debian-packages:
-	$(MAKE) documentation
-	rm -f debian/packages/postgresql-*-pldotnet_*.deb
+# Cleans up built temporary files
+.PHONY: build-clean
+build-clean:
+	rm -rf ../postgresql-*-pldotnet*deb ../pldotnet_*.build ../pldotnet_*.changes ../pldotnet_*.buildinfo
+	rm -rf build-*
+	rm -rf debian/.debhelper debian/postgresql-*-pldotnet* debian/control debian/debhelper-build-stamp debian/files debian/control.in
+
+# Builds PL.NET in the local machine
+.PHONY: build-local
+build-local:
+	rm -f debian/packages/dotnet-$(DOTNET_VERSION)-*.deb
+	sed "s/@@DOTNET_VERSION@@/${DOTNET_VERSION}/g" debian/control.tmpl > debian/control.in
 	pg_buildext updatecontrol
-	debuild -b -uc -us --lintian-opts --suppress-tags=initial-upload-closes-no-bugs,custom-library-search-path --profile debian
+	debuild -e TargetFramework=net${DOTNET_VERSION} -e DOTNET_VERSION=$(DOTNET_VERSION) -b -uc -us --lintian-opts --suppress-tags=initial-upload-closes-no-bugs,custom-library-search-path --profile debian
 	mkdir -p debian/packages
 	cp ../postgresql-*-pldotnet_*.deb debian/packages/
-	rm -rf ../postgresql-*-pldotnet_*.deb
+	for file in ../postgresql-*-pldotnet_*.deb; do \
+		cp "$$file" "debian/packages/dotnet-$(DOTNET_VERSION)-$$(basename "$$file")"; \
+	done
+	$(MAKE) build-clean
 
-cpplint:
-	cpplint --filter=-readability/casting,-build/include_subdir,-runtime/int,-runtime/printf,-build/header_guard src/*.c src/*.h
+# Builds PL.NET in a Docker container
+# It also copies the built files to the local machine
+# Requires .env file with the following variables:
+# DOTNET_VERSION
+# POSTGRES_VERSION
+# POSTGRES_PORT
+# POSTGRES_PASSWORD
+.PHONY: build-docker
+build-docker:
+	@echo "[INFO] Loading environment from .env"
+	set -a && \
+    . ./.env && \
+    set +a && \
+	echo "[INFO] Building with Docker buildx. .NET $$DOTNET_VERSION / PostgreSQL $$POSTGRES_VERSION" && \
+	docker buildx build \
+	  --target artifacts \
+	  --output type=local,dest=./debian/packages \
+	  --build-arg POSTGRES_VERSION=$$POSTGRES_VERSION \
+	  --build-arg POSTGRES_PORT=$$POSTGRES_PORT \
+	  --build-arg POSTGRES_PASSWORD=$$POSTGRES_PASSWORD \
+	  .
 
-documentation:
-	doxygen docs/Doxyfile
 
-clean-docker:
-	# These might fail if there are no containers and/or images
-	# first you remove the containers
-	-docker ps -a|grep -v CREATED|awk '{print $$1}'| xargs docker rm
-	# second, you remove the images
-	-docker images|grep -v CREATED|awk '{print $$3}'| xargs docker rmi
-	rm -rf postgres-data
+#######
+# RUN #
+#######
 
-pldotnet-ubuntu:
-	docker-compose run --rm pldotnet-ubuntu22 bash
+.PHONY: dev
+dev:
+	docker-compose -f docker-compose.yml -f docker-compose-dev.yml up --build
 
-pldotnet-postgres:
-	$(MAKE) clean
-	$(MAKE)
-	$(MAKE) pldotnet-install
-	sudo -u $(DBUSER) psql
+.PHONY: run
+run:
+	docker-compose -f docker-compose.yml up --build
 
-build-package:
-	docker-compose up pldotnet-build | tee package-build-log.txt
+.PHONY: down
+down:
+	docker-compose down
 
-build-package-bash:
-	$(MAKE) build-package
-	docker-compose run --rm pldotnet-build bash
+########
+# TEST #
+########
 
-build-package-arm:
-	docker-compose up pldotnet-build-arm | tee package-build-arm-log.txt
+# xUnit test directory
+XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
+# Default filter for xUnit tests
+XUNIT_FILTER ?=
+# Command to run xUnit tests
+RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test $(if $(XUNIT_FILTER),--filter "$(XUNIT_FILTER)")
+# Where to put the test files
+APP_DIR ?= /app/pldotnet
+# The name of the running PL/.NET container
+PLDOTNET_CONTAINER ?= pldotnet-runtime
+# Builds tests and prepares the database for running them
 
-build-package-arm-bash:
-	$(MAKE) build-package-arm
-	docker-compose run --rm pldotnet-build-arm bash
-
+.PHONY: pre-tests-script
 pre-tests-script:
 	dotnet build $(CURRENT_DIR)/tests/csharp/DotNetTestProject -c Release
 	dotnet build $(CURRENT_DIR)/tests/fsharp/DotNetTestProject -c Release
 	mkdir -p automated_test_results
 	find automated_test_results -mindepth 1 -delete
-	echo 'DROP TABLE IF EXISTS automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);' | (sudo -u $(DBUSER)  psql)
+	runuser -u $(DBUSER) -- psql -f tests/setup.sql
 
+.PHONY: post-tests-script
 post-tests-script:
 	cd $(CURRENT_DIR)/tests/csharp/DotNetTestProject/ && rm -rf bin obj
 	cd $(CURRENT_DIR)/tests/fsharp/DotNetTestProject/ && rm -rf bin obj
 	cd $(CURRENT_DIR)/
-	echo 'SELECT FEATURE, TEST_NAME, RESULT from automated_test_results;' | (sudo -u $(DBUSER)  psql 2>&1) | tee automated_test_results/automated_test_results.out
-	echo 'SELECT RESULT, COUNT(1) FROM automated_test_results GROUP BY RESULT;' | (sudo -u $(DBUSER)  psql)
+	echo 'SELECT FEATURE, TEST_NAME, RESULT from automated_test_results;' | (runuser -u $(DBUSER) psql 2>&1) | tee automated_test_results/automated_test_results.out
+	echo 'SELECT RESULT, COUNT(1) FROM automated_test_results GROUP BY RESULT;' | (runuser -u $(DBUSER) psql)
 
-
-# xUnit test directory
-XUNIT_TEST_DIR := $(CURRENT_DIR)/tests/xUnit
-# Command to run xUnit tests
-RUN_XUNIT_TESTS = cd $(XUNIT_TEST_DIR) && dotnet test
-
-pldotnet-tests:
+# Runs tests locally, on the current machine
+.PHONY: test-local
+test-local:
 	$(MAKE) pre-tests-script
 	$(RUN_XUNIT_TESTS)
-
-csharp-tests:
-	$(MAKE) pre-tests-script
-	$(RUN_XUNIT_TESTS) --filter Language=CSharp
-
-fsharp-tests:
-	$(MAKE) pre-tests-script
-	$(RUN_XUNIT_TESTS) --filter Language=FSharp
-
-csharp-tests-cats:
-	for sqlfile in tests/csharp/*.sql; do \
-		echo "Running $$sqlfile"; \
-		cat $$sqlfile | (sudo -u postgres psql 2>&1) | tee automated_test_results/`basename $$sqlfile .sql`.out; \
-	done
-
-fsharp-tests-cats:
-	for sqlfile in tests/fsharp/*.sql; do \
-		echo "Running $$sqlfile"; \
-		cat $$sqlfile | (sudo -u postgres psql 2>&1) | tee automated_test_results/`basename $$sqlfile .sql`.out; \
-	done
-
-pldotnet-tests-sql:
-	$(MAKE) pre-tests-script
-	$(MAKE) csharp-tests-cats
-	$(MAKE) fsharp-tests-cats
 	$(MAKE) post-tests-script
 
-csharp-tests-sql:
+.PHONY: sql-test-local
+sql-test-local:
 	$(MAKE) pre-tests-script
-	$(MAKE) csharp-tests-cats
+	@if [ -n "$(SQL_FILE)" ]; then \
+		if [ -f "$(SQL_FILE)" ]; then \
+			echo "Running SQL test: $(SQL_FILE)"; \
+			output_file="automated_test_results/$$(basename "$(SQL_FILE)" .sql).out"; \
+			runuser -u postgres -- psql -f "$(SQL_FILE)" 2>&1 | tee "$$output_file"; \
+		else \
+			echo "Error: File '$(SQL_FILE)' does not exist."; \
+			exit 1; \
+		fi \
+	else \
+		echo "Running all SQL tests for C#..." ; \
+		for file in $$(ls tests/csharp/*.sql | sort); do \
+			echo "Running SQL test: $$file"; \
+			output_file="automated_test_results/csharp_$$(basename "$$file" .sql).out"; \
+			runuser -u postgres -- psql -f "$$file" 2>&1 | tee "$$output_file"; \
+		done ; \
+		echo "Running all SQL tests for F#..." ; \
+		for file in $$(ls tests/fsharp/*.sql | sort); do \
+			echo "Running SQL test: $$file"; \
+			output_file="automated_test_results/fsharp_$$(basename "$$file" .sql).out"; \
+			runuser -u postgres -- psql -f "$$file" 2>&1 | tee "$$output_file"; \
+		done ; \
+	fi
 	$(MAKE) post-tests-script
 
-fsharp-tests-sql:
-	$(MAKE) pre-tests-script
-	$(MAKE) fsharp-tests-cats
-	$(MAKE) post-tests-script
+# Runs tests in a running Docker container
+# Assumes that the container is running and named pldotnet-runtime,
+# as defined in the docker-compose.yml file.
+.PHONY: test-docker
+test-docker:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make $(if $(XUNIT_FILTER),XUNIT_FILTER="$(XUNIT_FILTER)") test-local
 
-stress-test:
-	mkdir -p automated_test_results
-	find automated_test_results -mindepth 1 -delete
-	echo 'DROP TABLE automated_test_results;CREATE TABLE automated_test_results(ID SERIAL PRIMARY KEY, FEATURE TEXT, TEST_NAME TEXT, RESULT boolean);' | (sudo -u $(DBUSER) psql)
-	sudo bash tests/stress_test/stress_test.sh
+.PHONY: sql-test-docker
+sql-test-docker:
+	@echo "Running SQL tests in Docker container..."
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} make sql-test-local $(if $(SQL_FILE),SQL_FILE=$(SQL_FILE))
 
-benchmark-tests:
-	mkdir -p automated_test_results
-	cat tests/benchmark/python/init-extension.sql | (sudo -u $(DBUSER) psql)
-	echo "ALTER DATABASE postgres SET pljava.libjvm_location TO '$$(sudo find /usr -name libjvm.so | head -n 1)';" | sudo -u $(DBUSER) psql
-	cat tests/benchmark/java/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/perl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/lua/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/tcl/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/r/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cat tests/benchmark/v8javascript/init-extension.sql | (sudo -u $(DBUSER) psql)
-	cd $(CURRENT_DIR)/tests/benchmark/java/test-suite && mvn install && cd $(CURRENT_DIR)/
-	echo "select sqlj.install_jar('file:$(CURRENT_DIR)/tests/benchmark/java/test-suite/target/test-suite-1.0.0.jar', 'testsuite', true);" | (sudo -u $(DBUSER) psql)
-	echo "select sqlj.set_classpath('public', 'testsuite');" | (sudo -u $(DBUSER) psql)
-	bash tests/benchmark/benchmark.sh
+.PHONY: npgsql-test-docker
+npgsql-test-docker:
+	docker exec -w "${APP_DIR}" -it ${PLDOTNET_CONTAINER} ./tests/npgsql/run_tests.sh
 
-spi-tests:
-	$(MAKE) pre-tests-script
-	cat tests/csharp/testspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testspi.out
-	cat tests/fsharp/testfsspi.sql | (sudo -u postgres  psql 2>&1) | tee automated_test_results/testfsspi.out
-	$(MAKE) post-tests-script
+########
+# DOCS #
+########
 
-npgsql-tests:
-	bash tests/npgsql/run_tests.sh
-	$(PYTHON) tests/npgsql/process_npgsql_results.py
+.PHONY: documentation
+documentation:
+	doxygen docs/Doxyfile
 
-npgsql-working-tests:
-	bash tests/npgsql/run_working_tests.sh
-	$(PYTHON) tests/npgsql/process_npgsql_results.py
+########
+# LINT #
+########
+
+.PHONY: lint
+lint:
+	cpplint --repository=. --root=./src --recursive --linelength=120 --filter=-readability/casting,-build/include_subdir src

@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Floats")]
-public class ReturnDoubleArrayFsharpTests : PlDotNetTest
+public abstract class BaseReturnDoubleArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-doubles
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnDoubleArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnDoubleArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnDoubleArrayFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("doubles", "float8[]") },
-            ReturnType = "float8[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnDoubleArrayFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("doubles", "float8[]") }, ReturnType = "float8[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-float8-null-1array", "returnDoubleArrayFSharp1", "ARRAY[21.0000000000109::float8, null::float8, 4.521234313421::float8, 7.412344328978::float8]", "= ARRAY[21.0000000000109::float8, null::float8, 4.521234313421::float8, 7.412344328978::float8]" },
-        new object[] { "f#-float8-null-2array-arraynull", "returnDoubleArrayFSharp2", "ARRAY[[null::float8, null::float8], [4.521234313421::float8, 7.412344328978::float8]]", "= ARRAY[[null::float8, null::float8], [4.521234313421::float8, 7.412344328978::float8]]" },
-        };
+        return new object[][] { new object[] { "f#-float8-null-1array", "returnDoubleArrayFSharp1", "ARRAY[21.0000000000109::float8, null::float8, 4.521234313421::float8, 7.412344328978::float8]", "= ARRAY[21.0000000000109::float8, null::float8, 4.521234313421::float8, 7.412344328978::float8]" }, new object[] { "f#-float8-null-2array-arraynull", "returnDoubleArrayFSharp2", "ARRAY[[null::float8, null::float8], [4.521234313421::float8, 7.412344328978::float8]]", "= ARRAY[[null::float8, null::float8], [4.521234313421::float8, 7.412344328978::float8]]" }, };
     }
 
     [Theory]
@@ -41,4 +26,14 @@ doubles
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Floats")]
+public class ReturnDoubleArrayFsharpTestsFSharp : BaseReturnDoubleArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+doubles
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

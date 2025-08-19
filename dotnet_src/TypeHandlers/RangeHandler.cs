@@ -15,7 +15,6 @@
 using System;
 using System.Runtime.InteropServices;
 using NpgsqlTypes;
-using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
@@ -28,7 +27,7 @@ namespace PlDotNET.Handler
     public abstract class RangeHandler<T, THandler> : StructTypeHandler<NpgsqlRange<T>>
             where THandler : BaseTypeHandler<T>, new()
     {
-        public static THandler HandlerObj = new ();
+        public static THandler HandlerObj = new();
 
         /// <inheritdoc />
         public override unsafe NpgsqlRange<T> InputValue(IntPtr datum)
@@ -154,14 +153,14 @@ namespace PlDotNET.Handler
     /// <remarks>
     /// See https://www.postgresql.org/docs/current/rangetypes.html.
     /// </remarks>
-    public class RangeConstructors
+    public partial class RangeConstructors
     {
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumRangeAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static unsafe extern void pldotnet_GetDatumRangeAttributes(
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial void pldotnet_GetDatumRangeAttributes(
                 IntPtr inputDatum,
                 byte* isEmpty,
                 IntPtr* lowerRange,
@@ -171,8 +170,8 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumRangeBoundAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static unsafe extern void pldotnet_GetDatumRangeBoundAttributes(
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial void pldotnet_GetDatumRangeBoundAttributes(
                 IntPtr inputRange,
                 IntPtr* rangeDatum,
                 byte* infinite,
@@ -183,8 +182,8 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumRange().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static unsafe extern IntPtr pldotnet_CreateDatumRange(
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial IntPtr pldotnet_CreateDatumRange(
             OID rtOid,
             IntPtr lowerDatum,
             byte lowerInfinite,
@@ -197,8 +196,8 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateEmptyDatumRange().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static unsafe extern IntPtr pldotnet_CreateEmptyDatumRange(OID rangeTypeId);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial IntPtr pldotnet_CreateEmptyDatumRange(OID rangeTypeId);
     }
 
     /// <summary>

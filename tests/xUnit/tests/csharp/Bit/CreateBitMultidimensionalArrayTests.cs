@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Bit")]
-public class CreateBitMultidimensionalArrayTests : PlDotNetTest
+public abstract class BaseCreateBitMultidimensionalArrayTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-BitArray objects_value = new BitArray(new bool[8]{true, false, true, false, true, true, false, false});
-BitArray?[, ,] three_dimensional_array = new BitArray?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
-return three_dimensional_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateBitMultidimensionalArrayTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateBitMultidimensionalArrayTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateBitMultidimensionalArray",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "BIT(8)[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateBitMultidimensionalArray", Arguments = new List<FunctionArgument> { }, ReturnType = "BIT(8)[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-bit-null-3array-arraynull", "CreateBitMultidimensionalArray1", "", "= ARRAY[[['10101100'::BIT(8), '10101100'::BIT(8)], [null::BIT(8), null::BIT(8)]], [['10101100'::BIT(8), null::BIT(8)], ['10101100'::BIT(8), '10101100'::BIT(8)]]]" },
-        };
+        return new object[][] { new object[] { "c#-bit-null-3array-arraynull", "CreateBitMultidimensionalArray1", "", "= ARRAY[[['10101100'::BIT(8), '10101100'::BIT(8)], [null::BIT(8), null::BIT(8)]], [['10101100'::BIT(8), null::BIT(8)], ['10101100'::BIT(8), '10101100'::BIT(8)]]]" }, };
     }
 
     [Theory]
@@ -42,4 +26,16 @@ return three_dimensional_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Bit")]
+public class CreateBitMultidimensionalArrayTestsCSharp : BaseCreateBitMultidimensionalArrayTests
+{
+    protected override string FunctionBody => @"
+BitArray objects_value = new BitArray(new bool[8]{true, false, true, false, true, true, false, false});
+BitArray?[, ,] three_dimensional_array = new BitArray?[2, 2, 2] {{{objects_value, objects_value}, {null, null}}, {{objects_value, null}, {objects_value, objects_value}}};
+return three_dimensional_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

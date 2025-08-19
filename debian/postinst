@@ -1,5 +1,32 @@
 #!/bin/bash
 echo "Post install script is running now"
 
-DOTNET_LIBDIR=$(dpkg -L dotnet-apphost-pack-6.0 | fgrep libnethost.so | head -1 | xargs dirname)
-ldconfig  $DOTNET_LIBDIR
+# Dynamically locate the .NET library directory for the installed version
+DOTNET_LIBDIR=$(dpkg -L $(dpkg -l | awk '/dotnet-apphost-pack-/ {print $2}' | head -1) | fgrep libnethost.so | head -1 | xargs dirname)
+
+# Update the linker cache for the .NET library
+if [ -n "$DOTNET_LIBDIR" ]; then
+    ldconfig "$DOTNET_LIBDIR"
+else
+    echo "libnethost.so not found in any installed dotnet-apphost-pack version."
+fi
+
+# Locate the PostgreSQL configuration file
+PG_CONF=$(runuser -u postgres -- psql -tAc "SHOW config_file;" | xargs)
+
+if [ -f "$PG_CONF" ]; then
+    echo "" >> "$PG_CONF"
+    echo "# Added by PL/DOTNET package" >> "$PG_CONF"
+    echo "pldotnet.always_nullable = 'off'" >> "$PG_CONF"
+    echo "pldotnet.print_source_code = 'off'" >> "$PG_CONF"
+    echo "pldotnet.save_source_code = 'on'" >> "$PG_CONF"
+    echo "pldotnet.compile_fsharp_with_fcs = 'off'" >> "$PG_CONF"
+    echo "pldotnet.verbose_level = 0" >> "$PG_CONF"
+    echo "pldotnet.path_to_save_source_code = '/tmp/PlDotNET/GeneratedCodes'" >> "$PG_CONF"
+    echo "pldotnet.path_to_temporary_files = '/tmp/PlDotNET/'" >> "$PG_CONF"
+    runuser -u postgres -- psql -c "SELECT pg_reload_conf();"
+
+    echo "PostgreSQL configuration updated and reloaded."
+else
+    echo "Could not locate postgresql.conf. Ensure PostgreSQL is installed and running." >&2
+fi

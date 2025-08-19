@@ -16,7 +16,7 @@ using System;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -27,8 +27,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-net-types.html.
     /// </remarks>
     [OIDHandler(OID.MACADDROID, OID.MACADDRARRAYOID)]
-    public class MacaddrHandler : ObjectTypeHandler<PhysicalAddress>
+    public partial class MacaddrHandler : ObjectTypeHandler<PhysicalAddress>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MacaddrHandler"/> class.
+        /// </summary>
         public MacaddrHandler()
         {
             this.ElementOID = OID.MACADDROID;
@@ -39,15 +42,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumMacAddressAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumMacAddressAttributes(IntPtr datum, int length, byte[] bytes);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumMacAddressAttributes(IntPtr datum, int length, byte[] bytes);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumMacAddress().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumMacAddress(int length, byte[] bytes);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumMacAddress(int length, byte[] bytes);
 
         /// <inheritdoc />
         public override PhysicalAddress InputValue(IntPtr datum)
@@ -73,6 +76,9 @@ namespace PlDotNET.Handler
     [OIDHandler(OID.MACADDR8OID, OID.MACADDR8ARRAYOID)]
     public class Macaddr8Handler : ObjectTypeHandler<PhysicalAddress>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Macaddr8Handler"/> class.
+        /// </summary>
         public Macaddr8Handler()
         {
             this.ElementOID = OID.MACADDR8OID;
@@ -101,8 +107,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-net-types.html.
     /// </remarks>
     [OIDHandler(OID.INETOID, OID.INETARRAYOID)]
-    public class InetHandler : StructTypeHandler<(IPAddress Address, int Netmask)>
+    public partial class InetHandler : StructTypeHandler<(IPAddress Address, int Netmask)>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InetHandler"/> class.
+        /// </summary>
         public InetHandler()
         {
             this.ElementOID = OID.INETOID;
@@ -113,15 +122,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumInetAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumInetAttributes(IntPtr datum, ref int nelem, byte[] bytes, ref int netmask);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumInetAttributes(IntPtr datum, ref int nelem, byte[] bytes, ref int netmask);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumInet().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumInet(int length, byte[] bytes, int netmask);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumInet(int length, byte[] bytes, int netmask);
 
         /// <inheritdoc />
         public override (IPAddress Address, int Netmask) InputValue(IntPtr datum)
@@ -154,6 +163,9 @@ namespace PlDotNET.Handler
     [OIDHandler(OID.CIDROID, OID.CIDRARRAYOID)]
     public class CidrHandler : StructTypeHandler<(IPAddress Address, int Netmask)>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CidrHandler"/> class.
+        /// </summary>
         public CidrHandler()
         {
             this.ElementOID = OID.CIDROID;

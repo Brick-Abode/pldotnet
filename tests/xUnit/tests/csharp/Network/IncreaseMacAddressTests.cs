@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseMacAddressTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseMacAddressTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseMacAddress", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MACADDR[]") }, ReturnType = "MACADDR[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-macaddr-1array", "IncreaseMacAddress1", "ARRAY[MACADDR '08-00-2b-01-02-03', MACADDR '09-00-2b-01-02-03', null::macaddr, MACADDR 'a8-00-2b-01-02-03']", "= ARRAY[MACADDR '09-00-2b-01-02-03', MACADDR '0a-00-2b-01-02-03', null::macaddr, MACADDR 'a9-00-2b-01-02-03']" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseMacAddress(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Network")]
-public class IncreaseMacAddressTests : PlDotNetTest
+public class IncreaseMacAddressTestsCSharp : BaseIncreaseMacAddressTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -26,32 +49,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseMacAddressTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseMacAddress",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "MACADDR[]") },
-            ReturnType = "MACADDR[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-macaddr-1array", "IncreaseMacAddress1", "ARRAY[MACADDR '08-00-2b-01-02-03', MACADDR '09-00-2b-01-02-03', null::macaddr, MACADDR 'a8-00-2b-01-02-03']", "= ARRAY[MACADDR '09-00-2b-01-02-03', MACADDR '0a-00-2b-01-02-03', null::macaddr, MACADDR 'a9-00-2b-01-02-03']" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseMacAddress(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

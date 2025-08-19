@@ -26,13 +26,13 @@ do $$
 $$ language plcsharp;
     ";
 
-	public DoLanguageTests()
-	{
-		FunctionInfo = new SqlFunctionInfo
-		{
-			TestType = SqlTestType.DoBlock,
-		};
-	}
+    public DoLanguageTests()
+    {
+        FunctionInfo = new SqlFunctionInfo
+        {
+            TestType = SqlTestType.DoBlock,
+        };
+    }
 
     [Fact]
     public void TestDoLanguage()

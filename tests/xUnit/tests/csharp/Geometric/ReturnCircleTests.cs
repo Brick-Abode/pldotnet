@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Geometric")]
-public class ReturnCircleTests : PlDotNetTest
+public abstract class BaseReturnCircleTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return orig_circle;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnCircleTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnCircleTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnCircle",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("orig_circle", "CIRCLE") },
-            ReturnType = "CIRCLE",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnCircle", Arguments = new List<FunctionArgument> { new FunctionArgument("orig_circle", "CIRCLE") }, ReturnType = "CIRCLE", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {"c#-circle","returnCircle","CIRCLE '2.5, 3.5, 12.78'","~= CIRCLE '<(2.5, 3.5), 12.78>'"}
-        };
+        return new object[][] { new object[] { "c#-circle", "returnCircle", "CIRCLE '2.5, 3.5, 12.78'", "~= CIRCLE '<(2.5, 3.5), 12.78>'" } };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return orig_circle;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Geometric")]
+public class ReturnCircleTestsCSharp : BaseReturnCircleTests
+{
+    protected override string FunctionBody => @"
+return orig_circle;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

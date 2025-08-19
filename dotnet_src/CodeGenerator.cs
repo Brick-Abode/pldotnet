@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using NpgsqlTypes;
 using PlDotNET.Common;
 using PlDotNET.Handler;
 
@@ -45,40 +46,139 @@ using PlDotNET.Handler;
 //        + For SRF, argument handling is only for CALL_SRF_FIRST case
 namespace PlDotNET
 {
+    /// <summary>
+    /// Base class for code generation in PL/.NET.
+    /// </summary>
     public abstract class CodeGenerator
     {
+        /// <summary>
+        /// The PostgreSQL function name as it appears in the database.
+        /// </summary>
         public string FuncName;
+
+        /// <summary>
+        /// The OID of the PostgreSQL return type.
+        /// </summary>
         public uint ReturnTypeId;
+
+        /// <summary>
+        /// True if the function returns a set (SETOF); otherwise false.
+        /// </summary>
         public bool Retset;
+
+        /// <summary>
+        /// True if this is a trigger function; otherwise false.
+        /// </summary>
         public bool IsTrigger;
+
+        /// <summary>
+        /// The names of each parameter in order.
+        /// </summary>
         public string[] ParamNames;
+
+        /// <summary>
+        /// The PostgreSQL OIDs of each parameter’s type, in the same order as <see cref="ParamNames"/>.
+        /// </summary>
         public uint[] ParamTypes;
+
+        /// <summary>
+        /// The mode of each parameter (In, Out, InOut, Table, Variadic) as raw bytes.
+        /// </summary>
         public byte[] ParamModes;
+
+        /// <summary>
+        /// How many output columns the function produces.
+        /// </summary>
         public int NumOutputValues;
+
+        /// <summary>
+        /// The raw function body or assembly-qualified name provided by the user.
+        /// </summary>
         public string FuncBody;
+
+        /// <summary>
+        /// Whether NULL input is allowed (STRICT or RETURNS NULL ON NULL INPUT).
+        /// </summary>
         public bool SupportNullInput;
+
+        /// <summary>
+        /// The “complex” .NET return type (e.g. IEnumerable&lt;T&gt; for set-returning functions).
+        /// </summary>
         public string ComplexReturnType;
+
+        /// <summary>
+        /// The “simple” .NET return type (without IEnumerable wrapping).
+        /// </summary>
         public string SimpleReturnType;
+
+        /// <summary>
+        /// The .NET types of each parameter, calculated from <see cref="ParamTypes"/>.
+        /// </summary>
         public string[] DotnetTypes;
+
+        /// <summary>
+        /// Number of output values when in table-returning mode.
+        /// </summary>
         public int BcsrOutputValues;
+
+        /// <summary>
+        /// The .NET type used when the function returns rows (table-returning).
+        /// </summary>
         public string TableReturnType;
 
+        /// <summary>
+        /// Namespace + class prefix to call the user’s function (default: "PlDotNET.UserSpace.UserFunction").
+        /// </summary>
         public string UserFunctionPrefix = "PlDotNET.UserSpace.UserFunction";
 
+        /// <summary>
+        /// File path to the C# user-handler template.
+        /// </summary>
         public string UserHandlerTemplatePath;
+
+        /// <summary>
+        /// File path to the C# trigger-handler template.
+        /// </summary>
         public string UserTHandlerTemplatePath;
+
+        /// <summary>
+        /// File path to the C# user-function template.
+        /// </summary>
         public string UserFunctionTemplatePath;
+
+        /// <summary>
+        /// If true, generate the handler as if it were targeting F#-style functions.
+        /// </summary>
         public bool UserHandlerForFSharp = false;
 
+        /// <summary>
+        /// The target .NET language (CSharp or FSharp).
+        /// </summary>
         public DotNETLanguage Language;
 
-        public byte[] InputModes = new byte[] { (byte)ProArgMode.In, (byte)ProArgMode.InOut };
-        public byte[] OutputModes = new byte[] { (byte)ProArgMode.Out, (byte)ProArgMode.InOut };
+        /// <summary>
+        /// Parameter modes treated as inputs (In, InOut).
+        /// </summary>
+        public byte[] InputModes = [(byte)ProArgMode.In, (byte)ProArgMode.InOut];
 
-        // This is "output modes plus table"; it has nothing to do with trigger
-        public byte[] TOutputModes = new byte[] { (byte)ProArgMode.Out, (byte)ProArgMode.InOut, (byte)ProArgMode.Table };
+        /// <summary>
+        /// Parameter modes treated as outputs (Out, InOut).
+        /// </summary>
+        public byte[] OutputModes = [(byte)ProArgMode.Out, (byte)ProArgMode.InOut];
 
-        // taken from catalog/pg_proc.h
+        /// <summary>
+        /// Parameter modes treated as outputs plus table columns.
+        /// </summary>
+        public byte[] TOutputModes = [(byte)ProArgMode.Out, (byte)ProArgMode.InOut, (byte)ProArgMode.Table];
+
+        /// <summary>
+        /// Settings for the pldotnet engine.
+        /// </summary>
+        public PlDotNETSettings Settings;
+
+        /// <summary>
+        /// The type of the arguments in the user function.
+        /// </summary>
         public enum ProArgMode : byte
         {
             [Description("PROARGMODE_IN")]
@@ -93,6 +193,9 @@ namespace PlDotNET
             Table = (byte)'t',
         }
 
+        /// <summary>
+        /// A helper to debug the code generator state.
+        /// </summary>
         public string DebugInfoOrig()
         {
             return $@"Debug info for {this.GetType().Name}:
@@ -103,7 +206,7 @@ namespace PlDotNET
                 ParamNames: {string.Join(", ", this.ParamNames)}
                 paramTypes: {string.Join(", ", this.ParamTypes)}
                 paramModes: {string.Join(", ", this.ParamModes)}
-                num_output_values: {this.NumOutputValues}
+                numOutputValues: {this.NumOutputValues}
                 funcBody: {this.FuncBody.Replace(Environment.NewLine, "\\n")}
                 supportNullInput: {this.SupportNullInput}
                 complexReturnType: {this.ComplexReturnType}
@@ -113,6 +216,9 @@ namespace PlDotNET
                 tableReturnType: {this.TableReturnType}";
         }
 
+        /// <summary>
+        /// Generates a debug information string for the current state of the code generator.
+        /// </summary>
         public string DebugInfo()
         {
             var sb = new StringBuilder();
@@ -128,7 +234,7 @@ namespace PlDotNET
                 sb.AppendLine($"ParamNames: {(this.ParamNames != null ? string.Join(", ", this.ParamNames) : "null")}");
                 sb.AppendLine($"paramTypes: {(this.ParamTypes != null ? string.Join(", ", this.ParamTypes) : "null")}");
                 sb.AppendLine($"paramModes: {(this.ParamModes != null ? string.Join(", ", this.ParamModes) : "null")}");
-                sb.AppendLine($"num_output_values: {this.NumOutputValues}");
+                sb.AppendLine($"numOutputValues: {this.NumOutputValues}");
                 sb.AppendLine($"funcBody: {(this.FuncBody != null ? this.FuncBody.Replace(Environment.NewLine, "\\n") : "null")}");
                 sb.AppendLine($"supportNullInput: {this.SupportNullInput}");
                 sb.AppendLine($"complexReturnType: {this.ComplexReturnType ?? "null"}");
@@ -142,20 +248,33 @@ namespace PlDotNET
             catch (Exception ex)
             {
                 Elog.Error($"Exception encountered while generating debug info. " +
-                    $"Current state:\n{sb.ToString()}\nException:\n{ex}");
+                    $"Current state:\n{sb}\nException:\n{ex}");
                 throw;
             }
         }
 
-        public void baseInitializer(
+        /// <summary>
+        /// Initializes the code generator with the basic parameters.
+        /// </summary>
+        /// <param name="funcName">The name of the function.</param>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
+        /// <param name="isTrigger">True if this is a trigger function; otherwise false.</param>
+        /// <param name="paramNames">The names of the parameters.</param>
+        /// <param name="paramTypes">The OIDs of the parameter types.</param>
+        /// <param name="paramModes">The modes of the parameters (In, Out, InOut, Table).</param>
+        /// <param name="numOutputValues">The number of output values.</param>
+        /// <param name="funcBody">The raw function body or assembly-qualified name.</param>
+        /// <param name="supportNullInput">Whether NULL input is allowed (STRICT or RETURNS NULL ON NULL INPUT).</param>
+        public void BaseInitializer(
             string funcName,
             uint returnTypeId,
             bool retset,
-            bool is_trigger,
+            bool isTrigger,
             string[] paramNames,
             uint[] paramTypes,
             byte[] paramModes,
-            int num_output_values,
+            int numOutputValues,
             string funcBody,
             bool supportNullInput)
         {
@@ -163,22 +282,23 @@ namespace PlDotNET
             this.FuncName = funcName;
             this.ReturnTypeId = returnTypeId;
             this.Retset = retset;
-            this.IsTrigger = is_trigger;
+            this.IsTrigger = isTrigger;
             this.ParamNames = paramNames;
             this.ParamTypes = paramTypes;
             this.ParamModes = paramModes;
-            this.NumOutputValues = num_output_values;
+            this.NumOutputValues = numOutputValues;
             this.FuncBody = funcBody;
             this.SupportNullInput = supportNullInput;
             this.ComplexReturnType = this.GetReturnType(returnTypeId, retset = false);
             this.SimpleReturnType = this.GetReturnType(returnTypeId, retset = false);
+            this.Settings = new PlDotNETSettings();
 
             if (this.IsTrigger)
             {
                 Debug.Assert(!this.Retset, "Cannot return `SETOF` from a trigger");
                 Debug.Assert(this.ReturnTypeId == (uint)OID.TRIGGEROID, "Trigger functions must return TRIGGEROID");
                 Debug.Assert(this.ParamNames.Length == 0, "Trigger functions can take no arguments");
-                this.DotnetTypes = Array.Empty<string>();
+                this.DotnetTypes = [];
                 this.SimpleReturnType = "int";
                 this.ComplexReturnType = "int";
 
@@ -217,16 +337,16 @@ namespace PlDotNET
         {
             // We need an NPGSQL object for all arguments: IN/OUT/INOUT.  Thus, we
             // do not filter here by paramMode.
-            List<string> allHandlers = new ();
+            List<string> allHandlers = [];
 
             if ((OID)this.ReturnTypeId != OID.VOIDOID)
             {
-                allHandlers.Add(DatumConversion.GetTypeHandlerName(this.ReturnTypeId));
+                allHandlers.Add(DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId));
             }
 
             for (int i = 0; i < this.ParamTypes.Length; i++)
             {
-                allHandlers.Add(DatumConversion.GetTypeHandlerName(this.ParamTypes[i]));
+                allHandlers.Add(DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]));
             }
 
             return allHandlers.Distinct().ToList();
@@ -235,9 +355,10 @@ namespace PlDotNET
         /// <summary>
         /// Prints the source code if Engine.PrintSourceCode is true.
         /// </summary>
+        /// <param name="sourceCode">The source code to print.</param>
         public void PrintSourceCode(string sourceCode)
         {
-            if (Engine.PrintSourceCode)
+            if (this.Settings.PrintSourceCode)
             {
                 Elog.Info("===========================");
                 Elog.Info($"Source code:\n{sourceCode}");
@@ -264,17 +385,24 @@ namespace PlDotNET
         /// <summary>
         /// Saves the source code if Engine.SaveSourceCode is true.
         /// </summary>
+        /// <param name="sourceCode">The source code to save.</param>
+        /// <param name="fileName">The file name to save the source code as.</param>
         public void SaveSourceCode(string sourceCode, string fileName)
         {
-            if (Engine.SaveSourceCode)
+            if (this.Settings.SaveSourceCode)
             {
-                string path = Path.Combine(Engine.PathToSaveSourceCode, fileName);
+                string path = Path.Combine(this.Settings.PathToSaveSourceCode, fileName);
                 path = Path.ChangeExtension(path, this.Language == DotNETLanguage.CSharp ? ".cs" : ".fs");
                 File.WriteAllText(path, sourceCode, Encoding.UTF8);
             }
         }
 
-        // This can be considated back into BuildUserHandlerSourceCode be mildly abstracting it
+        /// <summary>
+        /// Creates the source code for the UserTHandler (trigger handler).
+        /// </summary>
+        /// <remarks>
+        /// This can be consolidated back into BuildUserHandlerSourceCode by mildly abstracting it.
+        /// </remarks>
         public string BuildUserTHandlerSourceCode()
         {
             // Check if the file exists
@@ -354,7 +482,7 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// Creates the SRF cache, or else a small comment if not SRF
+        /// Creates the SRF cache, or else a small comment if not SRF.
         /// </summary>
         /// <remarks>
         /// We need the cache so that the IEnumerator is not garbage
@@ -372,7 +500,7 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// Creates the opening for SRF handling, or else a small comment if not SRF
+        /// Creates the opening for SRF handling, or else a small comment if not SRF.
         /// </summary>
         /// <remarks>
         /// Generated SRF-handling code:
@@ -397,11 +525,11 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// Creates the middle of the SRF handling, or else a small comment if not SRF
+        /// Creates the middle of the SRF handling, or else a small comment if not SRF.
         /// </summary>
         /// <remarks>
         /// 1. we end the SRF_FIRST handling
-        /// 2. we open the SRF_NEXT handling
+        /// 2. we open the SRF_NEXT handling.
         /// </remarks>
         /// <returns>
         /// Returns the generated source code.
@@ -436,7 +564,7 @@ namespace PlDotNET
 
             if (this.ParamModes.Contains((byte)ProArgMode.Table))
             {
-                List<string> table_args = new List<string>();
+                List<string> table_args = [];
                 int argc = this.ParamTypes.Length;
 
                 // assign them
@@ -463,13 +591,13 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// Creates the end of the SRF handling, or else a small comment if not SRF
+        /// Creates the end of the SRF handling, or else a small comment if not SRF.
         /// </summary>
         /// <remarks>
         /// 1. we return mode SrfNext
         /// 2. we close the SRF_NEXT handling
         /// 3. we handle CALL_SRF_CLEANUP
-        /// 4. we error on all other cases
+        /// 4. we error on all other cases.
         /// </remarks>
         /// <returns>
         /// Returns the generated source code.
@@ -527,6 +655,11 @@ namespace PlDotNET
             return sourceCode;
         }
 
+        /// <summary>
+        /// Gets the .NET types of the SQL user function according to the language.
+        /// </summary>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
         public string GetReturnType(uint returnTypeId, bool retset)
         {
             if ((OID)returnTypeId == OID.TRIGGEROID)
@@ -552,9 +685,9 @@ namespace PlDotNET
             }
 
             string aux = this.SupportNullInput ? "?" : string.Empty;
-            List<string> parameters = new List<string>();
-            List<string> outputParameters = new List<string>();
-            List<string> inputParameters = new List<string>();
+            List<string> parameters = [];
+            List<string> outputParameters = [];
+            List<string> inputParameters = [];
 
             for (int i = 0, argc = this.DotnetTypes.Length; i < argc; i++)
             {
@@ -616,7 +749,7 @@ namespace PlDotNET
         /// <param name="retset">A boolean value indicating if it's a result set.</param>
         /// <returns>
         /// The complex return type. If it's not a result set, it returns the simple return type.
-        /// If it's a result set, it returns the complex return type in the form of `IEnumerable<T>`
+        /// If it's a result set, it returns the complex return type in the form of `IEnumerable.<T>`
         /// or seq<T> for C# and F# respectively.
         /// </returns>
         public abstract string GetComplexReturnType(bool retset);
@@ -634,6 +767,7 @@ namespace PlDotNET
         /// do the process of converting a Postgres type to an equivalente .NET
         /// type.
         /// </summary>
+        /// <param name="paramModes">The parameter modes to create the arguments for.</param>
         /// <returns>
         /// Returns the user function arguments.
         /// </returns>
@@ -676,25 +810,47 @@ namespace PlDotNET
         /// <summary>
         /// This function formats the generated code.
         /// </summary>
+        /// <param name="sourceCode">The source code to format.</param>
         /// <returns>
         /// Returns the formatted code.
         /// </returns>
         public abstract string FormatGeneratedCode(string sourceCode);
     }
 
+    /// <summary>
+    /// C# code generator for PL/.NET.
+    /// </summary>
     public class CSharpCodeGenerator : CodeGenerator
     {
+        /// <summary>
+        /// Whether the user handler is for F#.
+        /// </summary>
         public bool UserHandlerFSC;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CSharpCodeGenerator"/> class.
+        /// </summary>
+        /// <param name="funcName">The name of the function.</param>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
+        /// <param name="isTrigger">True if this is a trigger function; otherwise false.</param>
+        /// <param name="paramNames">The names of the parameters.</param>
+        /// <param name="paramTypes">The OIDs of the parameter types.</param>
+        /// <param name="paramModes">The modes of the parameters (In, Out, InOut, Table).</param>
+        /// <param name="numOutputValues">The number of output values.</param>
+        /// <param name="funcBody">The raw function body or assembly-qualified name.</param>
+        /// <param name="supportNullInput">Whether NULL input is allowed (STRICT or RETURNS NULL ON NULL INPUT).</param>
+        /// <param name="userHandlerFSC">If true, generate the handler as if it were targeting F#-style functions.</param>
+        /// <param name="userHandlerForFSharp">If true, generate the handler for F#-style functions.</param>
         public CSharpCodeGenerator(
             string funcName,
             uint returnTypeId,
             bool retset,
-            bool is_trigger,
+            bool isTrigger,
             string[] paramNames,
             uint[] paramTypes,
             byte[] paramModes,
-            int num_output_values,
+            int numOutputValues,
             string funcBody,
             bool supportNullInput,
             bool userHandlerFSC,
@@ -703,15 +859,15 @@ namespace PlDotNET
             this.Language = DotNETLanguage.CSharp;
             this.UserHandlerFSC = userHandlerFSC;
             this.UserHandlerForFSharp = userHandlerForFSharp;
-            this.baseInitializer(
+            this.BaseInitializer(
                     funcName,
                     returnTypeId,
                     retset,
-                    is_trigger,
+                    isTrigger,
                     paramNames,
                     paramTypes,
                     paramModes,
-                    num_output_values,
+                    numOutputValues,
                     funcBody,
                     supportNullInput);
 
@@ -760,7 +916,7 @@ namespace PlDotNET
 
                 if (this.InputModes.Contains(paramMode))
                 {
-                    string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string null_input = this.SupportNullInput ? $", isnull[{i - skips}]" : string.Empty;
 
                     string inputMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ?
@@ -799,7 +955,7 @@ namespace PlDotNET
             var sb = new System.Text.StringBuilder();
             bool has_output_var = this.ParamModes.Intersect(this.OutputModes).Any();
             string aux = this.SupportNullInput ? "?" : string.Empty;
-            List<string> parameters = new List<string>();
+            List<string> parameters = [];
 
             sb.AppendLine(string.Empty);
 
@@ -897,13 +1053,15 @@ namespace PlDotNET
             return sb.ToString();
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Builds the function call for F#-style functions.
+        /// </summary>
         public string BuildFunctionCallForFSC()
         {
             var sb = new System.Text.StringBuilder();
-            bool has_output_var = this.ParamModes.Intersect(this.OutputModes).Any();
+            _ = this.ParamModes.Intersect(this.OutputModes).Any();
             string aux = this.SupportNullInput ? "?" : string.Empty;
-            List<string> parameters = new List<string>();
+            List<string> parameters = [];
 
             sb.AppendLine(string.Empty);
 
@@ -973,6 +1131,7 @@ namespace PlDotNET
             return sb.ToString();
         }
 
+        /// <inheritdoc />
         public override string BuildCallSetResult()
         {
             var sb = new System.Text.StringBuilder();
@@ -1003,7 +1162,7 @@ namespace PlDotNET
             {
                 sb.AppendLine($"// Handling normal function return (no INOUT/OUT arguments)");
                 string output_handler = DatumConversion.ArrayTypes.ContainsKey((OID)this.ReturnTypeId) ? "OutputNullableArray" : "OutputNullableValue";
-                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{output_handler}(result);");
+                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{output_handler}(result);");
                 sb.AppendLine($"OutputResult.SetDatumResult(resultDatum, result == null, output, 0, {this.ReturnTypeId});");
             }
             else if (this.NumOutputValues == 1)
@@ -1019,7 +1178,7 @@ namespace PlDotNET
                 }
 
                 sb.AppendLine($"// Handling single OUT return value `{outResultName}`, in slot {output_parameter_offset}");
-                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outHandler}({outResultName});");
+                sb.AppendLine($"IntPtr resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outHandler}({outResultName});");
                 sb.AppendLine($"OutputResult.SetDatumResult(resultDatum, {outResultName} == null, output, 0, {this.ReturnTypeId});");
             }
             else if (this.NumOutputValues > 1)
@@ -1036,7 +1195,7 @@ namespace PlDotNET
                         continue;
                     }
 
-                    string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     var outResultName = $"argument_{i}";
                     var outputHandler = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "OutputNullableArray" : "OutputNullableValue";
                     sb.AppendLine($"// Adding output-mode ({((char)this.ParamModes[i]).ToString()}) argument {i} for oid {this.ReturnTypeId}");
@@ -1057,7 +1216,7 @@ namespace PlDotNET
         {
             var sb = new System.Text.StringBuilder();
             string aux = this.SupportNullInput ? "?" : string.Empty;
-            List<string> parameters = new List<string>();
+            List<string> parameters = [];
 
             // for Set-Returning Functions, we create a C# generator
             if (this.IsTrigger)
@@ -1167,13 +1326,15 @@ namespace PlDotNET
         }
     }
 
+    /// <summary>
+    /// F# code generator for PL/.NET.
+    /// summary>.
     public class FSharpCodeGenerator : CodeGenerator
     {
         /// <summary>
         /// This Dictionary contains the C# types that differs from F# type names.
         /// </summary>
-        private static readonly Dictionary<string, string> FSharpTypes =
-               new ()
+        private static readonly Dictionary<string, string> FSharpTypes = new()
         {
             // TODO: Check if DatumConversion can return any other Nullable or other anomaly
             { "Object?[]", "obj[]" },
@@ -1188,8 +1349,7 @@ namespace PlDotNET
         /// This List contains object types which are inherently Nullable.
         /// </summary>
         private static readonly List<string> ClassTypes =
-               new ()
-        {
+               [
             "Nullable<obj[]>",
             "obj[]",
             "Array",
@@ -1197,30 +1357,43 @@ namespace PlDotNET
             "BitArray",
             "string",
             "PhysicalAddress",
-        };
+        ];
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FSharpCodeGenerator"/> class.
+        /// </summary>
+        /// <param name="funcName">The name of the function.</param>
+        /// <param name="returnTypeId">The OID of the return type.</param>
+        /// <param name="retset">True if the function returns a set; otherwise false.</param>
+        /// <param name="isTrigger">True if this is a trigger function; otherwise false.</param>
+        /// <param name="paramNames">The names of the parameters.</param>
+        /// <param name="paramTypes">The OIDs of the parameter types.</param>
+        /// <param name="paramModes">The modes of the parameters (In, Out, InOut, Table).</param>
+        /// <param name="numOutputValues">The number of output values.</param>
+        /// <param name="funcBody">The raw function body or assembly-qualified name.</param>
+        /// <param name="supportNullInput">Whether NULL input is allowed (STRICT or RETURNS NULL ON NULL INPUT).</param>
         public FSharpCodeGenerator(
             string funcName,
             uint returnTypeId,
             bool retset,
-            bool is_trigger,
+            bool isTrigger,
             string[] paramNames,
             uint[] paramTypes,
             byte[] paramModes,
-            int num_output_values,
+            int numOutputValues,
             string funcBody,
             bool supportNullInput)
         {
             this.Language = DotNETLanguage.FSharp;
-            this.baseInitializer(
+            this.BaseInitializer(
                     funcName,
                     returnTypeId,
                     retset,
-                    is_trigger,
+                    isTrigger,
                     paramNames,
                     paramTypes,
                     paramModes,
-                    num_output_values,
+                    numOutputValues,
                     funcBody,
                     supportNullInput);
 
@@ -1230,22 +1403,25 @@ namespace PlDotNET
         }
 
         /// <summary>
-        /// Use the FSharpTypes Dictionary to convert C# types that differs from F# type names if necessary
+        /// Use the FSharpTypes Dictionary to convert C# types that differs from F# type names if necessary.
         /// </summary>
+        /// <param name="type">The type to ensure is in F# format.</param>
         public static string EnsureFSharpType(string type)
         {
-            return FSharpTypes.ContainsKey(type) ? FSharpTypes[type] : type;
+            return FSharpTypes.TryGetValue(type, out string value) ? value : type;
         }
 
         /// <summary>
         /// Indents code according to the provided number of space.
         /// </summary>
+        /// <param name="code">The code to indent.</param>
+        /// <param name="spaceNumber">The number of spaces to indent each line.</param>
         /// <returns>
         /// Returns the indented code.
         /// </returns>
         public static string IndentCode(string code, uint spaceNumber)
         {
-            string indentation = new (' ', (int)spaceNumber);
+            string indentation = new(' ', (int)spaceNumber);
             string newline = string.Empty;
             var sb = new System.Text.StringBuilder();
 
@@ -1279,12 +1455,12 @@ namespace PlDotNET
                 // Because F# is a functional language, it does not support INOUT or OUT arguments like C# does.
                 // Instead, IN and INOUT are treated as normal arguments, and INOUT and OUT get `output_{i}` variables
                 // to receive their return values.
-                string handler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
-                string argType = (this.OutputModes.Contains(this.ParamModes[i]) || this.SupportNullInput) ? $"{this.DotnetTypes[i]}?" : this.DotnetTypes[i];
+                string handler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
+                _ = (this.OutputModes.Contains(this.ParamModes[i]) || this.SupportNullInput) ? $"{this.DotnetTypes[i]}?" : this.DotnetTypes[i];
 
                 if (this.InputModes.Contains(this.ParamModes[i]))
                 {
-                    string handlerName = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    _ = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string null_input = this.SupportNullInput ? $", isnull[{i - skips}]" : string.Empty;
                     string inputMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ?
                         (this.SupportNullInput ? "InputNullableArray" : "InputArray") :
@@ -1309,9 +1485,9 @@ namespace PlDotNET
         /// <inheritdoc />
         public override string BuildFunctionCall()
         {
-            List<string> retvals = new List<string>();
-            List<string> arguments = new List<string>();
-            List<string> variables = new List<string>();
+            List<string> retvals = [];
+            List<string> arguments = [];
+            List<string> variables = [];
             string let_result;
             int i, output_num = 0;
 
@@ -1366,7 +1542,7 @@ namespace PlDotNET
 
             if (this.NumOutputValues < 0)
             {
-                throw new SystemException($"Unrecognized num_output_values: {this.NumOutputValues}");
+                throw new SystemException($"Unrecognized numOutputValues: {this.NumOutputValues}");
             }
 
             if (this.NumOutputValues == 0)
@@ -1378,19 +1554,19 @@ namespace PlDotNET
                 string isnull = ClassTypes.Contains(returnType) ? "Object.ReferenceEquals(result, null)" : "not result.HasValue";
                 sb.AppendLine($"// Handling normal function return (no INOUT/OUT arguments)");
 
-                string makeDatum = $"let resultDatum = {DatumConversion.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outputHandler}(result)";
+                string makeDatum = $"let resultDatum = {DatumConversion.Instance.GetTypeHandlerName(this.ReturnTypeId)}Obj.{outputHandler}(result)";
                 sb.AppendLine(makeDatum);
                 string setDatum = $"OutputResult.SetDatumResult(resultDatum, {isnull}, output, 0, uint32 {this.ReturnTypeId})";
                 sb.AppendLine(setDatum);
                 return "// Create PostgreSQL datum\n" + IndentCode(sb.ToString(), 8);
             }
 
-            // num_output_values > 1, so use "output_0", "output_1", etc
+            // numOutputValues > 1, so use "output_0", "output_1", etc
             for (i = 0; i < this.ParamTypes.Length; i++)
             {
                 if (this.OutputModes.Contains(this.ParamModes[i]))
                 {
-                    string outputTypeHandler = DatumConversion.GetTypeHandlerName(this.ParamTypes[i]);
+                    string outputTypeHandler = DatumConversion.Instance.GetTypeHandlerName(this.ParamTypes[i]);
                     string type = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "Array" : DatumConversion.SupportedTypesStr[(OID)this.ParamTypes[i]];
                     string returnType = EnsureFSharpType(type);
                     string outputHandlerMethod = DatumConversion.ArrayTypes.ContainsKey((OID)this.ParamTypes[i]) ? "OutputNullableArray" : "OutputNullableValue";
@@ -1414,7 +1590,7 @@ namespace PlDotNET
             if (this.IsTrigger)
             {
                 sb.Append($"static member {this.FuncName} (tg: TriggerData) : ReturnMode = \n");
-                sb.Append($"#line 1{(this.FuncBody.StartsWith("\n") ? string.Empty : "\n")}{this.FuncBody}\n");
+                sb.Append($"#line 1{(this.FuncBody.StartsWith('\n') ? string.Empty : "\n")}{this.FuncBody}\n");
                 return sb.ToString();
             }
 
@@ -1424,7 +1600,7 @@ namespace PlDotNET
                 return_type = this.ComplexReturnType;
             }
 
-            List<string> outputTypes = new ();
+            List<string> outputTypes = [];
 
             sb.Append($"static member {this.FuncName}");
 
@@ -1433,8 +1609,8 @@ namespace PlDotNET
             {
                 if (this.OutputModes.Contains(this.ParamModes[i]))
                 {
-                    string outputParamType = EnsureFSharpType(this.DotnetTypes[i]);
-                    outputParamType = ClassTypes.Contains(this.DotnetTypes[i]) ? this.DotnetTypes[i] : $"Nullable<{this.DotnetTypes[i]}>";
+                    _ = EnsureFSharpType(this.DotnetTypes[i]);
+                    string outputParamType = ClassTypes.Contains(this.DotnetTypes[i]) ? this.DotnetTypes[i] : $"Nullable<{this.DotnetTypes[i]}>";
                     outputTypes.Add(outputParamType);
                 }
 
@@ -1443,7 +1619,7 @@ namespace PlDotNET
                     string inputParamType = this.DotnetTypes[i];
                     if (this.SupportNullInput && (!ClassTypes.Contains(inputParamType)))
                     {
-                       inputParamType = $"Nullable<{inputParamType}>";
+                        inputParamType = $"Nullable<{inputParamType}>";
                     }
 
                     sb.Append($" ({this.ParamNames[i]}: {inputParamType})");
@@ -1467,11 +1643,11 @@ namespace PlDotNET
 
             if (return_type == "void")
             {
-                sb.Append($" = \n#line 1{(this.FuncBody.StartsWith("\n") ? string.Empty : "\n")}{IndentCode(this.FuncBody, 8)}");
+                sb.Append($" = \n#line 1{(this.FuncBody.StartsWith('\n') ? string.Empty : "\n")}{IndentCode(this.FuncBody, 8)}");
             }
             else
             {
-                sb.Append($" : {return_type} = \n#line 1{(this.FuncBody.StartsWith("\n") ? string.Empty : "\n")}{IndentCode(this.FuncBody, 8)}");
+                sb.Append($" : {return_type} = \n#line 1{(this.FuncBody.StartsWith('\n') ? string.Empty : "\n")}{IndentCode(this.FuncBody, 8)}");
             }
 
             return sb.ToString();

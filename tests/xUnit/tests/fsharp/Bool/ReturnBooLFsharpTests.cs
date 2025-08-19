@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Bool")]
-public class ReturnBooLFsharpTests : PlDotNetTest
+public abstract class BaseReturnBooLFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-false
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnBooLFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnBooLFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnBooLFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "boolean",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnBooLFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "boolean", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-    new object[] 
-        { 
-            "f#-bool", 
-            "returnBoolFSharp", 
-            "", 
-            "is false" 
-        }        };
+        return new object[][] { new object[] { "f#-bool", "returnBoolFSharp", "", "is false" } };
     }
 
     [Theory]
@@ -45,4 +26,14 @@ false
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Bool")]
+public class ReturnBooLFsharpTestsFSharp : BaseReturnBooLFsharpTests
+{
+    protected override string FunctionBody => @"
+false
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,19 +1,16 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Dll")]
-public class ModifyStringArrayFsharpDllTests : PlDotNetTest
+public abstract class BaseModifyStringArrayFsharpDllTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/net6.0/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!modifyStringArray'
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ModifyStringArrayFsharpDllTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseModifyStringArrayFsharpDllTests()
     {
         FunctionInfo = new SqlFunctionInfo
         {
@@ -21,19 +18,14 @@ public class ModifyStringArrayFsharpDllTests : PlDotNetTest
             Arguments = new List<FunctionArgument> { new FunctionArgument("a", "VARCHAR[]"), new FunctionArgument("b", "TEXT") },
             ReturnType = "VARCHAR[]",
             Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
+            Language = LanguageType.PlfSharp,
             IsStrict = false,
         };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-varchar-1array-dll", "modifyStringArrayFSharpDLL1", "ARRAY['Alemanha'::VARCHAR, 'Inglaterra'::VARCHAR, 'Espanha'::VARCHAR], 'Portugal'::TEXT", "= ARRAY['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR, 'Espanha'::VARCHAR]" },
-        new object[] { "f#-varchar-2array-null-dll", "modifyStringArrayFSharpDLL2", "ARRAY[['Alemanha'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]], 'Portugal'::TEXT", "= ARRAY[['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]]" },
-        new object[] { "f#-varchar-2array-null-dll", "modifyStringArrayFSharpDLL3", "ARRAY[[NULL::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]], 'Portugal'::TEXT", "= ARRAY[['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]]" },
-        };
+        return new object[][] { new object[] { "f#-varchar-1array-dll", "modifyStringArrayFSharpDLL1", "ARRAY['Alemanha'::VARCHAR, 'Inglaterra'::VARCHAR, 'Espanha'::VARCHAR], 'Portugal'::TEXT", "= ARRAY['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR, 'Espanha'::VARCHAR]" }, new object[] { "f#-varchar-2array-null-dll", "modifyStringArrayFSharpDLL2", "ARRAY[['Alemanha'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]], 'Portugal'::TEXT", "= ARRAY[['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]]" }, new object[] { "f#-varchar-2array-null-dll", "modifyStringArrayFSharpDLL3", "ARRAY[[NULL::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]], 'Portugal'::TEXT", "= ARRAY[['Portugal'::VARCHAR, 'Inglaterra'::VARCHAR], ['Espanha'::VARCHAR, NULL::VARCHAR]]" }, };
     }
 
     [Theory]
@@ -42,17 +34,22 @@ public class ModifyStringArrayFsharpDllTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
 
+[Trait("Language", "FSharp")]
+[Trait("Category", "Dll")]
+public class ModifyStringArrayFsharpDllTestsFSharp : BaseModifyStringArrayFsharpDllTests
+{
+    protected override string FunctionBody => @"
+'/app/pldotnet/tests/fsharp/DotNetTestProject/bin/Release/FSharpTest.dll:TestFSharpDLLFunctions.TestFSharpClass!modifyStringArray'
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
     public override string GetFunctionDefinition(SqlFunctionInfo functionInfo)
     {
         var arguments = string.Join(", ", functionInfo.Arguments.Select(arg => $"{arg.Name} {arg.Type}"));
         string strictKeyword = functionInfo.IsStrict ? "STRICT" : "";
-
         // Conditionally build the returnTypeString
-        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType)
-                                    ? string.Empty
-                                    : $"RETURNS {functionInfo.ReturnType}";
-
+        string returnTypeString = string.IsNullOrEmpty(functionInfo.ReturnType) ? string.Empty : $"RETURNS {functionInfo.ReturnType}";
         return $@"CREATE OR REPLACE FUNCTION {functionInfo.Name}({arguments})
 {returnTypeString} AS {functionInfo.Body} LANGUAGE {functionInfo.LanguageString} {strictKeyword};";
     }

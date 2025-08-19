@@ -1,44 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Floats")]
-public class SumRealTests : PlDotNetTest
+public abstract class BaseSumRealTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-if (a == null)
-    a = 0;
+    protected abstract string FunctionBody { get; }
 
-if (b == null)
-    b = 0;
+    protected abstract LanguageType Language { get; }
 
-return a+b;
-    ";
-
-    public SumRealTests()
+    public BaseSumRealTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "SumReal",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "real"), new FunctionArgument("b", "real") },
-            ReturnType = "real",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "SumReal", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "real"), new FunctionArgument("b", "real") }, ReturnType = "real", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-float4", "sumReal1", "1.50055, 1.50054", "= real '3.00109'" },
-        new object[] { "c#-float4-null", "sumReal2", "NULL, 1.50054", "= real '1.50054'" },
-        };
+        return new object[][] { new object[] { "c#-float4", "sumReal1", "1.50055, 1.50054", "= real '3.00109'" }, new object[] { "c#-float4-null", "sumReal2", "NULL, 1.50054", "= real '1.50054'" }, };
     }
 
     [Theory]
@@ -47,4 +26,20 @@ return a+b;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Floats")]
+public class SumRealTestsCSharp : BaseSumRealTests
+{
+    protected override string FunctionBody => @"
+if (a == null)
+    a = 0;
+
+if (b == null)
+    b = 0;
+
+return a+b;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

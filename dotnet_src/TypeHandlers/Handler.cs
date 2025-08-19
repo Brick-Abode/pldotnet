@@ -22,50 +22,52 @@ using PlDotNET.Common;
 
 namespace PlDotNET.Handler
 {
-    public static class DatumConversion
+    public class DatumConversion : IDatumConversion
     {
-        public static BoolHandler BoolHandlerObj = new ();
-        public static ShortHandler ShortHandlerObj = new ();
-        public static IntHandler IntHandlerObj = new ();
-        public static LongHandler LongHandlerObj = new ();
-        public static FloatHandler FloatHandlerObj = new ();
-        public static DoubleHandler DoubleHandlerObj = new ();
-        public static PointHandler PointHandlerObj = new ();
-        public static LineHandler LineHandlerObj = new ();
-        public static LineSegmentHandler LineSegmentHandlerObj = new ();
-        public static BoxHandler BoxHandlerObj = new ();
-        public static PathHandler PathHandlerObj = new ();
-        public static PolygonHandler PolygonHandlerObj = new ();
-        public static CircleHandler CircleHandlerObj = new ();
-        public static DateHandler DateHandlerObj = new ();
-        public static TimeHandler TimeHandlerObj = new ();
-        public static TimeTzHandler TimeTzHandlerObj = new ();
-        public static TimestampHandler TimestampHandlerObj = new ();
-        public static TimestampTzHandler TimestampTzHandlerObj = new ();
-        public static IntervalHandler IntervalHandlerObj = new ();
-        public static MacaddrHandler MacaddrHandlerObj = new ();
-        public static Macaddr8Handler Macaddr8HandlerObj = new ();
-        public static InetHandler InetHandlerObj = new ();
-        public static CidrHandler CidrHandlerObj = new ();
-        public static TextHandler TextHandlerObj = new ();
-        public static MoneyHandler MoneyHandlerObj = new ();
-        public static BitStringHandler BitStringHandlerObj = new ();
-        public static VarBitStringHandler VarBitStringHandlerObj = new ();
-        public static ByteaHandler ByteaHandlerObj = new ();
-        public static CharHandler CharHandlerObj = new ();
-        public static CharVaryingHandler CharVaryingHandlerObj = new ();
-        public static XmlHandler XmlHandlerObj = new ();
-        public static JsonHandler JsonHandlerObj = new ();
-        public static UuidHandler UuidHandlerObj = new ();
-        public static IntRangeHandler IntRangeHandlerObj = new ();
-        public static LongRangeHandler LongRangeHandlerObj = new ();
-        public static TimestampRangeHandler TimestampRangeHandlerObj = new ();
-        public static TimestampTzRangeHandler TimestampTzRangeHandlerObj = new ();
-        public static DateRangeHandler DateRangeHandlerObj = new ();
-        public static RecordHandler RecordHandlerObj = new ();
+        public static readonly DatumConversion Instance = new();
+
+        public static BoolHandler BoolHandlerObj = new();
+        public static ShortHandler ShortHandlerObj = new();
+        public static IntHandler IntHandlerObj = new();
+        public static LongHandler LongHandlerObj = new();
+        public static FloatHandler FloatHandlerObj = new();
+        public static DoubleHandler DoubleHandlerObj = new();
+        public static PointHandler PointHandlerObj = new();
+        public static LineHandler LineHandlerObj = new();
+        public static LineSegmentHandler LineSegmentHandlerObj = new();
+        public static BoxHandler BoxHandlerObj = new();
+        public static PathHandler PathHandlerObj = new();
+        public static PolygonHandler PolygonHandlerObj = new();
+        public static CircleHandler CircleHandlerObj = new();
+        public static DateHandler DateHandlerObj = new();
+        public static TimeHandler TimeHandlerObj = new();
+        public static TimeTzHandler TimeTzHandlerObj = new();
+        public static TimestampHandler TimestampHandlerObj = new();
+        public static TimestampTzHandler TimestampTzHandlerObj = new();
+        public static IntervalHandler IntervalHandlerObj = new();
+        public static MacaddrHandler MacaddrHandlerObj = new();
+        public static Macaddr8Handler Macaddr8HandlerObj = new();
+        public static InetHandler InetHandlerObj = new();
+        public static CidrHandler CidrHandlerObj = new();
+        public static TextHandler TextHandlerObj = new();
+        public static MoneyHandler MoneyHandlerObj = new();
+        public static BitStringHandler BitStringHandlerObj = new();
+        public static VarBitStringHandler VarBitStringHandlerObj = new();
+        public static ByteaHandler ByteaHandlerObj = new();
+        public static CharHandler CharHandlerObj = new();
+        public static CharVaryingHandler CharVaryingHandlerObj = new();
+        public static XmlHandler XmlHandlerObj = new();
+        public static JsonHandler JsonHandlerObj = new();
+        public static UuidHandler UuidHandlerObj = new();
+        public static IntRangeHandler IntRangeHandlerObj = new();
+        public static LongRangeHandler LongRangeHandlerObj = new();
+        public static TimestampRangeHandler TimestampRangeHandlerObj = new();
+        public static TimestampTzRangeHandler TimestampTzRangeHandlerObj = new();
+        public static DateRangeHandler DateRangeHandlerObj = new();
+        public static RecordHandler RecordHandlerObj = new();
 
         public static Dictionary<OID, OID> ArrayTypes =
-               new ()
+               new()
         {
             { OID.BOOLARRAYOID, OID.BOOLOID },
             { OID.INT2ARRAYOID, OID.INT2OID },
@@ -116,7 +118,7 @@ namespace PlDotNET.Handler
 
 #nullable enable
         public static Dictionary<OID, Type> SupportedTypes =
-                       new ()
+                       new()
         {
             { OID.BOOLOID, typeof(bool) },
             { OID.INT2OID, typeof(short) },
@@ -162,7 +164,7 @@ namespace PlDotNET.Handler
 #nullable disable
 
         public static Dictionary<OID, string> SupportedTypesStr =
-                       new ()
+                       new()
         {
             { OID.BOOLOID, "bool" },
             { OID.INT2OID, "short" },
@@ -207,12 +209,21 @@ namespace PlDotNET.Handler
         };
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="DatumConversion"/> class.
+        /// Registers the DatumConversionProvider with the current instance.
+        /// </summary>
+        public DatumConversion()
+        {
+            DatumConversionProvider.Register(this);
+        }
+
+        /// <summary>
         /// Returns the handler object NAME for the specified OID.
         /// </summary>
         /// <returns>
         /// Returns The TypeHandler name.
         /// </returns>
-        public static string GetTypeHandlerName(uint id)
+        public string GetTypeHandlerName(uint id)
         {
             switch (id)
             {
@@ -306,7 +317,7 @@ namespace PlDotNET.Handler
             }
         }
 
-        public static object InputValue(IntPtr datum, OID type, bool arrayAllowsNullElements = false)
+        public object InputValue(IntPtr datum, OID type, bool arrayAllowsNullElements = false)
         {
             return (object)type switch
             {
@@ -391,12 +402,12 @@ namespace PlDotNET.Handler
                 OID.DATERANGEARRAYOID => DateRangeHandlerObj.InputArrayT(datum, arrayAllowsNullElements),
                 OID.RECORDARRAYOID => RecordHandlerObj.InputArrayT(datum, arrayAllowsNullElements),
 
-                _ => throw new InvalidOperationException($"Failed on InputValue. Unsupported type: {type}")
+                _ => throw new InvalidOperationException($"Failed on InputValue. Unsupported type: {type}"),
             };
         }
 
 #nullable enable
-        public static object? InputNullableValue(IntPtr datum, OID type, bool isNull, bool arrayAllowsNullElements = false)
+        public object? InputNullableValue(IntPtr datum, OID type, bool isNull, bool arrayAllowsNullElements = false)
         {
             return (object)type switch
             {
@@ -481,13 +492,13 @@ namespace PlDotNET.Handler
                 OID.DATERANGEARRAYOID => DateRangeHandlerObj.InputNullableArrayT(datum, isNull, arrayAllowsNullElements),
                 OID.RECORDARRAYOID => RecordHandlerObj.InputNullableArrayT(datum, isNull, arrayAllowsNullElements),
 
-                _ => throw new InvalidOperationException($"Failed on InputNullableValue. Unsupported type: {type}")
+                _ => throw new InvalidOperationException($"Failed on InputNullableValue. Unsupported type: {type}"),
             };
         }
 #nullable disable
 
 #nullable enable
-        public static IntPtr OutputNullableValue(OID type, object? value)
+        public IntPtr OutputNullableValue(OID type, object? value)
         {
             if (DBNull.Value.Equals(value))
             {
@@ -577,21 +588,21 @@ namespace PlDotNET.Handler
                 OID.DATERANGEARRAYOID => DateRangeHandlerObj.OutputNullableArray((Array?)value),
                 OID.RECORDARRAYOID => RecordHandlerObj.OutputNullableArray((Array?)value),
 
-                _ => throw new InvalidOperationException($"Failed on OutputNullableValue. Unsupported type: {type}")
+                _ => throw new InvalidOperationException($"Failed on OutputNullableValue. Unsupported type: {type}"),
             };
         }
 #nullable disable
 
-        public static Type GetFieldType(OID type)
+        public Type GetFieldType(OID type)
         {
             if (ArrayTypes.ContainsKey(type))
             {
                 return typeof(Array);
             }
 
-            if (SupportedTypes.ContainsKey(type))
+            if (SupportedTypes.TryGetValue(type, out Type value))
             {
-                return SupportedTypes[type];
+                return value;
             }
 
             throw new NotImplementedException($"pldotnet does not support the {(OID)type} type.");

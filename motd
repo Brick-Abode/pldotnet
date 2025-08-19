@@ -1,0 +1,16 @@
+██████╗ ██╗         ██╗███╗   ██╗███████╗████████╗
+██╔══██╗██║        ██╔╝████╗  ██║██╔════╝╚══██╔══╝
+██████╔╝██║       ██╔╝ ██╔██╗ ██║█████╗     ██║   
+██╔═══╝ ██║      ██╔╝  ██║╚██╗██║██╔══╝     ██║   
+██║     ███████╗██╔╝██╗██║ ╚████║███████╗   ██║   
+╚═╝     ╚══════╝╚═╝ ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   
+
+PL/.NET v1.0.0 - https://github.com/Brick-Abode/pldotnet
+
+Usage instructions:
+- If you are running this through a `docker run` command overriding the default command, you need to simply start PostgreSQL with:
+    `pg_ctlcluster 17 main start`
+- To play around with PL/.NET, you can use `psql`:
+    `runuser -u postgres psql`
+- Then you can execute .NET code in your database:
+    `do $$ Elog.Info("Hello, World!"); $$ language plcsharp;`

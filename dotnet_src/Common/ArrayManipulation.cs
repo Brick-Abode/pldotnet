@@ -82,7 +82,7 @@ namespace PlDotNET.Common
             }
 
             auxiliar[ndim - loc] = 0;
-            contEl = ReshapeArray(originalArray, ref multiArray, auxiliar, contEl, ++loc);
+            contEl = ReshapeArray(originalArray, ref multiArray, auxiliar, contEl, loc + 1);
             return contEl;
         }
 
@@ -145,7 +145,7 @@ namespace PlDotNET.Common
             }
 
             auxiliar[ndim - loc] = 0;
-            contEl = FlatArray(originalArray, ref flatArray, auxiliar, contEl, ++loc);
+            contEl = FlatArray(originalArray, ref flatArray, auxiliar, contEl, loc + 1);
             return contEl;
         }
     }

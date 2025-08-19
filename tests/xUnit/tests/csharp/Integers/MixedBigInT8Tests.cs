@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Integers")]
-public class MixedBigInT8Tests : PlDotNetTest
+public abstract class BaseMixedBigInT8Tests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return (short)(b+c);
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MixedBigInT8Tests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMixedBigInT8Tests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MixedBigInT8",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("b", "smallint"), new FunctionArgument("c", "bigint") },
-            ReturnType = "smallint",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MixedBigInT8", Arguments = new List<FunctionArgument> { new FunctionArgument("b", "smallint"), new FunctionArgument("c", "bigint") }, ReturnType = "smallint", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-int8", "mixedBigInt8", "CAST(32 AS SMALLINT), CAST(100 AS BIGINT)", "= smallint '132'" },
-        };
+        return new object[][] { new object[] { "c#-int8", "mixedBigInt8", "CAST(32 AS SMALLINT), CAST(100 AS BIGINT)", "= smallint '132'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return (short)(b+c);
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Integers")]
+public class MixedBigInT8TestsCSharp : BaseMixedBigInT8Tests
+{
+    protected override string FunctionBody => @"
+return (short)(b+c);
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

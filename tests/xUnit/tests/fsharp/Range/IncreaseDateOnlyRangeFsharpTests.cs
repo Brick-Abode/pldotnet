@@ -1,43 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Range")]
-public class IncreaseDateOnlyRangeFsharpTests : PlDotNetTest
+public abstract class BaseIncreaseDateOnlyRangeFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let a = if a.HasValue then a.Value else NpgsqlRange<DateOnly>(DateOnly(2022, 1, 1), true, false, DateOnly(2022, 12, 25), false, false)
-let b = if b.HasValue then b.Value else 1
-NpgsqlRange<DateOnly>(a.LowerBound.AddDays(int b), a.LowerBoundIsInclusive, a.LowerBoundInfinite, a.UpperBound.AddDays(int b), a.UpperBoundIsInclusive, a.UpperBoundInfinite)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public IncreaseDateOnlyRangeFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseDateOnlyRangeFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseDateOnlyRangeFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "DATERANGE"), new FunctionArgument("b", "INTEGER") },
-            ReturnType = "DATERANGE",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseDateOnlyRangeFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "DATERANGE"), new FunctionArgument("b", "INTEGER") }, ReturnType = "DATERANGE", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp1", "'[2021-01-01, 2021-01-04)'::DATERANGE, 1", "= '[2021-01-02, 2021-01-05)'::DATERANGE" },
-        new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp2", "'[, 2021-01-01)'::DATERANGE, 3", "= '[, 2021-01-04)'::DATERANGE" },
-        new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp3", "'[,)'::DATERANGE, 3", "= '(,)'::DATERANGE" },
-        new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp4", "'(2021-01-01, 2021-01-04]'::DATERANGE, 3", "= '(2021-01-04, 2021-01-07]'::DATERANGE" },
-        new object[] { "f#-daterange-null", "IncreaseDateonlyRangeFSharp5", "NULL::DATERANGE, 3", "= '[2022-01-04,2022-12-28)'::DATERANGE" },
-        };
+        return new object[][] { new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp1", "'[2021-01-01, 2021-01-04)'::DATERANGE, 1", "= '[2021-01-02, 2021-01-05)'::DATERANGE" }, new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp2", "'[, 2021-01-01)'::DATERANGE, 3", "= '[, 2021-01-04)'::DATERANGE" }, new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp3", "'[,)'::DATERANGE, 3", "= '(,)'::DATERANGE" }, new object[] { "f#-daterange", "IncreaseDateonlyRangeFSharp4", "'(2021-01-01, 2021-01-04]'::DATERANGE, 3", "= '(2021-01-04, 2021-01-07]'::DATERANGE" }, new object[] { "f#-daterange-null", "IncreaseDateonlyRangeFSharp5", "NULL::DATERANGE, 3", "= '[2022-01-04,2022-12-28)'::DATERANGE" }, };
     }
 
     [Theory]
@@ -46,4 +26,16 @@ NpgsqlRange<DateOnly>(a.LowerBound.AddDays(int b), a.LowerBoundIsInclusive, a.Lo
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Range")]
+public class IncreaseDateOnlyRangeFsharpTestsFSharp : BaseIncreaseDateOnlyRangeFsharpTests
+{
+    protected override string FunctionBody => @"
+let a = if a.HasValue then a.Value else NpgsqlRange<DateOnly>(DateOnly(2022, 1, 1), true, false, DateOnly(2022, 12, 25), false, false)
+let b = if b.HasValue then b.Value else 1
+NpgsqlRange<DateOnly>(a.LowerBound.AddDays(int b), a.LowerBoundIsInclusive, a.LowerBoundInfinite, a.UpperBound.AddDays(int b), a.UpperBoundIsInclusive, a.UpperBoundInfinite)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,41 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class MultiplyVarCharFsharpTests : PlDotNetTest
+public abstract class BaseMultiplyVarCharFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-    let mutable  c:string = """"
-    let i = 0
-    for i in 1..b do
-        c <- c + a
-    c.ToUpper()
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MultiplyVarCharFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMultiplyVarCharFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MultiplyVarCharFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "VARCHAR"), new FunctionArgument("b", "int") },
-            ReturnType = "VARCHAR",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MultiplyVarCharFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "VARCHAR"), new FunctionArgument("b", "int") }, ReturnType = "VARCHAR", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-varchar", "multiplyVarCharFSharp", "'hello '::VARCHAR, 5", "= 'HELLO HELLO HELLO HELLO HELLO '::VARCHAR" },
-        };
+        return new object[][] { new object[] { "f#-varchar", "multiplyVarCharFSharp", "'hello '::VARCHAR, 5", "= 'HELLO HELLO HELLO HELLO HELLO '::VARCHAR" }, };
     }
 
     [Theory]
@@ -44,4 +26,18 @@ public class MultiplyVarCharFsharpTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class MultiplyVarCharFsharpTestsFSharp : BaseMultiplyVarCharFsharpTests
+{
+    protected override string FunctionBody => @"
+    let mutable  c:string = """"
+    let i = 0
+    for i in 1..b do
+        c <- c + a
+    c.ToUpper()
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

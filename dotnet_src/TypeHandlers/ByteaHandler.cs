@@ -17,7 +17,7 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -28,8 +28,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-binary.html.
     /// </remarks>
     [OIDHandler(OID.BYTEAOID, OID.BYTEAARRAYOID)]
-    public class ByteaHandler : ObjectTypeHandler<byte[]>
+    public partial class ByteaHandler : ObjectTypeHandler<byte[]>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ByteaHandler"/> class.
+        /// </summary>
         public ByteaHandler()
         {
             this.ElementOID = OID.BYTEAOID;
@@ -40,15 +43,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumByteaAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern unsafe void pldotnet_GetDatumByteaAttributes(IntPtr datum, ref int len, ref byte* buf);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static unsafe partial void pldotnet_GetDatumByteaAttributes(IntPtr datum, ref int len, ref byte* buf);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumBytea().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumBytea(int len, byte[] buf);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumBytea(int len, byte[] buf);
 
         /// <inheritdoc />
         public override unsafe byte[] InputValue(IntPtr datum)
@@ -56,7 +59,7 @@ namespace PlDotNET.Handler
             int len = 0;
             byte* buf = null;
             pldotnet_GetDatumByteaAttributes(datum, ref len, ref buf);
-            ReadOnlySpan<byte> nativeSpan = new (buf, len);
+            ReadOnlySpan<byte> nativeSpan = new(buf, len);
             return nativeSpan.ToArray();
         }
 

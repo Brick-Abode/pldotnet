@@ -1,48 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Geometric")]
-public class ReturnPathFsharpTests : PlDotNetTest
+public abstract class BaseReturnPathFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-orig_path
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnPathFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnPathFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnPathFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("orig_path", "PATH") },
-            ReturnType = "PATH",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnPathFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("orig_path", "PATH") }, ReturnType = "PATH", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] {
-                "f#-path",
-                "returnPathFSharp - open",
-                "PATH '[(1.5,2.75),(3.0,4.75),(5.0,5.0)]'",
-                "<= PATH '[(1.5,2.75),(3.0,4.75),(5.0,5.0)]'"
-            },
-            new object[] {
-                "f#-path",
-                "returnPathFSharp - close",
-                "PATH '((1.5,2.75),(3.0,4.75),(5.0,5.0))'",
-                "<= PATH '((1.5,2.75),(3.0,4.75),(5.0,5.0))'"
-            },
-        };
+        return new object[][] { new object[] { "f#-path", "returnPathFSharp - open", "PATH '[(1.5,2.75),(3.0,4.75),(5.0,5.0)]'", "<= PATH '[(1.5,2.75),(3.0,4.75),(5.0,5.0)]'" }, new object[] { "f#-path", "returnPathFSharp - close", "PATH '((1.5,2.75),(3.0,4.75),(5.0,5.0))'", "<= PATH '((1.5,2.75),(3.0,4.75),(5.0,5.0))'" }, };
     }
 
     [Theory]
@@ -51,4 +26,14 @@ orig_path
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Geometric")]
+public class ReturnPathFsharpTestsFSharp : BaseReturnPathFsharpTests
+{
+    protected override string FunctionBody => @"
+orig_path
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

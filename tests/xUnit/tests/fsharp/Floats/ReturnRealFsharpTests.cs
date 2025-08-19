@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Floats")]
-public class ReturnRealFsharpTests : PlDotNetTest
+public abstract class BaseReturnRealFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-1.50055f
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnRealFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnRealFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnRealFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "real",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnRealFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "real", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-float4", "returnRealFSharp", "", "= real '1.50055'" },
-        };
+        return new object[][] { new object[] { "f#-float4", "returnRealFSharp", "", "= real '1.50055'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ public class ReturnRealFsharpTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Floats")]
+public class ReturnRealFsharpTestsFSharp : BaseReturnRealFsharpTests
+{
+    protected override string FunctionBody => @"
+1.50055f
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

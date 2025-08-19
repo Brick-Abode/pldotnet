@@ -1,38 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "String")]
-public class ConcatenateCharsFsharpTests : PlDotNetTest
+public abstract class BaseConcatenateCharsFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-(a + "" "" + b + "" "" + c).ToUpper()
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ConcatenateCharsFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseConcatenateCharsFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ConcatenateCharsFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BPCHAR"), new FunctionArgument("b", "BPCHAR"), new FunctionArgument("c", "BPCHAR") },
-            ReturnType = "BPCHAR",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ConcatenateCharsFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "BPCHAR"), new FunctionArgument("b", "BPCHAR"), new FunctionArgument("c", "BPCHAR") }, ReturnType = "BPCHAR", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-bpchar", "concatenateCharsFSharp1", "'hello'::BPCHAR, 'beautiful'::BPCHAR, 'world!'::BPCHAR", "= 'HELLO BEAUTIFUL WORLD!'::BPCHAR" },
-        new object[] { "f#-bpchar-null", "concatenateCharsFSharp2", "NULL::BPCHAR, 'beautiful'::BPCHAR, NULL::BPCHAR", "= ' BEAUTIFUL '::BPCHAR" },
-        };
+        return new object[][] { new object[] { "f#-bpchar", "concatenateCharsFSharp1", "'hello'::BPCHAR, 'beautiful'::BPCHAR, 'world!'::BPCHAR", "= 'HELLO BEAUTIFUL WORLD!'::BPCHAR" }, new object[] { "f#-bpchar-null", "concatenateCharsFSharp2", "NULL::BPCHAR, 'beautiful'::BPCHAR, NULL::BPCHAR", "= ' BEAUTIFUL '::BPCHAR" }, };
     }
 
     [Theory]
@@ -41,4 +26,14 @@ public class ConcatenateCharsFsharpTests : PlDotNetTest
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "String")]
+public class ConcatenateCharsFsharpTestsFSharp : BaseConcatenateCharsFsharpTests
+{
+    protected override string FunctionBody => @"
+(a + "" "" + b + "" "" + c).ToUpper()
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

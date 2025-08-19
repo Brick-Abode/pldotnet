@@ -136,12 +136,14 @@ AS $$
             var nullInt = new NpgsqlParameter
             {
                 ParameterName = "_",
-                NpgsqlDbType = NpgsqlDbType.Integer
+                NpgsqlDbType = NpgsqlDbType.Integer,
+                Value = DBNull.Value
             };
             var nullFloat = new NpgsqlParameter
             {
                 ParameterName = "_",
-                NpgsqlDbType = NpgsqlDbType.Real
+                NpgsqlDbType = NpgsqlDbType.Real,
+                Value = DBNull.Value
             };
             return new object[]{nullInt, nullFloat};
         default:
@@ -231,4 +233,3 @@ WITH cte AS (
 INSERT INTO automated_test_results (FEATURE, TEST_NAME, RESULT)
 SELECT 'c#-drec-types', 'null-is-not-present', (a IS NOT NULL AND b IS NOT NULL)
 FROM cte;
-

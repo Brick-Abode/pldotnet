@@ -101,30 +101,30 @@ CREATE OR REPLACE TRIGGER test_trigger_BIR_1
 BEFORE INSERT ON trigger_test_table
 FOR EACH ROW
 WHEN (new.id = 2)
-EXECUTE FUNCTION trigger_test_function_modify('BEFORE/INSERT/ROW', 1);
+EXECUTE FUNCTION trigger_test_function_modify('BEFORE/INSERT/ROW', '1');
 
 CREATE OR REPLACE TRIGGER test_trigger_BIR_2
 BEFORE INSERT ON trigger_test_table
 FOR EACH ROW
 WHEN (new.id = 5)
-EXECUTE FUNCTION trigger_test_skip('BEFORE/INSERT/ROW', 2);
+EXECUTE FUNCTION trigger_test_skip('BEFORE/INSERT/ROW', '2');
 
 CREATE OR REPLACE TRIGGER test_trigger_BIR_3
 BEFORE INSERT ON trigger_test_table
 FOR EACH ROW
 WHEN (new.id = 6)
-EXECUTE FUNCTION trigger_test_tg_vals('BEFORE/INSERT/ROW', 3);
+EXECUTE FUNCTION trigger_test_tg_vals('BEFORE/INSERT/ROW', '3');
 
 CREATE OR REPLACE TRIGGER test_trigger_BIR_4
 BEFORE INSERT ON trigger_test_table
 FOR EACH ROW
 WHEN (new.id = 7)
-EXECUTE FUNCTION trigger_test_update_type('BEFORE/INSERT/ROW', 4);
+EXECUTE FUNCTION trigger_test_update_type('BEFORE/INSERT/ROW', '4');
 
 CREATE OR REPLACE TRIGGER test_trigger_AUS_4
 AFTER UPDATE ON trigger_test_table
 FOR EACH STATEMENT
-EXECUTE FUNCTION trigger_test_exception ('AFTER/UPDATE/STATEMENT', 4);
+EXECUTE FUNCTION trigger_test_exception ('AFTER/UPDATE/STATEMENT', '4');
 
 ----------------------------------------
 -- Data manipulation

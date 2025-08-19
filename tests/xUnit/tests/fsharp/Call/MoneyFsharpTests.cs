@@ -1,41 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Call")]
-public class MoneyFSharpTests : PlDotNetTest
+public abstract class BaseMoneyFSharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let a = if a.HasValue then a.Value else 0
-a
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MoneyFSharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMoneyFSharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "testMoneyFSharp",
-            Arguments = new List<FunctionArgument> {
-                new FunctionArgument("a", "MONEY")
-            },
-            ReturnType = "MONEY",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp,
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "testMoneyFSharp", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "MONEY") }, ReturnType = "MONEY", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-money", "testMoneyFSharp1", "'32500.0'::MONEY", " = '32500.0'::MONEY" },
-            new object[] { "f#-money", "testMoneyFSharp1", "NULL::MONEY", " = 0::MONEY" },
-        };
+        return new object[][] { new object[] { "f#-money", "testMoneyFSharp1", "'32500.0'::MONEY", " = '32500.0'::MONEY" }, new object[] { "f#-money", "testMoneyFSharp1", "NULL::MONEY", " = 0::MONEY" }, };
     }
 
     [Theory]
@@ -44,4 +26,15 @@ a
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Call")]
+public class MoneyFSharpTestsFSharp : BaseMoneyFSharpTests
+{
+    protected override string FunctionBody => @"
+let a = if a.HasValue then a.Value else 0
+a
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

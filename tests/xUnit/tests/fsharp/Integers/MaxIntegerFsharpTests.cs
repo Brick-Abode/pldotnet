@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Integers")]
-public class MaxIntegerFsharpTests : PlDotNetTest
+public abstract class BaseMaxIntegerFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-Nullable 2147483647
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MaxIntegerFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMaxIntegerFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MaxIntegerFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "int4",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MaxIntegerFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "int4", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-int4", "maxIntegerFSharp", "", "= int4 '2147483647'" },
-        };
+        return new object[][] { new object[] { "f#-int4", "maxIntegerFSharp", "", "= int4 '2147483647'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ Nullable 2147483647
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Integers")]
+public class MaxIntegerFsharpTestsFSharp : BaseMaxIntegerFsharpTests
+{
+    protected override string FunctionBody => @"
+Nullable 2147483647
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

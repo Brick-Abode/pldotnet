@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseCirclesTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseCirclesTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseCircles", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "CIRCLE[]") }, ReturnType = "CIRCLE[]", Body = FunctionBody, Language = Language, IsStrict = true, CastFunctionAs = "TEXT", };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-circle-null-1array", "IncreaseCircles1", "ARRAY[CIRCLE(POINT(0.0,1.0), 2.5), CIRCLE(POINT(-5.0,4.5), 4), null::CIRCLE, CIRCLE(POINT(0.0,1.0),4.5)]", "= CAST(ARRAY[CIRCLE(POINT(0.0,1.0), 3.5), CIRCLE(POINT(-5.0,4.5), 5), null::CIRCLE, CIRCLE(POINT(0.0,1.0),5.5)] AS TEXT)" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseCircles(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "Geometric")]
-public class IncreaseCirclesTests : PlDotNetTest
+public class IncreaseCirclesTestsCSharp : BaseIncreaseCirclesTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,33 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseCirclesTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseCircles",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "CIRCLE[]") },
-            ReturnType = "CIRCLE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-            CastFunctionAs = "TEXT",
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-circle-null-1array", "IncreaseCircles1", "ARRAY[CIRCLE(POINT(0.0,1.0), 2.5), CIRCLE(POINT(-5.0,4.5), 4), null::CIRCLE, CIRCLE(POINT(0.0,1.0),4.5)]", "= CAST(ARRAY[CIRCLE(POINT(0.0,1.0), 3.5), CIRCLE(POINT(-5.0,4.5), 5), null::CIRCLE, CIRCLE(POINT(0.0,1.0),5.5)] AS TEXT)" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseCircles(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

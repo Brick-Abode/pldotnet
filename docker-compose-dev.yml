@@ -1,0 +1,4 @@
+services:
+  pldotnet-runtime:
+    volumes:
+      - .:/app/pldotnet

@@ -1,40 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Range")]
-public class CreateDateOnlyRangeArrayFsharpTests : PlDotNetTest
+public abstract class BaseCreateDateOnlyRangeArrayFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-let arr = Array.CreateInstance(typeof<NpgsqlRange<DateOnly>>, 1, 1, 1)
-let objects_value = NpgsqlRange<DateOnly>(DateOnly(2022, 4, 14), true, false, DateOnly(2022, 4, 15), false, false)
-arr.SetValue(objects_value, 0, 0, 0)
-arr
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateDateOnlyRangeArrayFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateDateOnlyRangeArrayFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateDateOnlyRangeArrayFsharp",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "DATERANGE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateDateOnlyRangeArrayFsharp", Arguments = new List<FunctionArgument> { }, ReturnType = "DATERANGE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-daterange-null-3array-arraynull", "CreateDateonlyRangeArrayFSharp1", "", "= ARRAY[[['[2022-04-14, 2022-04-15)'::DATERANGE]]]" },
-        };
+        return new object[][] { new object[] { "f#-daterange-null-3array-arraynull", "CreateDateonlyRangeArrayFSharp1", "", "= ARRAY[[['[2022-04-14, 2022-04-15)'::DATERANGE]]]" }, };
     }
 
     [Theory]
@@ -43,4 +26,17 @@ arr
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Range")]
+public class CreateDateOnlyRangeArrayFsharpTestsFSharp : BaseCreateDateOnlyRangeArrayFsharpTests
+{
+    protected override string FunctionBody => @"
+let arr = Array.CreateInstance(typeof<NpgsqlRange<DateOnly>>, 1, 1, 1)
+let objects_value = NpgsqlRange<DateOnly>(DateOnly(2022, 4, 14), true, false, DateOnly(2022, 4, 15), false, false)
+arr.SetValue(objects_value, 0, 0, 0)
+arr
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

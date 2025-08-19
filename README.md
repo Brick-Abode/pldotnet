@@ -1,10 +1,10 @@
-![PL.NET LOGO](./PL-NET_LOGO.png)
-
 # PL/.NET
 
-pl/dotnet adds full support for C# and F# to PostgreSQL.  0.99 is our public beta release.
+![PL.NET LOGO](./PL-NET_LOGO.png)
 
-- In our benchmarks, pl/dotnet is the fastest PL in PostgreSQL
+PL/.NET (or simply _pldotnet_) adds full support for C# and F# to PostgreSQL. 0.99 is our public beta release.
+
+- In our benchmarks, PL/.NET is the fastest PL in PostgreSQL
 - We support all Procedural Language (PL) operations: functions, procedures, DO, SPI, triggers, records, SRF, OUT/INOUT, table functions, etc
 - We natively support 38 out of 46 standard user types, the most of any non-native PL
 - We are the only PL using the native database API; our database access(SPI) is fully NPGSQL-compatible
@@ -13,6 +13,37 @@ pl/dotnet adds full support for C# and F# to PostgreSQL.  0.99 is our public bet
 - 100% free software under the PostgreSQL license
 
 Our white paper has extensive discussion of all of these items; check it out.
+
+## Getting started
+
+To get started with PL/.NET, you will need to install it on your
+PostgreSQL server or run it with a Docker container.
+You can find more information in our [Installation Guide](https://github.com/Brick-Abode/pldotnet/blob/master/INSTALL.md).
+
+Detailed installation and usage instructions can also be found in the
+pldotnet [Wiki pages](https://github.com/Brick-Abode/pldotnet/wiki), along
+with examples and information on the supported PostgreSQL data types.
+
+Feel free to open an issue or a discussion topic on our GitHub repository.
+
+## Pre-built Docker Images
+
+We provide ready-to-use Docker images to make running PL/.NET fast and simple.
+Two variants are available:
+
+- `brickabode/pldotnet:latest` – Lean and production-ready image.
+- `brickabode/pldotnet:dev` – Development image with testing tools and examples.
+
+Example: pull and start the development image for quick experimentation:
+```bash
+docker pull brickabode/pldotnet:dev
+docker run --rm -it \
+  --name pldotnet-test \
+  -p 5432:5432 \
+  brickabode/pldotnet:dev bash
+```
+
+Use `latest` in production deployments, and `dev` when you want a fully equipped environment for building, testing, or exploring PL/.NET features.
 
 ## Usage examples
 
@@ -46,30 +77,31 @@ datatype or SQL feature.
 
 ## Major features
 
-We support  all SQL function modes:
+We support all SQL function modes:
+
 - normal procedures and functions
 - full support for trigger functions: trigger arguments, old/new row, row rewriting (where allowed), and all the standard trigger information
 - set-returning functions, nicely mapped to iterators in C# and sequences in F#
 - table functions, as well as functions returning records or sets of records
 - full support for IN/OUT/INOUT functions
-- full support for trigger functions: 
-    + trigger function arguments, 
-    + old row and new row,
-    + row rewriting (where allowed by SQL), and 
-    + all the standard trigger information: Name, When, Level, Event, Table Name, Table Schema, etc
+- full support for trigger functions:
+  - trigger function arguments,
+  - old row and new row,
+  - row rewriting (where allowed by SQL), and
+  - all the standard trigger information: Name, When, Level, Event, Table Name, Table Schema, etc
 
 Data types and SPI are described below.
 
 ## Data type support
 
 We support 36 PostgreSQL types, with all mapped to their NPGSQL-standard
-dotnet types.  The only notable exceptions are multirange, enum, and
-struct types, all of which we hope to add in the future.  All datatypes
+dotnet types. The only notable exceptions are multirange, enum, and
+struct types, all of which we hope to add in the future. All datatypes
 are nullable, have full array support, and are fully unit-tested for C#
 and F#.
 
 | PostgreSQL type  | Dotnet type                      |
-|------------------|----------------------------------|
+| ---------------- | -------------------------------- |
 | BitString        | BitArray                         |
 | Bool             | bool                             |
 | Box              | NpgsqlBox                        |
@@ -116,41 +148,41 @@ client protocol handling with SPI calls; NPGSQL was otherwise unmodified.
 We imported the NPGSQL test suite as stored procedures and are using
 it for our testing, giving us high confidence in our compatibility.
 
-Work remains to improve the compatibility and add features.  Our biggest
+Work remains to improve the compatibility and add features. Our biggest
 category of NPGSQL incompatibility is error mapping, because SPI throws
-exceptions differently than NPGSQL does.  Such incompatibilities are
+exceptions differently than NPGSQL does. Such incompatibilities are
 minor, and work continues to improve them.
 
 Here are our currently tested SPI operations:
 
 - Data Manipulation Language (DML) Operations
-    - Select
-    - Insert
-    - Update
-    - Delete
+  - Select
+  - Insert
+  - Update
+  - Delete
 - Data Definition Language (DDL) Operations
-    - Create Table
-    - Alter Table
-    - Drop Table
-    - Truncate
-    - Create Index
-    - Drop Index
-    - Create View
-    - Drop View
-    - Create Function
-    - Call Function
-    - Drop Function
-    - Create Procedure
-    - Call Procedure
-    - Drop Procedure
+  - Create Table
+  - Alter Table
+  - Drop Table
+  - Truncate
+  - Create Index
+  - Drop Index
+  - Create View
+  - Drop View
+  - Create Function
+  - Call Function
+  - Drop Function
+  - Create Procedure
+  - Call Procedure
+  - Drop Procedure
 - Transaction Control
-    - Begin Transaction
-    - Commit
-    - Rollback
+  - Begin Transaction
+  - Commit
+  - Rollback
 - Supported Data Types
-    - Basic types
-    - Array types
-    - Record
+  - Basic types
+  - Array types
+  - Record
 
 ## What we don't have
 
@@ -163,13 +195,3 @@ We fully support Linux and provide dpkg's for Debian and Ubuntu, but we do not y
 Our package build system for dpkg is functional but not as tidy as we would like.
 
 We welcome code submissions to address any of these features, and we hope to improve them all in time.
-
-## Getting started
-
-To get started with pldotnet, you will need to install it on your
-PostgreSQL server. Detailed installation instructions can be found in the
-pldotnet [Wiki pages](https://github.com/Brick-Abode/pldotnet/wiki), along
-with examples and information on the supported PostgreSQL data types.
-
-Feel free to open an issue or a discussion topic on our GitHub repository.
-

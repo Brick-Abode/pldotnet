@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "Geometric")]
-public class CreateLineSegmentFsharpTests : PlDotNetTest
+public abstract class BaseCreateLineSegmentFsharpTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-NpgsqlLSeg(start_point, end_point)
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public CreateLineSegmentFsharpTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseCreateLineSegmentFsharpTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "CreateLineSegmentFsharp",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("start_point", "POINT"), new FunctionArgument("end_point", "POINT") },
-            ReturnType = "LSEG",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "CreateLineSegmentFsharp", Arguments = new List<FunctionArgument> { new FunctionArgument("start_point", "POINT"), new FunctionArgument("end_point", "POINT") }, ReturnType = "LSEG", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-lseg", "createLineSegmentFSharp", "POINT(0.088997,1.258456),POINT(5.456102,3.04561)", "= LSEG '[(0.088997,1.258456),(5.456102,3.04561)]'" },
-        };
+        return new object[][] { new object[] { "f#-lseg", "createLineSegmentFSharp", "POINT(0.088997,1.258456),POINT(5.456102,3.04561)", "= LSEG '[(0.088997,1.258456),(5.456102,3.04561)]'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ NpgsqlLSeg(start_point, end_point)
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "Geometric")]
+public class CreateLineSegmentFsharpTestsFSharp : BaseCreateLineSegmentFsharpTests
+{
+    protected override string FunctionBody => @"
+NpgsqlLSeg(start_point, end_point)
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

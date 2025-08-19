@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Integers")]
-public class MaxIntegerTests : PlDotNetTest
+public abstract class BaseMaxIntegerTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return 2147483647;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MaxIntegerTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMaxIntegerTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MaxInteger",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "integer",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MaxInteger", Arguments = new List<FunctionArgument> { }, ReturnType = "integer", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-int4", "maxInteger", "", "= integer '2147483647'" },
-        };
+        return new object[][] { new object[] { "c#-int4", "maxInteger", "", "= integer '2147483647'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return 2147483647;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Integers")]
+public class MaxIntegerTestsCSharp : BaseMaxIntegerTests
+{
+    protected override string FunctionBody => @"
+return 2147483647;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

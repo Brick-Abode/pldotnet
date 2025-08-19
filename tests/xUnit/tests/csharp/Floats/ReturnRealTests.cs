@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Floats")]
-public class ReturnRealTests : PlDotNetTest
+public abstract class BaseReturnRealTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return 1.50055f;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnRealTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnRealTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnReal",
-            Arguments = new List<FunctionArgument> {  },
-            ReturnType = "real",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnReal", Arguments = new List<FunctionArgument> { }, ReturnType = "real", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-float4", "returnReal", "", "= real '1.50055'" },
-        };
+        return new object[][] { new object[] { "c#-float4", "returnReal", "", "= real '1.50055'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return 1.50055f;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Floats")]
+public class ReturnRealTestsCSharp : BaseReturnRealTests
+{
+    protected override string FunctionBody => @"
+return 1.50055f;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

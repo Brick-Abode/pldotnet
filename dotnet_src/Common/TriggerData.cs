@@ -18,58 +18,89 @@ using System.Linq;
 namespace PlDotNET.Common
 {
 #nullable enable
-    public class TriggerData
+    /// <summary>
+    /// Represents metadata and row-level data passed to a PostgreSQL trigger function,
+    /// including old and new row values, trigger context, and table identifiers.
+    /// </summary>
+    /// <param name="oldRow">The contents of the row before the triggering operation (for UPDATE or DELETE).</param>
+    /// <param name="newRow">The contents of the row after the triggering operation (for INSERT or UPDATE).</param>
+    /// <param name="triggerName">The name of the trigger as defined in PostgreSQL.</param>
+    /// <param name="triggerWhen">Specifies whether the trigger fires BEFORE or AFTER the operation.</param>
+    /// <param name="triggerLevel">The level of the trigger: ROW or STATEMENT.</param>
+    /// <param name="triggerEvent">The type of DML operation that triggered this call: INSERT, UPDATE, or DELETE.</param>
+    /// <param name="relationId">The OID (object identifier) of the table on which the trigger fired.</param>
+    /// <param name="tableName">The name of the table that the trigger is defined on.</param>
+    /// <param name="tableSchema">The schema that contains the table.</param>
+    /// <param name="arguments">Arguments passed to the trigger from the PostgreSQL CREATE TRIGGER statement.</param>
+    public class TriggerData(
+        object?[] oldRow,
+        object?[] newRow,
+        string triggerName,
+        string triggerWhen,
+        string triggerLevel,
+        string triggerEvent,
+        int relationId,
+        string tableName,
+        string tableSchema,
+        string[] arguments)
     {
-        public TriggerData(
-            object?[] oldRow,
-            object?[] newRow,
-            string triggerName,
-            string triggerWhen,
-            string triggerLevel,
-            string triggerEvent,
-            int relationId,
-            string tableName,
-            string tableSchema,
-            string[] arguments)
-        {
-            this.OldRow = oldRow;
-            this.NewRow = newRow;
-            this.TriggerName = triggerName;
-            this.TriggerWhen = triggerWhen;
-            this.TriggerLevel = triggerLevel;
-            this.TriggerEvent = triggerEvent;
-            this.RelationId = relationId;
-            this.TableName = tableName;
-            this.TableSchema = tableSchema;
-            this.Arguments = arguments;
-        }
+        /// <summary>
+        /// Gets or sets the values of the row before the triggering operation.
+        /// Only populated for UPDATE and DELETE triggers.
+        /// </summary>
+        public object?[] OldRow { get; set; } = oldRow;
 
-        // Row-level information for operations
-        public object?[] OldRow { get; set; }
+        /// <summary>
+        /// Gets or sets the values of the row after the triggering operation.
+        /// Only populated for INSERT and UPDATE triggers.
+        /// </summary>
+        public object?[] NewRow { get; set; } = newRow;
 
-        public object?[] NewRow { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the trigger that was fired.
+        /// </summary>
+        public string TriggerName { get; set; } = triggerName;
 
-        // Trigger metadata
-        public string TriggerName { get; set; }
+        /// <summary>
+        /// Gets or sets the timing of the trigger execution (e.g., BEFORE or AFTER).
+        /// </summary>
+        public string TriggerWhen { get; set; } = triggerWhen;
 
-        public string TriggerWhen { get; set; }
+        /// <summary>
+        /// Gets or sets the level at which the trigger was fired (e.g., ROW or STATEMENT).
+        /// </summary>
+        public string TriggerLevel { get; set; } = triggerLevel;
 
-        public string TriggerLevel { get; set; } // TODO: make this an enum
+        /// <summary>
+        /// Gets or sets the DML event that caused the trigger (INSERT, UPDATE, or DELETE).
+        /// </summary>
+        public string TriggerEvent { get; set; } = triggerEvent;
 
-        public string TriggerEvent { get; set; } // TODO: make this an enum
+        /// <summary>
+        /// Gets or sets the PostgreSQL internal relation OID (object identifier) of the table.
+        /// </summary>
+        public int RelationId { get; set; } = relationId;
 
-        // Table-related details
-        public int RelationId { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the table associated with the trigger.
+        /// </summary>
+        public string TableName { get; set; } = tableName;
 
-        // [Obsolete("RelationName is deprecated and may be removed in future releases. Use TableName instead.")]
-        // public string RelationName { get; set; }
-        public string TableName { get; set; }
+        /// <summary>
+        /// Gets or sets the schema name of the table associated with the trigger.
+        /// </summary>
+        public string TableSchema { get; set; } = tableSchema;
 
-        public string TableSchema { get; set; }
+        /// <summary>
+        /// Gets or sets the array of arguments passed to the trigger.
+        /// </summary>
+        public string[] Arguments { get; set; } = arguments;
 
-        // Trigger arguments
-        public string[] Arguments { get; set; }
-
+        /// <summary>
+        /// Returns a string representation of the trigger data for debugging purposes.
+        /// Includes trigger metadata, old and new rows, and arguments.
+        /// </summary>
+        /// <returns>A multi-line string summarizing the contents of this instance.</returns>
         public override string ToString()
         {
             string newline = Environment.NewLine;

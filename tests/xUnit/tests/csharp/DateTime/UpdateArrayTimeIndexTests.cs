@@ -1,41 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "DateTime")]
-public class UpdateArrayTimeIndexTests : PlDotNetTest
+public abstract class BaseUpdateArrayTimeIndexTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-int[] arrayInteger = index.Cast<int>().ToArray();
-values_array.SetValue(desired, arrayInteger);
-return values_array;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public UpdateArrayTimeIndexTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseUpdateArrayTimeIndexTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "UpdateArrayTimeIndex",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "TIME[]"), new FunctionArgument("desired", "TIME"), new FunctionArgument("index", "integer[]") },
-            ReturnType = "TIME[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "UpdateArrayTimeIndex", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array", "TIME[]"), new FunctionArgument("desired", "TIME"), new FunctionArgument("index", "integer[]") }, ReturnType = "TIME[]", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-time-1array", "updateArrayTimeIndex1", "ARRAY[TIME '05:30 PM', TIME '06:30 PM', null::time, TIME '09:30 AM'], TIME '5:45 AM', ARRAY[2]", "= ARRAY[TIME '05:30 PM', TIME '06:30 PM', TIME '05:45 AM', TIME '09:30 AM']" },
-        new object[] { "c#-time-2array", "updateArrayTimeIndex2", "ARRAY[[TIME '05:30 PM', TIME '06:30 PM'], [null::time, TIME '09:30 AM']], TIME '5:45 AM', ARRAY[1, 0]", "= ARRAY[[TIME '05:30 PM', TIME '06:30 PM'], [TIME '05:45 AM', TIME '09:30 AM']]" },
-        new object[] { "c#-time-null-2array-arraynull", "updateArrayTimeIndex3", "ARRAY[[null::TIME, null::TIME], [null::time, TIME '09:30 AM']], TIME '5:45 AM', ARRAY[1, 0]", "= ARRAY[[null::TIME, null::TIME], [TIME '05:45 AM', TIME '09:30 AM']]" },
-        };
+        return new object[][] { new object[] { "c#-time-1array", "updateArrayTimeIndex1", "ARRAY[TIME '05:30 PM', TIME '06:30 PM', null::time, TIME '09:30 AM'], TIME '5:45 AM', ARRAY[2]", "= ARRAY[TIME '05:30 PM', TIME '06:30 PM', TIME '05:45 AM', TIME '09:30 AM']" }, new object[] { "c#-time-2array", "updateArrayTimeIndex2", "ARRAY[[TIME '05:30 PM', TIME '06:30 PM'], [null::time, TIME '09:30 AM']], TIME '5:45 AM', ARRAY[1, 0]", "= ARRAY[[TIME '05:30 PM', TIME '06:30 PM'], [TIME '05:45 AM', TIME '09:30 AM']]" }, new object[] { "c#-time-null-2array-arraynull", "updateArrayTimeIndex3", "ARRAY[[null::TIME, null::TIME], [null::time, TIME '09:30 AM']], TIME '5:45 AM', ARRAY[1, 0]", "= ARRAY[[null::TIME, null::TIME], [TIME '05:45 AM', TIME '09:30 AM']]" }, };
     }
 
     [Theory]
@@ -44,4 +26,16 @@ return values_array;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "DateTime")]
+public class UpdateArrayTimeIndexTestsCSharp : BaseUpdateArrayTimeIndexTests
+{
+    protected override string FunctionBody => @"
+int[] arrayInteger = index.Cast<int>().ToArray();
+values_array.SetValue(desired, arrayInteger);
+return values_array;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

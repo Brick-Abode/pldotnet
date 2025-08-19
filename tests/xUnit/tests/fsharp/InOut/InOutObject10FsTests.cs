@@ -1,39 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "FSharp")]
-[Trait("Category", "InOut")]
-public class InOutObject10FsTests : PlDotNetTest
+public abstract class BaseInOutObject10FsTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-a + "" "" + b;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public InOutObject10FsTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseInOutObject10FsTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "InOutObject10Fs",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "text"), new FunctionArgument("INOUT b", "text") },
-            ReturnType = "",
-            Body = FunctionBody,
-            Language = LanguageType.PlfSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "InOutObject10Fs", Arguments = new List<FunctionArgument> { new FunctionArgument("IN a", "text"), new FunctionArgument("INOUT b", "text") }, ReturnType = "", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "f#-inout-object-10", "inout_object_10_fs", "'red', 'blue'", "= 'red blue'" },
-        new object[] { "f#-inout-object-11", "inout_object_10_fs", "'red', NULL", "= 'red '" },
-        new object[] { "f#-inout-object-12", "inout_object_10_fs", "NULL, 'blue'", "= ' blue'" },
-        };
+        return new object[][] { new object[] { "f#-inout-object-10", "inout_object_10_fs", "'red', 'blue'", "= 'red blue'" }, new object[] { "f#-inout-object-11", "inout_object_10_fs", "'red', NULL", "= 'red '" }, new object[] { "f#-inout-object-12", "inout_object_10_fs", "NULL, 'blue'", "= ' blue'" }, };
     }
 
     [Theory]
@@ -42,4 +26,14 @@ a + "" "" + b;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "FSharp")]
+[Trait("Category", "InOut")]
+public class InOutObject10FsTestsFSharp : BaseInOutObject10FsTests
+{
+    protected override string FunctionBody => @"
+a + "" "" + b;
+    ";
+    protected override LanguageType Language => LanguageType.PlfSharp;
 }

@@ -1,37 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Integers")]
-public class MixedInTTests : PlDotNetTest
+public abstract class BaseMixedInTTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-return (int)a+(int)b+c;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public MixedInTTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseMixedInTTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "MixedInT",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("a", "smallint"), new FunctionArgument("b", "smallint"), new FunctionArgument("c", "integer") },
-            ReturnType = "integer",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = true,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "MixedInT", Arguments = new List<FunctionArgument> { new FunctionArgument("a", "smallint"), new FunctionArgument("b", "smallint"), new FunctionArgument("c", "integer") }, ReturnType = "integer", Body = FunctionBody, Language = Language, IsStrict = true, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-int4", "mixedInt", "CAST(32767 AS smallint),  CAST(32767 AS smallint), 100", "= integer '65634'" },
-        };
+        return new object[][] { new object[] { "c#-int4", "mixedInt", "CAST(32767 AS smallint),  CAST(32767 AS smallint), 100", "= integer '65634'" }, };
     }
 
     [Theory]
@@ -40,4 +26,14 @@ return (int)a+(int)b+c;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Integers")]
+public class MixedInTTestsCSharp : BaseMixedInTTests
+{
+    protected override string FunctionBody => @"
+return (int)a+(int)b+c;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

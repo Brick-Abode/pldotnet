@@ -1,42 +1,23 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
-[Trait("Language", "CSharp")]
-[Trait("Category", "Money")]
-public class ReturnMoneyTests : PlDotNetTest
+public abstract class BaseReturnMoneyTests : PlDotNetTest
 {
-    private static readonly string FunctionBody = @"
-decimal s = salary == null ? 0.0M : (decimal)salary;
-    decimal b = bonus == null ? 0.0M : (decimal)bonus;
-    decimal d = discounts == null ? 0.0M : (decimal)discounts;
-    return s+b-d;
-    ";
+    protected abstract string FunctionBody { get; }
 
-    public ReturnMoneyTests()
+    protected abstract LanguageType Language { get; }
+
+    public BaseReturnMoneyTests()
     {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "ReturnMoney",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("salary", "MONEY"), new FunctionArgument("bonus", "MONEY"), new FunctionArgument("discounts", "MONEY") },
-            ReturnType = "MONEY",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp, 
-            IsStrict = false,
-        };
+        FunctionInfo = new SqlFunctionInfo { Name = "ReturnMoney", Arguments = new List<FunctionArgument> { new FunctionArgument("salary", "MONEY"), new FunctionArgument("bonus", "MONEY"), new FunctionArgument("discounts", "MONEY") }, ReturnType = "MONEY", Body = FunctionBody, Language = Language, IsStrict = false, };
     }
 
     public static object[][] TestCases()
     {
-        return new object[][]
-        {
-            new object[] { "c#-money", "returnMoney1", "'32500.0'::MONEY, '1556.25'::MONEY, '899.99'::MONEY", "= '33156.26'::MONEY" },
-        new object[] { "c#-money-null", "returnMoney2", "'13525.21'::MONEY, null::MONEY, '899.99'::MONEY", "= '12625.22'::MONEY" },
-        new object[] { "c#-money-null", "returnMoney3", "null::MONEY, null::MONEY, null::MONEY", "= '0'::MONEY" },
-        };
+        return new object[][] { new object[] { "c#-money", "returnMoney1", "'32500.0'::MONEY, '1556.25'::MONEY, '899.99'::MONEY", "= '33156.26'::MONEY" }, new object[] { "c#-money-null", "returnMoney2", "'13525.21'::MONEY, null::MONEY, '899.99'::MONEY", "= '12625.22'::MONEY" }, new object[] { "c#-money-null", "returnMoney3", "null::MONEY, null::MONEY, null::MONEY", "= '0'::MONEY" }, };
     }
 
     [Theory]
@@ -45,4 +26,17 @@ decimal s = salary == null ? 0.0M : (decimal)salary;
     {
         RunGenericTest(featureName, testName, input, expectedResult);
     }
+}
+
+[Trait("Language", "CSharp")]
+[Trait("Category", "Money")]
+public class ReturnMoneyTestsCSharp : BaseReturnMoneyTests
+{
+    protected override string FunctionBody => @"
+decimal s = salary == null ? 0.0M : (decimal)salary;
+    decimal b = bonus == null ? 0.0M : (decimal)bonus;
+    decimal d = discounts == null ? 0.0M : (decimal)discounts;
+    return s+b-d;
+    ";
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }

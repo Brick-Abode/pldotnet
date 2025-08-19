@@ -14,7 +14,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using PlDotNET.Common;
+using NpgsqlTypes;
 
 namespace PlDotNET.Handler
 {
@@ -25,8 +25,11 @@ namespace PlDotNET.Handler
     /// See https://www.postgresql.org/docs/current/static/datatype-uuid.html.
     /// </remarks>
     [OIDHandler(OID.UUIDOID, OID.UUIDARRAYOID)]
-    public class UuidHandler : StructTypeHandler<Guid>
+    public partial class UuidHandler : StructTypeHandler<Guid>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UuidHandler"/> class.
+        /// </summary>
         public UuidHandler()
         {
             this.ElementOID = OID.UUIDOID;
@@ -37,15 +40,15 @@ namespace PlDotNET.Handler
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_GetDatumUuidAttributes().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern void pldotnet_GetDatumUuidAttributes(IntPtr datum, byte[] data);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial void pldotnet_GetDatumUuidAttributes(IntPtr datum, byte[] data);
 
         /// <summary>
         /// C function declared in pldotnet_conversions.h.
         /// See ::pldotnet_CreateDatumUuid().
         /// </summary>
-        [DllImport("@PKG_LIBDIR/pldotnet.so")]
-        public static extern IntPtr pldotnet_CreateDatumUuid(byte[] data);
+        [LibraryImport("@PKG_LIBDIR/pldotnet.so")]
+        public static partial IntPtr pldotnet_CreateDatumUuid(byte[] data);
 
         /// <inheritdoc />
         public override Guid InputValue(IntPtr datum)

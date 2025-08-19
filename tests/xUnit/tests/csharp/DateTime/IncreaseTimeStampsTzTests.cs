@@ -1,15 +1,38 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Xunit;
 using System.Linq;
 
+public abstract class BaseIncreaseTimeStampsTzTests : PlDotNetTest
+{
+    protected abstract string FunctionBody { get; }
+
+    protected abstract LanguageType Language { get; }
+
+    public BaseIncreaseTimeStampsTzTests()
+    {
+        FunctionInfo = new SqlFunctionInfo { Name = "IncreaseTimeStampsTz", Arguments = new List<FunctionArgument> { new FunctionArgument("values_array TIMESTAMP WITH TIME", "ZONE[]"), new FunctionArgument("days_to_add", "INT") }, ReturnType = "TIMESTAMP WITH TIME ZONE[]", Body = FunctionBody, Language = Language, IsStrict = true, };
+    }
+
+    public static object[][] TestCases()
+    {
+        return new object[][] { new object[] { "c#-timestamptz-1array", "IncreaseTimestampstz", "ARRAY[TIMESTAMP WITH TIME ZONE '2004-10-19 10:23:54 PM +02', TIMESTAMP WITH TIME ZONE '2020-10-19 10:23:54 PM +03', null::timestamptz, TIMESTAMP WITH TIME ZONE '2022-12-25 10:23:54 PM -05'], 2", "= ARRAY[TIMESTAMP WITH TIME ZONE '2004-10-21 10:23:54 PM +02', TIMESTAMP WITH TIME ZONE '2020-10-21 10:23:54 PM +03', null::timestamptz, TIMESTAMP WITH TIME ZONE '2022-12-27 10:23:54 PM -05']" }, };
+    }
+
+    [Theory]
+    [MemberData(nameof(TestCases))]
+    public void TestIncreaseTimeStampsTz(string featureName, string testName, string input, string expectedResult)
+    {
+        RunGenericTest(featureName, testName, input, expectedResult);
+    }
+}
+
 [Trait("Language", "CSharp")]
 [Trait("Category", "DateTime")]
-public class IncreaseTimeStampsTzTests : PlDotNetTest
+public class IncreaseTimeStampsTzTestsCSharp : BaseIncreaseTimeStampsTzTests
 {
-    private static readonly string FunctionBody = @"
+    protected override string FunctionBody => @"
 Array flatten_values = Array.CreateInstance(typeof(object), values_array.Length);
 ArrayManipulation.FlatArray(values_array, ref flatten_values);
 for(int i = 0; i < flatten_values.Length; i++)
@@ -24,32 +47,5 @@ for(int i = 0; i < flatten_values.Length; i++)
 }
 return flatten_values;
     ";
-
-    public IncreaseTimeStampsTzTests()
-    {
-        FunctionInfo = new SqlFunctionInfo
-        {
-            Name = "IncreaseTimeStampsTz",
-            Arguments = new List<FunctionArgument> { new FunctionArgument("values_array TIMESTAMP WITH TIME", "ZONE[]"), new FunctionArgument("days_to_add", "INT") },
-            ReturnType = "TIMESTAMP WITH TIME ZONE[]",
-            Body = FunctionBody,
-            Language = LanguageType.PlcSharp,
-            IsStrict = true,
-        };
-    }
-
-    public static object[][] TestCases()
-    {
-        return new object[][]
-        {
-            new object[] { "c#-timestamptz-1array", "IncreaseTimestampstz", "ARRAY[TIMESTAMP WITH TIME ZONE '2004-10-19 10:23:54 PM +02', TIMESTAMP WITH TIME ZONE '2020-10-19 10:23:54 PM +03', null::timestamptz, TIMESTAMP WITH TIME ZONE '2022-12-25 10:23:54 PM -05'], 2", "= ARRAY[TIMESTAMP WITH TIME ZONE '2004-10-21 10:23:54 PM +02', TIMESTAMP WITH TIME ZONE '2020-10-21 10:23:54 PM +03', null::timestamptz, TIMESTAMP WITH TIME ZONE '2022-12-27 10:23:54 PM -05']" },
-        };
-    }
-
-    [Theory]
-    [MemberData(nameof(TestCases))]
-    public void TestIncreaseTimeStampsTz(string featureName, string testName, string input, string expectedResult)
-    {
-        RunGenericTest(featureName, testName, input, expectedResult);
-    }
+    protected override LanguageType Language => LanguageType.PlcSharp;
 }
